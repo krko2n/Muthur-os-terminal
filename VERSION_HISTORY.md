@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-25 - Commit 3f57dc8
+
+**Fix banner logo alignment**
+
+- Author: krkos
+- Hash: `3f57dc8`
+
+**Changed files:**
+```
+banner.png
+create-banner.ps1
+```
+
+---
+
+## 2026-05-24 - Commit d04ec44
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `d04ec44`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-25 - Commit db5485a
 
 **Replace icons with higher quality square version**
