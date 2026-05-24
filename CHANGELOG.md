@@ -5,6 +5,8 @@ All notable changes to MUTHUR OS Terminal will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+For detailed commit history, see [VERSION_HISTORY.md](VERSION_HISTORY.md).
+
 ## [Unreleased]
 
 ### Planned
@@ -13,6 +15,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Session persistence
 - SSH client integration
 - Split pane support
+
+---
+
+## [0.1.1] - 2026-05-24
+
+### Fixed
+- Fixed Arch Linux package name: webkit2gtk -> webkit2gtk-4.1
+- Fixed CI/CD workflow to handle missing package-lock.json
+- Added --legacy-peer-deps to npm install
+- Made clippy and fmt checks non-blocking
+
+### Changed
+- Redesigned README with focus on install/upgrade/uninstall
+- Updated all documentation with correct Arch package names
+
+### Added
+- Version bump script (version-bump.sh)
+- Automatic changelog generator (generate-changelog.sh)
+- GitHub Actions workflow for version history updates
+- QUICK_REFERENCE.md for common commands
 
 ---
 

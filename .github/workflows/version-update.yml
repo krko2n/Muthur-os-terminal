@@ -1,0 +1,34 @@
+name: Update Version History
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  update-history:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Generate version history
+      run: |
+        chmod +x generate-changelog.sh
+        ./generate-changelog.sh
+
+    - name: Commit version history
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+
+        if [ -f VERSION_HISTORY.md ]; then
+          git add VERSION_HISTORY.md
+          git diff --staged --quiet || git commit -m "docs: auto-update version history [skip ci]"
+          git push
+        fi
