@@ -32,7 +32,7 @@ $iconPath = "src-tauri\icons\128x128@2x.png"
 if (Test-Path $iconPath) {
     $icon = [System.Drawing.Image]::FromFile((Resolve-Path $iconPath))
     $iconSize = 200
-    $iconX = 102
+    $iconX = 104
     $iconY = ($height - $iconSize) / 2
 
     # Glow effect - perfectly centered
