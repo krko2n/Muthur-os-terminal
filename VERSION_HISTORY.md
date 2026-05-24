@@ -4,6 +4,37 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 61c7488
+
+**v0.1.1: Upgrade @react-three/fiber to v9 for React 19 compatibility**
+
+- Author: krkos
+- Hash: `61c7488`
+
+**Changed files:**
+```
+package.json
+src/components/Globe.tsx
+src/three-types.d.ts
+tsconfig.json
+```
+
+---
+
+## 2026-05-24 - Commit 4011040
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `4011040`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit b6d8cf2
 
 **v0.1.1: Fix Tauri v2 API imports and Three.js types**
