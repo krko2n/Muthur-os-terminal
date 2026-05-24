@@ -1,0 +1,193 @@
+MUTHUR OS Terminal - Complete File Structure
+============================================
+
+muthur-os-terminal/
+│
+├── README.md                   # Main documentation
+├── QUICKSTART.md               # 5-minute setup guide
+├── DEVELOPMENT.md              # Developer guide
+├── CONTRIBUTING.md             # Contribution guidelines
+├── CHANGELOG.md                # Version history
+├── LICENSE                     # MIT License
+├── PROJECT_SUMMARY.md          # Project overview
+├── UI_REFERENCE.md             # Visual design reference
+├── FILE_TREE.txt               # This file
+│
+├── package.json                # NPM dependencies
+├── package-lock.json           # NPM lock file
+├── tsconfig.json               # TypeScript config
+├── tsconfig.node.json          # TypeScript node config
+├── vite.config.ts              # Vite build config
+├── tailwind.config.js          # Tailwind CSS config
+├── postcss.config.js           # PostCSS config
+├── .prettierrc                 # Prettier config
+├── .eslintrc.json              # ESLint config
+├── .gitignore                  # Git ignore rules
+│
+├── install.sh                  # Automated installer
+├── build.sh                    # Production build script
+├── verify-setup.sh             # Setup verification
+├── test.sh                     # Test suite
+│
+├── index.html                  # HTML entry point
+│
+├── src/                        # React frontend source
+│   ├── main.tsx                # React entry point
+│   ├── App.tsx                 # Root component
+│   ├── index.css               # Global styles + Tailwind
+│   │
+│   └── components/             # React components
+│       ├── Header.tsx          # Top bar with clock (50 lines)
+│       ├── CustomCursor.tsx    # Sci-fi cursor (30 lines)
+│       ├── LeftPanel.tsx       # System stats panel (120 lines)
+│       ├── CenterPanel.tsx     # Main content area (60 lines)
+│       ├── RightPanel.tsx      # Network & AI panel (40 lines)
+│       ├── Terminal.tsx        # Multi-tab terminal (250 lines)
+│       ├── FileExplorer.tsx    # File browser (150 lines)
+│       ├── Globe.tsx           # 3D WebGL globe (100 lines)
+│       └── AIPanel.tsx         # AI assistant chat (120 lines)
+│
+├── src-tauri/                  # Rust backend source
+│   ├── Cargo.toml              # Rust dependencies
+│   ├── tauri.conf.json         # Tauri configuration
+│   ├── build.rs                # Build script
+│   │
+│   ├── src/                    # Rust source files
+│   │   ├── main.rs             # Entry point & commands (150 lines)
+│   │   ├── pty.rs              # PTY session manager (200 lines)
+│   │   ├── system.rs           # System monitoring (100 lines)
+│   │   ├── ai.rs               # Ollama API client (80 lines)
+│   │   └── crash.rs            # Crash handler (50 lines)
+│   │
+│   └── icons/                  # Application icons
+│       └── README.md           # Icon generation guide
+│
+├── .vscode/                    # VS Code settings
+│   └── extensions.json         # Recommended extensions
+│
+├── .github/                    # GitHub configuration
+│   └── workflows/
+│       └── build.yml           # CI/CD workflow
+│
+├── dist/                       # Frontend build output (generated)
+│   └── [build artifacts]
+│
+├── node_modules/               # NPM packages (generated)
+│   └── [thousands of files]
+│
+└── target/                     # Rust build output (generated)
+    ├── debug/                  # Debug builds
+    └── release/                # Release builds
+        ├── muthur-os-terminal     # Binary (~18 MB)
+        └── bundle/             # Platform packages
+            ├── appimage/       # AppImage (~28 MB)
+            └── deb/            # Debian package (~22 MB)
+
+
+FILE COUNTS
+===========
+Documentation:       9 files   (~15 KB)
+Configuration:      10 files   (~5 KB)
+Scripts:             4 files   (~10 KB)
+Frontend Source:    10 files   (~1,000 lines)
+Backend Source:      5 files   (~580 lines)
+GitHub/CI:           2 files   (~100 lines)
+Total Source:       40 files   (~1,700 lines of code)
+
+
+BUILD ARTIFACTS (after build)
+==============================
+Binary:          ~18 MB (stripped)
+AppImage:        ~28 MB (includes runtime)
+Deb Package:     ~22 MB (compressed)
+NPM modules:     ~300 MB (not bundled)
+Rust target:     ~500 MB (build cache)
+
+
+DEPENDENCIES
+============
+NPM (Frontend):
+  - react: 19.0.0
+  - @xterm/xterm: 5.5.0
+  - three: 0.170.0
+  - @tauri-apps/api: 2.0.0
+  - tailwindcss: 3.4.17
+  - (20+ total dependencies)
+
+Cargo (Backend):
+  - tauri: 2.0
+  - portable-pty: 0.8
+  - sysinfo: 0.31
+  - reqwest: 0.12
+  - tokio: 1.40
+  - (12 total dependencies)
+
+
+KEY FILES TO KNOW
+=================
+Entry Points:
+  - src/main.tsx            → React app start
+  - src-tauri/src/main.rs   → Rust backend start
+  - index.html              → HTML shell
+
+Configuration:
+  - src-tauri/tauri.conf.json → Window, permissions, bundle settings
+  - Cargo.toml                → Rust dependencies & build config
+  - package.json              → NPM scripts & frontend deps
+  - tailwind.config.js        → Theme colors & styling
+
+Main Components:
+  - src/App.tsx               → Root layout & state
+  - src/components/Terminal.tsx   → Terminal emulator logic
+  - src-tauri/src/pty.rs      → PTY management & I/O
+
+Build & Deploy:
+  - install.sh                → One-command install
+  - build.sh                  → Production build
+  - .github/workflows/build.yml → CI/CD pipeline
+
+
+TYPICAL WORKFLOW
+================
+1. Development:
+   npm run tauri dev
+
+2. Make changes:
+   - Frontend: src/components/*.tsx (hot reload)
+   - Backend: src-tauri/src/*.rs (requires restart)
+
+3. Test:
+   ./test.sh
+
+4. Build:
+   ./build.sh
+
+5. Install:
+   sudo cp target/release/muthur-os-terminal /usr/local/bin/muthur
+
+
+CLEANUP COMMANDS
+================
+Remove build artifacts:
+  rm -rf dist/ dist-ssr/ target/
+
+Remove dependencies:
+  rm -rf node_modules/
+
+Full clean:
+  git clean -fdx
+
+
+ESTIMATED SIZES
+===============
+Source code only:         ~500 KB
+With node_modules:        ~300 MB
+After first build:        ~800 MB
+Final binary:             ~18 MB
+Installed size:           ~25 MB
+
+
+END OF FILE TREE
+================
+Generated: 2026-05-24
+Version: 0.1.0

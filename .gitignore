@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+target/
+src-tauri/target/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Tauri
+src-tauri/Cargo.lock
+
+# Logs
+*.log
+logs/
+crash_reports/
+
+# OS
+Thumbs.db
+.Spotlight-V100
+.Trashes
