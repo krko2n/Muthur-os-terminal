@@ -4,6 +4,37 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit b6d8cf2
+
+**v0.1.1: Fix Tauri v2 API imports and Three.js types**
+
+- Author: krkos
+- Hash: `b6d8cf2`
+
+**Changed files:**
+```
+src/components/Globe.tsx
+src/components/Terminal.tsx
+src/three-types.d.ts
+tsconfig.json
+```
+
+---
+
+## 2026-05-24 - Commit 52ceeb1
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `52ceeb1`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 661419d
 
 **v0.1.1: Move Cargo.toml to correct src-tauri location**
