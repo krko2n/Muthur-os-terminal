@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sphere, Line } from '@react-three/drei';
 import * as THREE from 'three';
@@ -7,7 +7,7 @@ function RotatingGlobe() {
   const meshRef = useRef<THREE.Mesh>(null);
   const linesRef = useRef<THREE.Group>(null);
 
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     if (meshRef.current) {
       meshRef.current.rotation.y += delta * 0.15;
     }

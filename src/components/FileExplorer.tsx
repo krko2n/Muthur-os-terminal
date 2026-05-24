@@ -43,10 +43,12 @@ export default function FileExplorer() {
   };
 
   const getHomeDir = async (): Promise<string> => {
-    if (typeof window !== 'undefined') {
-      return process.env.HOME || process.env.USERPROFILE || '/home/user';
+    try {
+      const { homeDir } = await import('@tauri-apps/api/path');
+      return await homeDir();
+    } catch {
+      return '/home/user';
     }
-    return '/home/user';
   };
 
   const handleEntryClick = (entry: FileEntry) => {
