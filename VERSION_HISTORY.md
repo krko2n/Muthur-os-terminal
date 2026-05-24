@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 66c0748
+
+**v0.1.1: Fix remaining Rust compilation errors (6 errors)**
+
+- Author: krkos
+- Hash: `66c0748`
+
+**Changed files:**
+```
+src-tauri/src/pty.rs
+src-tauri/src/system.rs
+```
+
+---
+
+## 2026-05-24 - Commit d0c6139
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `d0c6139`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 65a1c97
 
 **v0.1.1: Fix Rust compilation errors - sysinfo 0.31 + portable-pty APIs**
