@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sysinfo::System;
+use sysinfo::{System, SystemExt, CpuExt, ProcessExt, NetworkExt, DiskExt};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SystemStats {
@@ -51,20 +51,20 @@ impl SystemMonitor {
         let mut sys = System::new_all();
         sys.refresh_all();
 
-        // CPU usage - in sysinfo 0.31+, global_cpu_usage() returns f32 directly
-        let cpu_usage = sys.global_cpu_usage();
+        // CPU usage
+        let cpu_usage = sys.global_cpu_info().cpu_usage();
 
         // Memory
         let memory_used = sys.used_memory();
         let memory_total = sys.total_memory();
         let memory_percent = (memory_used as f32 / memory_total as f32) * 100.0;
 
-        // Top processes - sysinfo 0.31+ returns &str for name()
+        // Top processes
         let mut processes: Vec<ProcessInfo> = sys.processes()
             .iter()
             .map(|(pid, process)| ProcessInfo {
                 pid: pid.as_u32(),
-                name: process.name().to_string_lossy().to_string(),
+                name: process.name().to_string(),
                 cpu_usage: process.cpu_usage(),
                 memory: process.memory(),
             })
@@ -73,15 +73,16 @@ impl SystemMonitor {
         processes.sort_by(|a, b| b.cpu_usage.partial_cmp(&a.cpu_usage).unwrap());
         processes.truncate(10);
 
-        // Network - sysinfo 0.31 uses Networks struct with iter()
+        // Network
+        let networks = sys.networks();
         let mut total_received = 0;
         let mut total_transmitted = 0;
-        for (_interface_name, data) in sys.networks().iter() {
+        for (_interface_name, data) in networks {
             total_received += data.received();
             total_transmitted += data.transmitted();
         }
 
-        // Disks - sysinfo 0.31 uses Disks struct with iter()
+        // Disks
         let disks: Vec<DiskInfo> = sys.disks()
             .iter()
             .map(|disk| {
@@ -111,7 +112,7 @@ impl SystemMonitor {
                 transmitted: total_transmitted,
             },
             disk: disks,
-            uptime: System::uptime(),  // sysinfo 0.31: uptime is a static method
+            uptime: sys.uptime(),
         }
     }
 }

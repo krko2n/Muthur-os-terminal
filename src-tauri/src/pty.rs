@@ -109,7 +109,8 @@ impl PtyManager {
 
     pub fn write(&mut self, session_id: SessionId, data: &[u8]) -> anyhow::Result<()> {
         if let Some(session) = self.sessions.get_mut(&session_id) {
-            session.master.write_all(data)?;
+            // Use std::io::Write trait method on the Box<dyn MasterPty>
+            std::io::Write::write_all(&mut *session.master, data)?;
             Ok(())
         } else {
             Err(anyhow::anyhow!("Session not found"))
