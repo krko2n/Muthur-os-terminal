@@ -4,6 +4,37 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-25 - Commit c3b547f
+
+**Security improvements and configurable AI model**
+
+- Author: krkos
+- Hash: `c3b547f`
+
+**Changed files:**
+```
+README.md
+SECURITY.md
+src-tauri/Cargo.toml
+src-tauri/src/ai.rs
+```
+
+---
+
+## 2026-05-24 - Commit af2a22a
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `af2a22a`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-25 - Commit ef9d5d3
 
 **Fix banner script cleanup error**
