@@ -2,12 +2,10 @@
 
 <div align="center">
 
+![MUTHUR OS Terminal Banner](banner.png)
+
 ![Version](https://img.shields.io/badge/version-0.1.1-brightgreen.svg?style=for-the-badge)
 ![Release](https://img.shields.io/github/v/release/krko2n/Muthur-os-terminal?style=for-the-badge)
-
-**Advanced Terminal Interface with AI Integration**
-
-*Inspired by eDEX-UI · Built with Tauri v2 + Rust + React 19*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-blue.svg)](https://tauri.app/)
