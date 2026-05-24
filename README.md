@@ -4,7 +4,7 @@
 
 **Advanced Terminal Interface with AI Integration**
 
-*Inspired by eDEX-UI with modern architecture*
+*Inspired by eDEX-UI · Built with Tauri v2 + Rust + React 19*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-blue.svg)](https://tauri.app/)
@@ -14,40 +14,47 @@
 
 ---
 
-## Features
+## Quick Start
 
-- **Multi-Tab Terminal**: Full-featured terminal emulator with multiple session support
-- **Real-Time System Monitoring**: CPU, memory, network, and process tracking
-- **AI Assistant Integration**: Command suggestions and error debugging via Ollama
-- **File System Explorer**: Browse and navigate your entire filesystem
-- **3D Network Visualization**: WebGL-powered rotating globe with real-time data
-- **Sci-Fi CRT Aesthetic**: Custom cursor, scanline effects, and retro-futuristic UI
-- **Low Resource Usage**: Optimized for laptops with <10% idle CPU usage
-- **Modular Architecture**: Clean separation of concerns, easy to extend
+```bash
+# Clone repository
+git clone https://github.com/krko2n/Muthur-os-terminal.git
+cd muthur-os-terminal
+
+# Install (takes 5-10 minutes)
+make install
+
+# Launch
+muthur
+```
 
 ---
 
-## System Requirements
+## Table of Contents
 
-### Minimum
-- **OS**: Linux (Arch, Ubuntu, Debian, Fedora)
-- **CPU**: Dual-core 2.0 GHz
-- **RAM**: 2 GB
-- **GPU**: Integrated graphics with OpenGL 3.0+
-- **Storage**: 500 MB free space
-
-### Recommended
-- **OS**: Arch Linux or Ubuntu 22.04+
-- **CPU**: Quad-core 2.5 GHz
-- **RAM**: 4 GB
-- **GPU**: Dedicated GPU with OpenGL 4.0+
-- **Storage**: 1 GB free space
+- [Installation](#installation)
+- [Upgrade](#upgrade)
+- [Uninstall](#uninstall)
+- [Features](#features)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
 ## Installation
 
-### Quick Install (One Command)
+### Requirements
+
+- **OS**: Linux (Arch, Ubuntu, Debian, Fedora)
+- **RAM**: 2 GB minimum (4 GB recommended)
+- **Storage**: 500 MB free space
+- **GPU**: OpenGL 3.0+ support
+
+### One-Command Install
 
 ```bash
 git clone https://github.com/krko2n/Muthur-os-terminal.git
@@ -55,227 +62,384 @@ cd muthur-os-terminal
 make install
 ```
 
-Or using the script directly:
+**What happens during installation:**
+
+1. Detects your Linux distribution automatically
+2. Installs system dependencies (GTK3, WebKit, OpenSSL, etc.)
+3. Installs Rust toolchain (if not present)
+4. Installs Node.js 20 (if not present)
+5. Optionally installs Ollama for AI features
+6. Builds the application (~5-10 minutes)
+7. Installs to `/usr/local/bin/muthur`
+8. Creates desktop entry
+
+**Alternative install methods:**
 
 ```bash
+# Using the script directly
 ./install.sh
+
+# Manual step-by-step (see DEVELOPMENT.md)
 ```
 
-The installer will:
-1. Detect your Linux distribution
-2. Install system dependencies
-3. Install Rust and Node.js (if needed)
-4. Optionally install Ollama for AI features
-5. Build and install the application (5-10 minutes)
+### First Launch
 
-### Upgrade
+```bash
+muthur
+```
+
+Or find **"MUTHUR OS Terminal"** in your application menu.
+
+---
+
+## Upgrade
+
+Keep MUTHUR up to date with the latest features and fixes.
+
+### One-Command Upgrade
 
 ```bash
 cd muthur-os-terminal
 make upgrade
 ```
 
-Or: `./upgrade.sh`
+**What happens during upgrade:**
 
-This will:
-- Pull latest changes from GitHub
-- Rebuild the application
-- Replace the installed binary
-- Preserve your configuration
+1. Fetches latest changes from GitHub
+2. Shows changelog of what's new
+3. Rebuilds the application
+4. Replaces the installed binary
+5. Preserves your configuration and settings
 
-### Uninstall
+**Alternative upgrade methods:**
+
+```bash
+# Using the script directly
+./upgrade.sh
+
+# Manual upgrade
+git pull origin main
+make build
+sudo cp src-tauri/target/release/muthur-os-terminal /usr/local/bin/muthur
+```
+
+### Check for Updates
+
+```bash
+cd muthur-os-terminal
+git fetch origin
+git log HEAD..origin/main --oneline
+```
+
+---
+
+## Uninstall
+
+Clean removal with optional configuration preservation.
+
+### One-Command Uninstall
 
 ```bash
 cd muthur-os-terminal
 make uninstall
 ```
 
-Or: `./uninstall.sh`
+**What gets removed:**
 
-This will remove:
 - Binary at `/usr/local/bin/muthur`
-- Desktop entry
-- Optionally remove config directory
+- Desktop entry at `~/.local/share/applications/muthur.desktop`
+- Optionally: Config directory at `~/.config/xKOR_3RR0R/`
 
-### Manual Installation
-
-#### 1. Install Dependencies
-
-**Arch Linux:**
-```bash
-sudo pacman -Sy base-devel curl wget file openssl gtk3 webkit2gtk librsvg
-```
-
-**Ubuntu/Debian:**
-```bash
-sudo apt install build-essential curl wget file libssl-dev libgtk-3-dev \
-  libayatana-appindicator3-dev librsvg2-dev libwebkit2gtk-4.1-dev
-```
-
-**Fedora:**
-```bash
-sudo dnf install gcc gcc-c++ make curl wget file openssl-devel gtk3-devel \
-  libappindicator-gtk3-devel librsvg2-devel webkit2gtk4.1-devel
-```
-
-#### 2. Install Rust
+**Alternative uninstall methods:**
 
 ```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env
+# Using the script directly
+./uninstall.sh
+
+# Manual removal
+sudo rm /usr/local/bin/muthur
+rm ~/.local/share/applications/muthur.desktop
+rm -rf ~/.config/xKOR_3RR0R/  # Optional: removes config
 ```
 
-#### 3. Install Node.js
-
-```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
-nvm install 20
-nvm use 20
-```
-
-#### 4. Build the Application
-
-```bash
-npm install
-npm run tauri build
-```
-
-#### 5. Install
-
-```bash
-# Copy binary
-sudo cp src-tauri/target/release/muthur-os-terminal /usr/local/bin/muthur
-sudo chmod +x /usr/local/bin/muthur
-
-# Create config directory
-mkdir -p ~/.config/xKOR_3RR0R/{crash_reports,logs}
-```
+The uninstall script will ask before removing your configuration directory, which contains crash reports and logs.
 
 ---
 
-## AI Assistant Setup (Optional)
+## Features
 
-MUTHUR includes AI-powered command suggestions and error debugging via Ollama.
+### Core Functionality
 
-### Install Ollama
+**Multi-Tab Terminal**
+- Full xterm.js terminal emulator
+- Multiple sessions in tabs
+- 256 color support
+- Clickable links
+- 10,000 line scrollback buffer
 
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-```
+**Real-Time System Monitoring**
+- CPU usage with live graphs
+- Memory statistics
+- Top processes by CPU usage
+- Network RX/TX statistics
+- Disk usage information
 
-### Download AI Model
+**AI Assistant (Ollama Integration)**
+- Command suggestions with `#` prefix
+- Automatic command execution
+- Error debugging and fixes
+- General Q&A assistance
 
-```bash
-ollama pull llama3.2
-```
+**File System Explorer**
+- Full filesystem access
+- Directory navigation
+- File metadata display
+- Quick path jumping
 
-### Start Ollama Service
+**3D Network Visualization**
+- WebGL-powered rotating globe
+- Real-time connection status
+- Low-latency rendering
 
-```bash
-ollama serve
-```
+### Visual Design
 
-### Usage in MUTHUR
+- Fullscreen borderless window
+- Custom cursor with glow effect
+- CRT scanline effects
+- Matrix green color scheme (`#00ff41`)
+- Retro-futuristic sci-fi aesthetic
+- Smooth animations
 
-- Type `#<context>` in the AI panel for command suggestions
-- AI will automatically execute suggested commands
-- Chat normally for general assistance
+### Performance
+
+- **Idle CPU**: Less than 10%
+- **Memory**: ~150 MB
+- **Startup**: 1-2 seconds
+- **Binary size**: ~18 MB
 
 ---
 
 ## Usage
 
-### Launch
+### Launching
 
 ```bash
+# Command line
 muthur
-```
 
-Or find "MUTHUR OS Terminal" in your application menu.
+# Application menu
+Search for "MUTHUR OS Terminal"
+```
 
 ### Keyboard Shortcuts
 
-- **Ctrl+Shift+T**: New terminal tab
-- **Ctrl+Shift+W**: Close current tab
-- **Ctrl+Tab**: Next tab
-- **Ctrl+Shift+Tab**: Previous tab
-- **Ctrl+C**: Copy (in terminal)
-- **Ctrl+V**: Paste (in terminal)
-- **Esc**: Exit fullscreen
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Shift+T` | New terminal tab |
+| `Ctrl+Shift+W` | Close current tab |
+| `Ctrl+Tab` | Switch to next tab |
+| `Ctrl+Shift+Tab` | Switch to previous tab |
+| `Ctrl+C` | Copy selected text |
+| `Ctrl+V` | Paste from clipboard |
+| `Esc` | Exit fullscreen mode |
 
-### Terminal Features
+### AI Assistant
 
-- Full xterm.js compatibility
-- 256 color support
-- Mouse support
-- Clickable links
-- Scrollback buffer (10,000 lines)
+**Command Suggestions** (type in AI panel):
+```
+#list all Python files
+#find large files over 100MB
+#show disk usage
+#list running docker containers
+```
+
+AI will suggest the appropriate command and execute it automatically.
+
+**Error Debugging**:
+```
+command not found: docker
+```
+
+AI will analyze the error and provide installation instructions.
+
+**General Chat**:
+```
+What is SSH?
+How do I install nginx?
+Explain git rebase
+```
 
 ---
 
-## Architecture
+## Configuration
+
+### AI Model Setup (Optional)
+
+MUTHUR uses Ollama for AI features. To enable:
+
+```bash
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Download AI model
+ollama pull llama3.2
+
+# Start Ollama service
+ollama serve
+```
+
+Keep `ollama serve` running in a separate terminal, then restart MUTHUR.
+
+### Change AI Model
+
+Edit `src-tauri/src/ai.rs` line 18:
+
+```rust
+model: "llama3.2".to_string(),  // Change to: llama3.1, mixtral, etc.
+```
+
+Then rebuild:
+```bash
+make build
+sudo cp src-tauri/target/release/muthur-os-terminal /usr/local/bin/muthur
+```
+
+### Customize Colors
+
+Edit `tailwind.config.js`:
+
+```javascript
+colors: {
+  'muthur-primary': '#00ff41',    // Matrix green
+  'muthur-secondary': '#00d4ff',  // Cyan
+  'muthur-accent': '#ff006e',     // Magenta
+  // Change to your preferred colors
+}
+```
+
+Then rebuild:
+```bash
+make build
+```
+
+### Config Files
 
 ```
-muthur-os-terminal/
-├── src-tauri/          # Rust backend
-│   ├── src/
-│   │   ├── main.rs     # Entry point & Tauri commands
-│   │   ├── pty.rs      # PTY manager (portable-pty)
-│   │   ├── system.rs   # System monitoring (sysinfo)
-│   │   ├── ai.rs       # Ollama client
-│   │   └── crash.rs    # Crash reporter
-│   ├── Cargo.toml
-│   └── tauri.conf.json
-│
-├── src/                # React frontend
-│   ├── components/
-│   │   ├── Header.tsx
-│   │   ├── LeftPanel.tsx
-│   │   ├── CenterPanel.tsx
-│   │   ├── RightPanel.tsx
-│   │   ├── Terminal.tsx
-│   │   ├── FileExplorer.tsx
-│   │   ├── Globe.tsx
-│   │   ├── AIPanel.tsx
-│   │   └── CustomCursor.tsx
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-│
-├── package.json
-├── vite.config.ts
-├── tailwind.config.js
-├── install.sh
-└── README.md
+~/.config/xKOR_3RR0R/
+├── crash_reports/    # Automatic crash logs
+└── logs/            # Application logs
+```
+
+---
+
+## Troubleshooting
+
+### Terminal Not Opening
+
+**Symptom**: "Session closed" immediately after opening
+
+**Fix**:
+```bash
+# Check your shell
+echo $SHELL
+# Should show /bin/bash or /bin/zsh
+
+# If empty or wrong, install bash
+sudo apt install bash  # Ubuntu/Debian
+sudo pacman -S bash    # Arch
+```
+
+### AI Shows "ERROR"
+
+**Symptom**: "AI service unavailable"
+
+**Fix**:
+```bash
+# Check if Ollama is running
+curl http://localhost:11434
+
+# If error, start Ollama
+ollama serve
+```
+
+### High CPU Usage
+
+**Symptom**: Fans running loud, system slow
+
+**Fix**:
+- Close unused terminal tabs (each tab runs a shell process)
+- Check for runaway processes in system monitor panel
+- Reduce terminal scrollback in settings
+
+### Graphics Issues
+
+**Symptom**: Black screen, missing UI elements, or poor performance
+
+**Fix**:
+```bash
+# Check OpenGL version
+glxinfo | grep "OpenGL version"
+# Should show 3.0 or higher
+
+# Update GPU drivers
+sudo apt update && sudo apt upgrade  # Ubuntu/Debian
+sudo pacman -Syu                     # Arch
+
+# If still issues, disable hardware acceleration
+LIBGL_ALWAYS_SOFTWARE=1 muthur
+```
+
+### Build Failures
+
+**Symptom**: Errors during `make install`
+
+**Fix**:
+```bash
+# Verify all dependencies
+make verify
+
+# Install missing dependencies manually
+# Ubuntu/Debian:
+sudo apt install build-essential libgtk-3-dev libwebkit2gtk-4.1-dev librsvg2-dev libssl-dev
+
+# Arch:
+sudo pacman -S base-devel gtk3 webkit2gtk librsvg openssl
+
+# Try again
+make install
+```
+
+### View Crash Reports
+
+```bash
+cat ~/.config/xKOR_3RR0R/crash_reports/crash_*.log
 ```
 
 ---
 
 ## Development
 
-### Run in Development Mode
+### Development Mode
 
 ```bash
 make dev
 ```
 
-Or: `npm run tauri dev`
+This starts the application with hot-reload enabled.
 
-### Build for Production
+### Build Production Binary
 
 ```bash
 make build
 ```
 
-Or: `./build.sh`
+Output: `src-tauri/target/release/muthur-os-terminal`
 
 ### Run Tests
 
 ```bash
 make test
 ```
-
-Or: `./test.sh`
 
 ### Clean Build Artifacts
 
@@ -289,7 +453,7 @@ make clean
 make help
 ```
 
-Available commands:
+**Available commands:**
 - `make install` - Install MUTHUR
 - `make upgrade` - Upgrade to latest version
 - `make uninstall` - Remove from system
@@ -299,70 +463,115 @@ Available commands:
 - `make test` - Run test suite
 - `make verify` - Verify setup
 
----
+### Architecture
 
-## Troubleshooting
+```
+muthur-os-terminal/
+├── src-tauri/              # Rust backend
+│   ├── src/
+│   │   ├── main.rs         # Tauri setup & IPC
+│   │   ├── pty.rs          # PTY session management
+│   │   ├── system.rs       # System monitoring
+│   │   ├── ai.rs           # Ollama API client
+│   │   └── crash.rs        # Crash reporting
+│   └── Cargo.toml
+│
+├── src/                    # React frontend
+│   ├── components/
+│   │   ├── Terminal.tsx    # Multi-tab terminal
+│   │   ├── FileExplorer.tsx
+│   │   ├── AIPanel.tsx
+│   │   ├── Globe.tsx       # 3D visualization
+│   │   └── ...
+│   └── App.tsx
+│
+├── install.sh              # Installation script
+├── upgrade.sh              # Upgrade script
+├── uninstall.sh            # Uninstall script
+└── Makefile                # Build automation
+```
 
-### Terminal Not Opening
-
-- Check if PTY is supported: `ls -la /dev/pts/`
-- Verify shell exists: `echo $SHELL`
-
-### AI Assistant Not Working
-
-- Ensure Ollama is running: `systemctl status ollama` or `ollama serve`
-- Check model is downloaded: `ollama list`
-- Verify localhost connection: `curl http://localhost:11434`
-
-### Graphics Issues
-
-- Update GPU drivers
-- Check OpenGL support: `glxinfo | grep "OpenGL version"`
-- Try disabling WebGL: Set `LIBGL_ALWAYS_SOFTWARE=1`
-
-### Crash Reports
-
-All crash reports are saved to: `~/.config/xKOR_3RR0R/crash_reports/`
+For detailed development documentation, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ---
 
 ## Contributing
 
-Contributions welcome! Please:
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting pull requests.
+
+**Quick contribution guide:**
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch: `git checkout -b feat/your-feature`
 3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+4. Follow the [no-emoji policy](NO_EMOJI_POLICY.md)
+5. Test thoroughly: `make test`
+6. Commit with conventional commits: `feat: add feature`
+7. Push and create a pull request
+
+**Coding standards:**
+- Rust: Follow `rustfmt` and `clippy` guidelines
+- TypeScript: Use Prettier and ESLint
+- No emojis in any files (see [NO_EMOJI_POLICY.md](NO_EMOJI_POLICY.md))
 
 ---
 
-## License
+## Documentation
 
-MIT License - see [LICENSE](LICENSE) file
-
----
-
-## Acknowledgments
-
-- Inspired by [eDEX-UI](https://github.com/GitSquared/edex-ui)
-- Visual style influenced by xKOR_3RR0R
-- Built with [Tauri](https://tauri.app/), [React](https://react.dev/), and [xterm.js](https://xtermjs.org/)
+- [README.md](README.md) - This file
+- [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Command quick reference
+- [QUICKSTART.md](QUICKSTART.md) - 5-minute setup guide
+- [DEVELOPMENT.md](DEVELOPMENT.md) - Developer documentation
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
+- [CHANGELOG.md](CHANGELOG.md) - Version history
+- [NO_EMOJI_POLICY.md](NO_EMOJI_POLICY.md) - Emoji usage policy
 
 ---
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/krko2n/Muthur-os-terminal/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/krko2n/Muthur-os-terminal/discussions)
+**Found a bug?**
+- [Report an issue](https://github.com/krko2n/Muthur-os-terminal/issues)
+
+**Have a question?**
+- [Start a discussion](https://github.com/krko2n/Muthur-os-terminal/discussions)
+
+**Need help?**
+- Check [QUICK_REFERENCE.md](QUICK_REFERENCE.md)
+- Read [Troubleshooting](#troubleshooting) section
+- Search [existing issues](https://github.com/krko2n/Muthur-os-terminal/issues)
+
+---
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2026 MUTHUR Development
+
+---
+
+## Acknowledgments
+
+**Inspired by:**
+- [eDEX-UI](https://github.com/GitSquared/edex-ui) by GitSquared
+- [xKOR_3RR0R](https://github.com/krko2n/xKOR_3RR0R) visual style
+
+**Built with:**
+- [Tauri](https://tauri.app/) - Application framework
+- [React](https://react.dev/) - UI framework
+- [xterm.js](https://xtermjs.org/) - Terminal emulator
+- [Three.js](https://threejs.org/) - 3D graphics
+- [Ollama](https://ollama.com/) - AI integration
 
 ---
 
 <div align="center">
 
-**MUTHUR://CORE - Advanced Terminal Interface**
+**MUTHUR://CORE**
 
 *Built with love for the Linux community*
+
+[Install](#installation) · [Upgrade](#upgrade) · [Docs](https://github.com/krko2n/Muthur-os-terminal) · [Report Bug](https://github.com/krko2n/Muthur-os-terminal/issues)
 
 </div>
