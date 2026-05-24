@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-25 - Commit 8671c5e
+
+**Update icons with AI-generated geometric design**
+
+- Author: krkos
+- Hash: `8671c5e`
+
+**Changed files:**
+```
+AI_ICON_PROMPT.md
+banner.png
+src-tauri/icons/128x128.png
+src-tauri/icons/128x128@2x.png
+src-tauri/icons/32x32.png
+```
+
+---
+
+## 2026-05-24 - Commit ea2d0d0
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `ea2d0d0`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 09995d0
 
 **Add banner image to README**
