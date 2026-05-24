@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 369beba
+
+**v0.1.1: CORRECTED - Upgrade to LATEST versions as requested + fix all errors**
+
+- Author: krkos
+- Hash: `369beba`
+
+**Changed files:**
+```
+src-tauri/Cargo.toml
+src-tauri/icons/generate-icons.sh
+src-tauri/src/pty.rs
+src-tauri/src/system.rs
+src-tauri/tauri.conf.json
+```
+
+---
+
+## 2026-05-24 - Commit 9f1b856
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `9f1b856`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit c94e11a
 
 **v0.1.1: FINAL FIX - Downgrade sysinfo to 0.29 for API compatibility**
