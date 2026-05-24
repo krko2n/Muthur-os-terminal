@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sysinfo::{System, SystemExt, CpuExt, ProcessExt, NetworkExt, DiskExt};
+use sysinfo::{System, Networks, Disks, Pid};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SystemStats {
@@ -51,20 +51,20 @@ impl SystemMonitor {
         let mut sys = System::new_all();
         sys.refresh_all();
 
-        // CPU usage
-        let cpu_usage = sys.global_cpu_info().cpu_usage();
+        // CPU usage - sysinfo 0.39: global_cpu_usage() returns f32 directly
+        let cpu_usage = sys.global_cpu_usage();
 
         // Memory
         let memory_used = sys.used_memory();
         let memory_total = sys.total_memory();
         let memory_percent = (memory_used as f32 / memory_total as f32) * 100.0;
 
-        // Top processes
+        // Top processes - sysinfo 0.39: Pid is numeric type, name() returns &OsStr
         let mut processes: Vec<ProcessInfo> = sys.processes()
             .iter()
             .map(|(pid, process)| ProcessInfo {
                 pid: pid.as_u32(),
-                name: process.name().to_string(),
+                name: process.name().to_string_lossy().to_string(),
                 cpu_usage: process.cpu_usage(),
                 memory: process.memory(),
             })
@@ -73,17 +73,18 @@ impl SystemMonitor {
         processes.sort_by(|a, b| b.cpu_usage.partial_cmp(&a.cpu_usage).unwrap());
         processes.truncate(10);
 
-        // Network
-        let networks = sys.networks();
+        // Network - sysinfo 0.39: Must create Networks separately
+        let networks = Networks::new_with_refreshed_list();
         let mut total_received = 0;
         let mut total_transmitted = 0;
-        for (_interface_name, data) in networks {
+        for (_interface_name, data) in &networks {
             total_received += data.received();
             total_transmitted += data.transmitted();
         }
 
-        // Disks
-        let disks: Vec<DiskInfo> = sys.disks()
+        // Disks - sysinfo 0.39: Must create Disks separately
+        let disks_list = Disks::new_with_refreshed_list();
+        let disks: Vec<DiskInfo> = disks_list
             .iter()
             .map(|disk| {
                 let total = disk.total_space();
@@ -112,7 +113,7 @@ impl SystemMonitor {
                 transmitted: total_transmitted,
             },
             disk: disks,
-            uptime: sys.uptime(),
+            uptime: System::uptime().unwrap_or(0),  // sysinfo 0.39: returns Option<u64>
         }
     }
 }
