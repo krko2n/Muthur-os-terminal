@@ -27,6 +27,7 @@ impl From<String> for SessionId {
 
 pub struct Session {
     pty_pair: PtyPair,
+    // Child process handle - stored to keep process alive
     #[allow(dead_code)]
     child: Box<dyn portable_pty::Child + Send>,
 }
@@ -99,7 +100,7 @@ impl PtyManager {
             session_id.clone(),
             Session {
                 pty_pair,
-                child: Box::new(child),
+                child,  // spawn_command already returns Box<dyn Child>
             },
         );
 
@@ -138,12 +139,10 @@ impl PtyManager {
     }
 }
 
-fn get_shell() -> &'static str {
+fn get_shell() -> String {
     if cfg!(target_os = "windows") {
-        "powershell.exe"
+        "powershell.exe".to_string()
     } else {
-        std::env::var("SHELL").ok()
-            .and_then(|s| s.parse::<&'static str>().ok())
-            .unwrap_or("/bin/bash")
+        std::env::var("SHELL").unwrap_or_else(|_| "/bin/bash".to_string())
     }
 }
