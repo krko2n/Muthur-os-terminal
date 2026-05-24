@@ -1,7 +1,6 @@
-use portable_pty::{native_pty_system, CommandBuilder, PtyPair, PtySize};
+use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use std::collections::HashMap;
 use std::io::{Read, Write};
-use std::sync::Arc;
 use tauri::{Emitter, Window};
 use tokio::task;
 use uuid::Uuid;
@@ -26,7 +25,7 @@ impl From<String> for SessionId {
 }
 
 pub struct Session {
-    pty_pair: PtyPair,
+    master: Box<dyn portable_pty::MasterPty + Send>,
     // Child process handle - stored to keep process alive
     #[allow(dead_code)]
     child: Box<dyn portable_pty::Child + Send>,
@@ -60,7 +59,8 @@ impl PtyManager {
         drop(pty_pair.slave);
 
         let session_id = SessionId::new();
-        let mut reader = pty_pair.master.try_clone_reader()?;
+        let master = pty_pair.master;
+        let mut reader = master.try_clone_reader()?;
 
         let sid_clone = session_id.clone();
         let window_clone = window.clone();
@@ -99,7 +99,7 @@ impl PtyManager {
         self.sessions.insert(
             session_id.clone(),
             Session {
-                pty_pair,
+                master,
                 child,  // spawn_command already returns Box<dyn Child>
             },
         );
@@ -109,7 +109,7 @@ impl PtyManager {
 
     pub fn write(&mut self, session_id: SessionId, data: &[u8]) -> anyhow::Result<()> {
         if let Some(session) = self.sessions.get_mut(&session_id) {
-            session.pty_pair.master.write_all(data)?;
+            session.master.write_all(data)?;
             Ok(())
         } else {
             Err(anyhow::anyhow!("Session not found"))
@@ -118,7 +118,7 @@ impl PtyManager {
 
     pub fn resize(&mut self, session_id: SessionId, cols: u16, rows: u16) -> anyhow::Result<()> {
         if let Some(session) = self.sessions.get_mut(&session_id) {
-            session.pty_pair.master.resize(PtySize {
+            session.master.resize(PtySize {
                 rows,
                 cols,
                 pixel_width: 0,

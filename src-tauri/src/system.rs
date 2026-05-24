@@ -73,16 +73,15 @@ impl SystemMonitor {
         processes.sort_by(|a, b| b.cpu_usage.partial_cmp(&a.cpu_usage).unwrap());
         processes.truncate(10);
 
-        // Network - sysinfo 0.31+ changed networks API
-        let networks = sys.networks();
+        // Network - sysinfo 0.31 uses Networks struct with iter()
         let mut total_received = 0;
         let mut total_transmitted = 0;
-        for (_interface_name, data) in networks.iter() {
+        for (_interface_name, data) in sys.networks().iter() {
             total_received += data.received();
             total_transmitted += data.transmitted();
         }
 
-        // Disks
+        // Disks - sysinfo 0.31 uses Disks struct with iter()
         let disks: Vec<DiskInfo> = sys.disks()
             .iter()
             .map(|disk| {
@@ -112,7 +111,7 @@ impl SystemMonitor {
                 transmitted: total_transmitted,
             },
             disk: disks,
-            uptime: sys.uptime(),
+            uptime: System::uptime(),  // sysinfo 0.31: uptime is a static method
         }
     }
 }
