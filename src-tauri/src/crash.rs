@@ -23,17 +23,27 @@ pub fn init_crash_handler() {
              {}\n\
              \n\
              Backtrace:\n\
-             {:?}\n",
+             {:?}\n\
+             \n\
+             ================================\n\
+             To report this crash:\n\
+             ./report-error.sh runtime {:?}\n\
+             \n\
+             Or manually: https://github.com/krko2n/Muthur-os-terminal/issues/new\n",
             Local::now().format("%Y-%m-%d %H:%M:%S"),
             std::thread::current().name(),
             panic_info,
-            std::backtrace::Backtrace::capture()
+            std::backtrace::Backtrace::capture(),
+            crash_file
         );
 
         if let Err(e) = fs::write(&crash_file, &crash_msg) {
             eprintln!("Failed to write crash log: {}", e);
         } else {
             eprintln!("Crash report written to: {:?}", crash_file);
+            eprintln!("\nTo report this crash automatically:");
+            eprintln!("  cd muthur-os-terminal");
+            eprintln!("  ./report-error.sh runtime {:?}", crash_file);
         }
 
         eprintln!("{}", crash_msg);

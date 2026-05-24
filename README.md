@@ -421,6 +421,26 @@ make install
 cat ~/.config/xKOR_3RR0R/crash_reports/crash_*.log
 ```
 
+### Report Errors Automatically
+
+```bash
+# After an installation error
+./report-error.sh install
+
+# After a build error
+./report-error.sh build
+
+# After a crash
+./report-error.sh runtime ~/.config/xKOR_3RR0R/crash_reports/crash_*.log
+```
+
+This automatically creates a GitHub issue with:
+- Your system information
+- Error log
+- Version information
+
+Requires [GitHub CLI](https://cli.github.com/) installed and authenticated.
+
 ---
 
 ## Development

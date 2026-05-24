@@ -161,7 +161,7 @@ build_app() {
 
     # Install npm dependencies
     echo -e "${YELLOW}[1/4]${NC} Installing frontend dependencies..."
-    npm install --quiet
+    npm install --legacy-peer-deps --quiet
     echo -e "${GREEN}[OK]${NC} Dependencies installed"
 
     # Build frontend
@@ -236,8 +236,41 @@ EOF
     echo -e "${GREEN}[OK]${NC} Desktop entry created"
 }
 
+# Error handler
+handle_error() {
+    echo ""
+    echo -e "${RED}================================${NC}"
+    echo -e "${RED}INSTALLATION FAILED${NC}"
+    echo -e "${RED}================================${NC}"
+    echo ""
+    echo "An error occurred during installation."
+    echo ""
+    echo "Error log saved to: /tmp/muthur-install-error.log"
+    echo ""
+    read -p "Report this error to GitHub? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if [ -x "./report-error.sh" ]; then
+            ./report-error.sh install /tmp/muthur-install-error.log
+        else
+            echo "Please report manually: https://github.com/krko2n/Muthur-os-terminal/issues/new"
+        fi
+    else
+        echo ""
+        echo "To report manually: https://github.com/krko2n/Muthur-os-terminal/issues/new"
+    fi
+    exit 1
+}
+
+# Set error trap
+trap 'handle_error' ERR
+
 # Main installation flow
 main() {
+    # Redirect all output to log file
+    exec > >(tee /tmp/muthur-install-error.log)
+    exec 2>&1
+
     detect_os
     install_deps
     install_rust
