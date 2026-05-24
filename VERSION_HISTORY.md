@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-25 - Commit 9b5acf2
+
+**Move icon 2px left and change text to black**
+
+- Author: krkos
+- Hash: `9b5acf2`
+
+**Changed files:**
+```
+banner.png
+create-banner.ps1
+```
+
+---
+
+## 2026-05-24 - Commit e4dd4bb
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `e4dd4bb`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-25 - Commit 8fff52f
 
 **Move icon 2 pixels right**
