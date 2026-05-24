@@ -82,14 +82,41 @@ echo "  - src-tauri/tauri.conf.json"
 echo "  - CHANGELOG.md"
 echo ""
 
-read -p "Commit changes? (y/N) " -n 1 -r
+echo ""
+echo "Updating README version badge..."
+sed -i "s/version-[0-9]*\.[0-9]*\.[0-9]*/version-${NEW_VERSION}/" README.md
+sed -i "s/Current Version: v[0-9]*\.[0-9]*\.[0-9]*/Current Version: v${NEW_VERSION}/" README.md
+
+git add Cargo.toml package.json src-tauri/tauri.conf.json CHANGELOG.md README.md
+
+echo ""
+echo "Files updated and staged"
+echo ""
+read -p "Enter commit message (or press Enter for default): " COMMIT_MSG
 echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    git add Cargo.toml package.json src-tauri/tauri.conf.json CHANGELOG.md
-    git commit -m "chore: bump version to v${NEW_VERSION}"
-    git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
-    echo ""
-    echo "Version bumped to v${NEW_VERSION}"
-    echo ""
-    echo "To push: git push && git push --tags"
+
+if [ -z "$COMMIT_MSG" ]; then
+    COMMIT_MSG="chore: bump version to v${NEW_VERSION}"
 fi
+
+git commit -m "v${NEW_VERSION}: ${COMMIT_MSG}
+
+Version: ${NEW_VERSION}
+Type: ${TYPE}
+Previous: ${CURRENT_VERSION}"
+
+git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
+
+echo ""
+echo "=========================================="
+echo "Version bumped: ${CURRENT_VERSION} -> ${NEW_VERSION}"
+echo "=========================================="
+echo ""
+echo "Commit created with message:"
+echo "  v${NEW_VERSION}: ${COMMIT_MSG}"
+echo ""
+echo "Tag created: v${NEW_VERSION}"
+echo ""
+echo "To push:"
+echo "  git push && git push --tags"
+echo ""

@@ -2,6 +2,9 @@
 
 <div align="center">
 
+![Version](https://img.shields.io/badge/version-0.1.1-brightgreen.svg?style=for-the-badge)
+![Release](https://img.shields.io/github/v/release/krko2n/Muthur-os-terminal?style=for-the-badge)
+
 **Advanced Terminal Interface with AI Integration**
 
 *Inspired by eDEX-UI · Built with Tauri v2 + Rust + React 19*
@@ -9,6 +12,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-blue.svg)](https://tauri.app/)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
+[![Latest Release](https://img.shields.io/github/release-date/krko2n/Muthur-os-terminal)](https://github.com/krko2n/Muthur-os-terminal/releases)
+
+**Current Version: v0.1.1** | [Release Notes](CHANGELOG.md) | [Version History](VERSION_HISTORY.md)
 
 </div>
 

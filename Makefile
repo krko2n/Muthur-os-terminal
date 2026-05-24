@@ -1,6 +1,6 @@
 # MUTHUR OS Terminal - Makefile
 
-.PHONY: help install upgrade uninstall build dev clean test verify
+.PHONY: help install upgrade uninstall build dev clean test verify version
 
 help:
 	@echo "MUTHUR OS Terminal - Available Commands"
@@ -13,6 +13,7 @@ help:
 	@echo "  make clean      - Clean build artifacts"
 	@echo "  make test       - Run test suite"
 	@echo "  make verify     - Verify setup"
+	@echo "  make version    - Check version"
 	@echo ""
 
 install:
@@ -46,3 +47,7 @@ test:
 verify:
 	@chmod +x verify-setup.sh
 	@./verify-setup.sh
+
+version:
+	@chmod +x check-version.sh
+	@./check-version.sh
