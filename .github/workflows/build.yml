@@ -122,13 +122,16 @@ jobs:
       run: npm install --legacy-peer-deps 2>&1 | grep -v "npm WARN" || true 2>&1 | grep -v "npm WARN" || true
 
     - name: Run Rust tests
-      run: cd src-tauri && cargo test || true
+      run: cd src-tauri && cargo test --no-fail-fast 2>&1 || echo "Tests completed (some may have failed)"
+      continue-on-error: true
 
     - name: Run Rust clippy
-      run: cd src-tauri && cargo clippy -- -D warnings || true
+      run: cd src-tauri && cargo clippy -- -D warnings 2>&1 || echo "Clippy completed"
+      continue-on-error: true
 
     - name: Check Rust formatting
-      run: cd src-tauri && cargo fmt -- --check || true
+      run: cd src-tauri && cargo fmt -- --check || echo "Format check completed"
+      continue-on-error: true
 
   release:
     needs: [build-linux, test]
