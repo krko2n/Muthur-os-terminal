@@ -58,10 +58,17 @@ jobs:
       uses: actions/cache@v4
       with:
         path: node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package.json') }}
+
+    - name: Generate lockfile if missing
+      run: |
+        if [ ! -f package-lock.json ]; then
+          echo "Generating package-lock.json..."
+          npm install --legacy-peer-deps --package-lock-only
+        fi
 
     - name: Install NPM dependencies
-      run: npm ci --legacy-peer-deps 2>&1 | grep -v "npm WARN" || true
+      run: npm install --legacy-peer-deps 2>&1 | grep -v "npm WARN" || true
 
     - name: Build frontend
       run: npm run build 2>&1 | head -50 || true
@@ -119,7 +126,7 @@ jobs:
         node-version: '20'
 
     - name: Install NPM dependencies
-      run: npm ci --legacy-peer-deps 2>&1 | grep -v "npm WARN" || true
+      run: npm install --legacy-peer-deps 2>&1 | grep -v "npm WARN" || true
 
     - name: Run Rust tests
       run: cd src-tauri && cargo test --no-fail-fast 2>&1 || echo "Tests completed (some may have failed)"
