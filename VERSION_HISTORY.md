@@ -4,6 +4,36 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 09995d0
+
+**Add banner image to README**
+
+- Author: krkos
+- Hash: `09995d0`
+
+**Changed files:**
+```
+README.md
+banner.png
+create-banner.ps1
+```
+
+---
+
+## 2026-05-24 - Commit 377d112
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `377d112`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 34872f7
 
 **v0.1.1: Add application icons - complete CI/CD fix**
