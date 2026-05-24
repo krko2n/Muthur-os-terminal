@@ -25,7 +25,7 @@
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/yourusername/muthur-os-terminal.git
+git clone https://github.com/krko2n/Muthur-os-terminal.git
 cd muthur-os-terminal
 npm install
 ```

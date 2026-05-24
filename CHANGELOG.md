@@ -97,6 +97,6 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for development guidelines.
 
 ## Links
 
-- **Repository**: https://github.com/yourusername/muthur-os-terminal
-- **Issues**: https://github.com/yourusername/muthur-os-terminal/issues
-- **Releases**: https://github.com/yourusername/muthur-os-terminal/releases
+- **Repository**: https://github.com/krko2n/Muthur-os-terminal
+- **Issues**: https://github.com/krko2n/Muthur-os-terminal/issues
+- **Releases**: https://github.com/krko2n/Muthur-os-terminal/releases

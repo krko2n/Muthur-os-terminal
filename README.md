@@ -50,7 +50,7 @@
 ### Automated Installation (Recommended)
 
 ```bash
-git clone https://github.com/yourusername/muthur-os-terminal.git
+git clone https://github.com/krko2n/Muthur-os-terminal.git
 cd muthur-os-terminal
 chmod +x install.sh
 ./install.sh
@@ -297,8 +297,8 @@ MIT License - see [LICENSE](LICENSE) file
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/muthur-os-terminal/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/muthur-os-terminal/discussions)
+- **Issues**: [GitHub Issues](https://github.com/krko2n/Muthur-os-terminal/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/krko2n/Muthur-os-terminal/discussions)
 
 ---
 

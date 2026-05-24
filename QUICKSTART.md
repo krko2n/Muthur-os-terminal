@@ -15,7 +15,7 @@ echo $SHELL
 ### One-Command Install
 
 ```bash
-git clone https://github.com/yourusername/muthur-os-terminal.git && \
+git clone https://github.com/krko2n/Muthur-os-terminal.git && \
 cd muthur-os-terminal && \
 chmod +x install.sh && \
 ./install.sh
@@ -207,7 +207,7 @@ See [README.md](README.md) for complete documentation.
 
 ## Getting Help
 
-- **Issues**: https://github.com/yourusername/muthur-os-terminal/issues
+- **Issues**: https://github.com/krko2n/Muthur-os-terminal/issues
 - **Discord**: [Coming soon]
 - **Wiki**: [Coming soon]
 

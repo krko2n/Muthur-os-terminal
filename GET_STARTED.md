@@ -7,7 +7,7 @@ Welcome! This guide will get you from zero to running MUTHUR in under 10 minutes
 ## Quick Start (Experienced Users)
 
 ```bash
-git clone https://github.com/yourusername/muthur-os-terminal.git
+git clone https://github.com/krko2n/Muthur-os-terminal.git
 cd muthur-os-terminal
 chmod +x install.sh
 ./install.sh
@@ -49,7 +49,7 @@ sudo pacman -S git    # Arch
 sudo dnf install git  # Fedora
 
 # Clone
-git clone https://github.com/yourusername/muthur-os-terminal.git
+git clone https://github.com/krko2n/Muthur-os-terminal.git
 cd muthur-os-terminal
 ```
 
@@ -346,10 +346,10 @@ sudo apt install build-essential libgtk-3-dev libwebkit2gtk-4.1-dev
 ## Getting Help
 
 **Found a bug?**
-→ [GitHub Issues](https://github.com/yourusername/muthur-os-terminal/issues)
+→ [GitHub Issues](https://github.com/krko2n/Muthur-os-terminal/issues)
 
 **Have a question?**
-→ [GitHub Discussions](https://github.com/yourusername/muthur-os-terminal/discussions)
+→ [GitHub Discussions](https://github.com/krko2n/Muthur-os-terminal/discussions)
 
 **Want to chat?**
 → Discord (coming soon)

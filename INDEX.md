@@ -108,7 +108,7 @@ Welcome to the complete documentation for MUTHUR OS Terminal!
 → [CONTRIBUTING.md](CONTRIBUTING.md#development-process)
 
 #### Report a bug
-→ [GitHub Issues](https://github.com/yourusername/muthur-os-terminal/issues)
+→ [GitHub Issues](https://github.com/krko2n/Muthur-os-terminal/issues)
 
 #### Customize colors
 → [GET_STARTED.md](GET_STARTED.md#customize-colors)
@@ -269,10 +269,10 @@ Current version: **0.1.0**
 ## External Resources
 
 ### Official Links
-- **Repository**: https://github.com/yourusername/muthur-os-terminal
-- **Issues**: https://github.com/yourusername/muthur-os-terminal/issues
-- **Discussions**: https://github.com/yourusername/muthur-os-terminal/discussions
-- **Releases**: https://github.com/yourusername/muthur-os-terminal/releases
+- **Repository**: https://github.com/krko2n/Muthur-os-terminal
+- **Issues**: https://github.com/krko2n/Muthur-os-terminal/issues
+- **Discussions**: https://github.com/krko2n/Muthur-os-terminal/discussions
+- **Releases**: https://github.com/krko2n/Muthur-os-terminal/releases
 
 ### Technology Docs
 - **Tauri**: https://tauri.app/v2/
@@ -292,7 +292,7 @@ Current version: **0.1.0**
 → [GET_STARTED.md](GET_STARTED.md)
 
 ### How do I report bugs?
-→ [GitHub Issues](https://github.com/yourusername/muthur-os-terminal/issues)
+→ [GitHub Issues](https://github.com/krko2n/Muthur-os-terminal/issues)
 
 ### Can I contribute?
 → Yes! See [CONTRIBUTING.md](CONTRIBUTING.md)
@@ -307,8 +307,8 @@ Current version: **0.1.0**
 
 ## Contact
 
-- **Issues**: https://github.com/yourusername/muthur-os-terminal/issues
-- **Discussions**: https://github.com/yourusername/muthur-os-terminal/discussions
+- **Issues**: https://github.com/krko2n/Muthur-os-terminal/issues
+- **Discussions**: https://github.com/krko2n/Muthur-os-terminal/discussions
 - **Email**: [Coming soon]
 
 ---

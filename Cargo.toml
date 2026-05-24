@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "MUTHUR OS - Advanced terminal interface with AI integration"
 authors = ["MUTHUR Development"]
 license = "MIT"
-repository = "https://github.com/yourusername/muthur-os-terminal"
+repository = "https://github.com/krko2n/Muthur-os-terminal"
 edition = "2021"
 
 [build-dependencies]

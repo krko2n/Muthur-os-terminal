@@ -13,7 +13,7 @@ Be respectful, inclusive, and constructive. We're all here to build something aw
 ### Reporting Bugs
 
 **Before submitting a bug report:**
-1. Check existing [issues](https://github.com/yourusername/muthur-os-terminal/issues)
+1. Check existing [issues](https://github.com/krko2n/Muthur-os-terminal/issues)
 2. Update to the latest version
 3. Try to reproduce with minimal configuration
 
@@ -30,7 +30,7 @@ Be respectful, inclusive, and constructive. We're all here to build something aw
 
 **Before suggesting a feature:**
 1. Check if it already exists
-2. Check if it's already suggested in [issues](https://github.com/yourusername/muthur-os-terminal/issues)
+2. Check if it's already suggested in [issues](https://github.com/krko2n/Muthur-os-terminal/issues)
 
 **When suggesting a feature:**
 - **Clear title**: Concise description
