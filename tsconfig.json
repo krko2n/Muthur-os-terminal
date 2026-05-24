@@ -5,7 +5,6 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "types": ["@react-three/fiber"],
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -17,6 +16,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "src/three-types.d.ts"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

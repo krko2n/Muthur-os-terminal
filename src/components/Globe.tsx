@@ -1,9 +1,7 @@
 import { useRef } from 'react';
-import { Canvas, useFrame, extend } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { Sphere, Line } from '@react-three/drei';
 import * as THREE from 'three';
-
-extend(THREE);
 
 function RotatingGlobe() {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -108,8 +106,8 @@ export default function Globe() {
       <Canvas
         camera={{ position: [0, 0, 6], fov: 50 }}
         gl={{ alpha: true, antialias: true }}
+        style={{ background: 'transparent' }}
       >
-        <color attach="background" args={['transparent']} />
         <RotatingGlobe />
       </Canvas>
     </div>
