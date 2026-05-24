@@ -4,6 +4,36 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-25 - Commit a588aa4
+
+**Fix banner and add TODO list for next session**
+
+- Author: krkos
+- Hash: `a588aa4`
+
+**Changed files:**
+```
+TODO.md
+banner.png
+create-banner.ps1
+```
+
+---
+
+## 2026-05-24 - Commit 821aebc
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `821aebc`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-25 - Commit c3b547f
 
 **Security improvements and configurable AI model**
