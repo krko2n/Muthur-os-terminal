@@ -4,6 +4,24 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 2f6aab5
+
+**v0.1.1: Add versioning system and update changelog**
+
+- Author: krkos
+- Hash: `2f6aab5`
+
+**Changed files:**
+```
+.github/workflows/version-update.yml
+CHANGELOG.md
+Cargo.toml
+VERSION_HISTORY.md
+generate-changelog.sh
+```
+
+---
+
 ## 2026-05-24 - Commit 370c109
 
 **Update all documentation with correct Arch package names**
