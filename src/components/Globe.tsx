@@ -1,7 +1,9 @@
 import { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, extend } from '@react-three/fiber';
 import { Sphere, Line } from '@react-three/drei';
 import * as THREE from 'three';
+
+extend(THREE);
 
 function RotatingGlobe() {
   const meshRef = useRef<THREE.Mesh>(null);

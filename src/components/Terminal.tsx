@@ -33,7 +33,8 @@ export default function Terminal() {
     if (!containerRef.current) return;
 
     try {
-      const { invoke, event } = await import('@tauri-apps/api');
+      const { invoke } = await import('@tauri-apps/api/core');
+      const { listen } = await import('@tauri-apps/api/event');
 
       // Create terminal instance
       const terminal = new XTerm({
@@ -75,12 +76,12 @@ export default function Terminal() {
       const sessionId = await invoke('create_terminal_session') as string;
 
       // Listen for output
-      await event.listen(`terminal-output-${sessionId}`, (e: any) => {
+      await listen(`terminal-output-${sessionId}`, (e: any) => {
         terminal.write(e.payload);
       });
 
       // Listen for session close
-      await event.listen(`terminal-closed-${sessionId}`, () => {
+      await listen(`terminal-closed-${sessionId}`, () => {
         terminal.write('\r\n\x1b[31mSession closed\x1b[0m\r\n');
       });
 
@@ -139,7 +140,7 @@ export default function Terminal() {
 
   const cleanupSession = async (sessionId: string) => {
     try {
-      const { invoke } = await import('@tauri-apps/api');
+      const { invoke } = await import('@tauri-apps/api/core');
       await invoke('close_terminal_session', { sessionId });
     } catch (error) {
       console.error('Failed to cleanup session:', error);
