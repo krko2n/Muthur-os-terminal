@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-25 - Commit a19c22a
+
+**Move icon 1 pixel right**
+
+- Author: krkos
+- Hash: `a19c22a`
+
+**Changed files:**
+```
+banner.png
+create-banner.ps1
+```
+
+---
+
+## 2026-05-24 - Commit dfd9d26
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `dfd9d26`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-25 - Commit c74b24a
 
 **Improve banner readability and icon position**
