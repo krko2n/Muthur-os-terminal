@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit cdb7d3e
+
+**v0.1.1: Make version highly visible in README and commits**
+
+- Author: krkos
+- Hash: `cdb7d3e`
+
+**Changed files:**
+```
+.gitmessage
+Makefile
+README.md
+check-version.sh
+version-bump.sh
+```
+
+---
+
+## 2026-05-24 - Commit d1c6aab
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `d1c6aab`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit c74c007
 
 **docs: add versioning guide and update README**
