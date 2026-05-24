@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 7bfc77b
+
+**v0.1.1: Fix CI/CD build failures**
+
+- Author: krkos
+- Hash: `7bfc77b`
+
+**Changed files:**
+```
+.github/workflows/build.yml
+```
+
+---
+
+## 2026-05-24 - Commit d6705b6
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `d6705b6`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 706ab89
 
 **v0.1.1: Remove need for manual git pull - upgrade is fully automatic**
