@@ -28,6 +28,10 @@ upgrade:
 	@chmod +x upgrade.sh
 	@./upgrade.sh
 
+quick-upgrade:
+	@chmod +x quick-upgrade.sh
+	@./quick-upgrade.sh
+
 uninstall:
 	@chmod +x uninstall.sh
 	@./uninstall.sh

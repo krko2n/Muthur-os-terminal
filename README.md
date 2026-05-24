@@ -111,33 +111,25 @@ cd muthur-os-terminal
 make upgrade
 ```
 
-**What happens during upgrade:**
+**Completely automatic - no prompts!**
 
-1. Fetches latest changes from GitHub
-2. Shows changelog of what's new
-3. Rebuilds the application
-4. Replaces the installed binary
-5. Preserves your configuration and settings
+What happens:
+1. Auto-fetches latest changes from GitHub
+2. Auto-pulls updates
+3. Auto-installs missing dependencies
+4. Auto-rebuilds application
+5. Auto-replaces binary
+6. Preserves configuration
 
-**Alternative upgrade methods:**
+No `git pull` needed - it does everything automatically!
 
-```bash
-# Using the script directly
-./upgrade.sh
+**That's it!** The upgrade script handles everything:
+- Checks for updates
+- Pulls latest code automatically
+- Installs missing dependencies
+- Rebuilds and reinstalls
 
-# Manual upgrade
-git pull origin main
-make build
-sudo cp src-tauri/target/release/muthur-os-terminal /usr/local/bin/muthur
-```
-
-### Check for Updates
-
-```bash
-cd muthur-os-terminal
-git fetch origin
-git log HEAD..origin/main --oneline
-```
+No manual steps required!
 
 ---
 
