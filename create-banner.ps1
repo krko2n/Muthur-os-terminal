@@ -32,7 +32,7 @@ $iconPath = "src-tauri\icons\128x128@2x.png"
 if (Test-Path $iconPath) {
     $icon = [System.Drawing.Image]::FromFile((Resolve-Path $iconPath))
     $iconSize = 200
-    $iconX = 100
+    $iconX = 101
     $iconY = ($height - $iconSize) / 2
 
     # Glow effect - perfectly centered
@@ -61,20 +61,28 @@ $textX = 350
 # Center align text vertically
 $textStartY = 100
 
-# Title
+# Title with shadow
+$titleShadowBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(220, 0, 0, 0))
+$graphics.DrawString("MUTHUR", $titleFont, $titleShadowBrush, $textX + 2, $textStartY + 2)
 $graphics.DrawString("MUTHUR", $titleFont, $textBrush, $textX, $textStartY)
 
-# Subtitle
+# Subtitle with shadow
+$graphics.DrawString("OS TERMINAL", $subtitleFont, $titleShadowBrush, $textX + 1, $textStartY + 81)
 $graphics.DrawString("OS TERMINAL", $subtitleFont, $textBrush, $textX, $textStartY + 80)
+$titleShadowBrush.Dispose()
 
-# Tagline
+# Tagline with shadow for readability
+$taglineShadowBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(200, 0, 0, 0))
 $tagline = "Advanced Terminal Interface with AI Integration"
+$graphics.DrawString($tagline, $taglineFont, $taglineShadowBrush, $textX + 1, $textStartY + 131)
 $graphics.DrawString($tagline, $taglineFont, $textBrush, $textX, $textStartY + 130)
 
-# Tech stack line
+# Tech stack line with shadow
 $techStack = "Tauri v2 // Rust // React 19 // Three.js"
-$dimTextBrush = New-Object System.Drawing.SolidBrush($matrixGreenDim)
+$dimTextBrush = New-Object System.Drawing.SolidBrush($matrixGreen)
+$graphics.DrawString($techStack, $taglineFont, $taglineShadowBrush, $textX + 1, $textStartY + 171)
 $graphics.DrawString($techStack, $taglineFont, $dimTextBrush, $textX, $textStartY + 170)
+$taglineShadowBrush.Dispose()
 
 # Border glow
 $borderPen = New-Object System.Drawing.Pen($matrixGreen, 2)
