@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 34872f7
+
+**v0.1.1: Add application icons - complete CI/CD fix**
+
+- Author: krkos
+- Hash: `34872f7`
+
+**Changed files:**
+```
+src-tauri/icons/128x128.png
+src-tauri/icons/128x128@2x.png
+src-tauri/icons/32x32.png
+src-tauri/icons/create-ico-icns.ps1
+src-tauri/icons/create-icons.ps1
+```
+
+---
+
+## 2026-05-24 - Commit 7d14921
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `7d14921`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 369beba
 
 **v0.1.1: CORRECTED - Upgrade to LATEST versions as requested + fix all errors**
