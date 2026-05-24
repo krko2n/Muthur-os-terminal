@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit fc42328
+
+**v0.1.1: CRITICAL FIX - Remove invalid shell-open feature from Tauri v2**
+
+- Author: krkos
+- Hash: `fc42328`
+
+**Changed files:**
+```
+src-tauri/Cargo.toml
+```
+
+---
+
+## 2026-05-24 - Commit ccc8413
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `ccc8413`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit a3097ce
 
 **v0.1.1: CRITICAL FIX - Restore CI build by reverting to npm install**
