@@ -32,7 +32,7 @@ $iconPath = "src-tauri\icons\128x128@2x.png"
 if (Test-Path $iconPath) {
     $icon = [System.Drawing.Image]::FromFile((Resolve-Path $iconPath))
     $iconSize = 200
-    $iconX = 104
+    $iconX = 102
     $iconY = ($height - $iconSize) / 2
 
     # Glow effect - perfectly centered
@@ -55,34 +55,25 @@ $titleFont = New-Object System.Drawing.Font("Consolas", 56, [System.Drawing.Font
 $subtitleFont = New-Object System.Drawing.Font("Consolas", 20)
 $taglineFont = New-Object System.Drawing.Font("Consolas", 14)
 
-$textBrush = New-Object System.Drawing.SolidBrush($matrixGreen)
+$textBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::Black)
 $textX = 350
 
 # Center align text vertically
 $textStartY = 100
 
-# Title with shadow
-$titleShadowBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(220, 0, 0, 0))
-$graphics.DrawString("MUTHUR", $titleFont, $titleShadowBrush, $textX + 2, $textStartY + 2)
+# Title
 $graphics.DrawString("MUTHUR", $titleFont, $textBrush, $textX, $textStartY)
 
-# Subtitle with shadow
-$graphics.DrawString("OS TERMINAL", $subtitleFont, $titleShadowBrush, $textX + 1, $textStartY + 81)
+# Subtitle
 $graphics.DrawString("OS TERMINAL", $subtitleFont, $textBrush, $textX, $textStartY + 80)
-$titleShadowBrush.Dispose()
 
-# Tagline with shadow for readability
-$taglineShadowBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(200, 0, 0, 0))
+# Tagline
 $tagline = "Advanced Terminal Interface with AI Integration"
-$graphics.DrawString($tagline, $taglineFont, $taglineShadowBrush, $textX + 1, $textStartY + 131)
 $graphics.DrawString($tagline, $taglineFont, $textBrush, $textX, $textStartY + 130)
 
-# Tech stack line with shadow
+# Tech stack line
 $techStack = "Tauri v2 // Rust // React 19 // Three.js"
-$dimTextBrush = New-Object System.Drawing.SolidBrush($matrixGreen)
-$graphics.DrawString($techStack, $taglineFont, $taglineShadowBrush, $textX + 1, $textStartY + 171)
-$graphics.DrawString($techStack, $taglineFont, $dimTextBrush, $textX, $textStartY + 170)
-$taglineShadowBrush.Dispose()
+$graphics.DrawString($techStack, $taglineFont, $textBrush, $textX, $textStartY + 170)
 
 # Border glow
 $borderPen = New-Object System.Drawing.Pen($matrixGreen, 2)
