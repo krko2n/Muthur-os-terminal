@@ -523,7 +523,8 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before
 - [QUICKSTART.md](QUICKSTART.md) - 5-minute setup guide
 - [DEVELOPMENT.md](DEVELOPMENT.md) - Developer documentation
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
-- [CHANGELOG.md](CHANGELOG.md) - Version history
+- [CHANGELOG.md](CHANGELOG.md) - Version history (curated)
+- [VERSION_HISTORY.md](VERSION_HISTORY.md) - Complete commit history (auto-generated)
 - [NO_EMOJI_POLICY.md](NO_EMOJI_POLICY.md) - Emoji usage policy
 
 ---
