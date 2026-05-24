@@ -4,6 +4,36 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit c94e11a
+
+**v0.1.1: FINAL FIX - Downgrade sysinfo to 0.29 for API compatibility**
+
+- Author: krkos
+- Hash: `c94e11a`
+
+**Changed files:**
+```
+src-tauri/Cargo.toml
+src-tauri/src/pty.rs
+src-tauri/src/system.rs
+```
+
+---
+
+## 2026-05-24 - Commit a7084b4
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `a7084b4`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 66c0748
 
 **v0.1.1: Fix remaining Rust compilation errors (6 errors)**
