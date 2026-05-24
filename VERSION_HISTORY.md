@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 2b2175c
+
+**v0.1.1: Make CI tests non-blocking with continue-on-error**
+
+- Author: krkos
+- Hash: `2b2175c`
+
+**Changed files:**
+```
+.github/workflows/build.yml
+CICD.md
+```
+
+---
+
+## 2026-05-24 - Commit 74bd6ef
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `74bd6ef`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 7bfc77b
 
 **v0.1.1: Fix CI/CD build failures**
