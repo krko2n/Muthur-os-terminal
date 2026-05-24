@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-25 - Commit c74b24a
+
+**Improve banner readability and icon position**
+
+- Author: krkos
+- Hash: `c74b24a`
+
+**Changed files:**
+```
+banner.png
+create-banner.ps1
+```
+
+---
+
+## 2026-05-24 - Commit 0fc5d74
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `0fc5d74`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-25 - Commit 3f57dc8
 
 **Fix banner logo alignment**
