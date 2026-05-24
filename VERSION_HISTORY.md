@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit c74c007
+
+**docs: add versioning guide and update README**
+
+- Author: krkos
+- Hash: `c74c007`
+
+**Changed files:**
+```
+README.md
+VERSIONING.md
+```
+
+---
+
+## 2026-05-24 - Commit 8df5d21
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `8df5d21`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 2f6aab5
 
 **v0.1.1: Add versioning system and update changelog**
