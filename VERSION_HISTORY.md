@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 65a1c97
+
+**v0.1.1: Fix Rust compilation errors - sysinfo 0.31 + portable-pty APIs**
+
+- Author: krkos
+- Hash: `65a1c97`
+
+**Changed files:**
+```
+src-tauri/src/pty.rs
+src-tauri/src/system.rs
+```
+
+---
+
+## 2026-05-24 - Commit cae16b3
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `cae16b3`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit fc42328
 
 **v0.1.1: CRITICAL FIX - Remove invalid shell-open feature from Tauri v2**
