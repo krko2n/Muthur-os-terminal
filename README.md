@@ -47,12 +47,17 @@
 
 ## Installation
 
-### Automated Installation (Recommended)
+### Quick Install (One Command)
 
 ```bash
 git clone https://github.com/krko2n/Muthur-os-terminal.git
 cd muthur-os-terminal
-chmod +x install.sh
+make install
+```
+
+Or using the script directly:
+
+```bash
 ./install.sh
 ```
 
@@ -61,7 +66,36 @@ The installer will:
 2. Install system dependencies
 3. Install Rust and Node.js (if needed)
 4. Optionally install Ollama for AI features
-5. Build and install the application
+5. Build and install the application (5-10 minutes)
+
+### Upgrade
+
+```bash
+cd muthur-os-terminal
+make upgrade
+```
+
+Or: `./upgrade.sh`
+
+This will:
+- Pull latest changes from GitHub
+- Rebuild the application
+- Replace the installed binary
+- Preserve your configuration
+
+### Uninstall
+
+```bash
+cd muthur-os-terminal
+make uninstall
+```
+
+Or: `./uninstall.sh`
+
+This will remove:
+- Binary at `/usr/local/bin/muthur`
+- Desktop entry
+- Optionally remove config directory
 
 ### Manual Installation
 
@@ -222,25 +256,48 @@ muthur-os-terminal/
 ### Run in Development Mode
 
 ```bash
-npm install
-npm run tauri dev
+make dev
 ```
+
+Or: `npm run tauri dev`
 
 ### Build for Production
 
 ```bash
-npm run tauri build
+make build
 ```
+
+Or: `./build.sh`
 
 ### Run Tests
 
 ```bash
-# Frontend tests
-npm test
-
-# Backend tests
-cd src-tauri && cargo test
+make test
 ```
+
+Or: `./test.sh`
+
+### Clean Build Artifacts
+
+```bash
+make clean
+```
+
+### All Make Commands
+
+```bash
+make help
+```
+
+Available commands:
+- `make install` - Install MUTHUR
+- `make upgrade` - Upgrade to latest version
+- `make uninstall` - Remove from system
+- `make build` - Build production binary
+- `make dev` - Run in development mode
+- `make clean` - Clean build artifacts
+- `make test` - Run test suite
+- `make verify` - Verify setup
 
 ---
 

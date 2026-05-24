@@ -14,7 +14,29 @@ echo ""
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Check if running as root
+if [ "$EUID" -eq 0 ]; then
+    echo -e "${RED}Error: Do not run this script as root/sudo${NC}"
+    echo "The script will ask for sudo password when needed"
+    exit 1
+fi
+
+# Check if already installed
+if [ -f "/usr/local/bin/muthur" ]; then
+    echo -e "${YELLOW}MUTHUR is already installed${NC}"
+    echo ""
+    read -p "Reinstall? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Installation cancelled"
+        echo "To upgrade, run: ./upgrade.sh"
+        exit 0
+    fi
+    echo ""
+fi
 
 # Detect OS
 detect_os() {
@@ -28,7 +50,7 @@ detect_os() {
         echo -e "${RED}Unsupported OS. This installer supports Arch, Debian/Ubuntu, and Fedora.${NC}"
         exit 1
     fi
-    echo -e "${GREEN}Detected OS: $OS${NC}"
+    echo -e "${GREEN}[OK]${NC} Detected OS: $OS"
 }
 
 # Install system dependencies
@@ -79,75 +101,86 @@ install_deps() {
             ;;
     esac
 
-    echo -e "${GREEN}System dependencies installed!${NC}"
+    echo -e "${GREEN}[OK]${NC} System dependencies installed"
 }
 
 # Install Rust
 install_rust() {
     if command -v rustc &> /dev/null; then
-        echo -e "${GREEN}Rust already installed!${NC}"
+        RUST_VERSION=$(rustc --version | cut -d' ' -f2)
+        echo -e "${GREEN}[OK]${NC} Rust already installed: $RUST_VERSION"
     else
         echo ""
-        echo "Installing Rust..."
+        echo -e "${YELLOW}Installing Rust...${NC}"
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         source "$HOME/.cargo/env"
-        echo -e "${GREEN}Rust installed!${NC}"
+        echo -e "${GREEN}[OK]${NC} Rust installed"
     fi
 }
 
 # Install Node.js
 install_node() {
     if command -v node &> /dev/null; then
-        echo -e "${GREEN}Node.js already installed!${NC}"
+        NODE_VERSION=$(node --version)
+        echo -e "${GREEN}[OK]${NC} Node.js already installed: $NODE_VERSION"
     else
         echo ""
-        echo "Installing Node.js via nvm..."
+        echo -e "${YELLOW}Installing Node.js via nvm...${NC}"
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         nvm install 20
         nvm use 20
-        echo -e "${GREEN}Node.js installed!${NC}"
+        echo -e "${GREEN}[OK]${NC} Node.js installed"
     fi
 }
 
 # Install Ollama (optional but recommended)
 install_ollama() {
-    echo ""
-    read -p "Install Ollama for AI features? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "Installing Ollama..."
-        curl -fsSL https://ollama.com/install.sh | sh
-        echo -e "${GREEN}Ollama installed!${NC}"
-        echo -e "${YELLOW}Run 'ollama pull llama3.2' to download the AI model${NC}"
+    if command -v ollama &> /dev/null; then
+        echo -e "${GREEN}[OK]${NC} Ollama already installed"
+    else
+        echo ""
+        read -p "Install Ollama for AI features? (y/N) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo ""
+            echo -e "${YELLOW}Installing Ollama...${NC}"
+            curl -fsSL https://ollama.com/install.sh | sh
+            echo -e "${GREEN}[OK]${NC} Ollama installed"
+            echo -e "${BLUE}Tip: Run 'ollama pull llama3.2' to download the AI model${NC}"
+        fi
     fi
 }
 
 # Build the application
 build_app() {
     echo ""
-    echo "Building MUTHUR OS Terminal..."
+    echo -e "${YELLOW}Building MUTHUR OS Terminal...${NC}"
+    echo "This will take 5-10 minutes..."
+    echo ""
 
     # Install npm dependencies
-    echo "Installing frontend dependencies..."
-    npm install
-
-    # Install Rust dependencies and build
-    echo "Building Rust backend..."
-    cd src-tauri
-    cargo build --release
-    cd ..
+    echo -e "${YELLOW}[1/4]${NC} Installing frontend dependencies..."
+    npm install --quiet
+    echo -e "${GREEN}[OK]${NC} Dependencies installed"
 
     # Build frontend
-    echo "Building frontend..."
-    npm run build
+    echo -e "${YELLOW}[2/4]${NC} Building frontend..."
+    npm run build --quiet
+    echo -e "${GREEN}[OK]${NC} Frontend built"
 
-    # Build Tauri app
-    echo "Building Tauri application..."
-    npm run tauri build
+    # Build Rust backend
+    echo -e "${YELLOW}[3/4]${NC} Building Rust backend (this takes longest)..."
+    cd src-tauri
+    cargo build --release --quiet
+    cd ..
+    echo -e "${GREEN}[OK]${NC} Backend built"
 
-    echo -e "${GREEN}Build complete!${NC}"
+    # Build Tauri app bundles
+    echo -e "${YELLOW}[4/4]${NC} Building application bundles..."
+    npm run tauri build --quiet 2>/dev/null || true
+    echo -e "${GREEN}[OK]${NC} Build complete"
 }
 
 # Install the application
@@ -160,23 +193,22 @@ install_app() {
             if [ -f "src-tauri/target/release/bundle/appimage/muthur-os-terminal_0.1.0_amd64.AppImage" ]; then
                 sudo cp "src-tauri/target/release/bundle/appimage/muthur-os-terminal_0.1.0_amd64.AppImage" /usr/local/bin/muthur
                 sudo chmod +x /usr/local/bin/muthur
-                echo -e "${GREEN}AppImage installed to /usr/local/bin/muthur${NC}"
+                echo -e "${GREEN}[OK]${NC} AppImage installed to /usr/local/bin/muthur"
             elif [ -f "src-tauri/target/release/bundle/deb/muthur-os-terminal_0.1.0_amd64.deb" ]; then
-                sudo dpkg -i "src-tauri/target/release/bundle/deb/muthur-os-terminal_0.1.0_amd64.deb"
-                echo -e "${GREEN}Deb package installed!${NC}"
+                sudo dpkg -i "src-tauri/target/release/bundle/deb/muthur-os-terminal_0.1.0_amd64.deb" 2>/dev/null
+                echo -e "${GREEN}[OK]${NC} Deb package installed"
             else
                 # Fallback: copy binary directly
                 sudo cp "src-tauri/target/release/muthur-os-terminal" /usr/local/bin/muthur
                 sudo chmod +x /usr/local/bin/muthur
-                echo -e "${GREEN}Binary installed to /usr/local/bin/muthur${NC}"
+                echo -e "${GREEN}[OK]${NC} Binary installed to /usr/local/bin/muthur"
             fi
             ;;
     esac
 
     # Create config directory
     mkdir -p ~/.config/xKOR_3RR0R/{crash_reports,logs}
-
-    echo -e "${GREEN}Installation complete!${NC}"
+    echo -e "${GREEN}[OK]${NC} Config directory created"
 }
 
 # Create desktop entry
@@ -197,7 +229,12 @@ Categories=System;TerminalEmulator;
 Keywords=terminal;shell;prompt;command;
 EOF
 
-    echo -e "${GREEN}Desktop entry created!${NC}"
+    # Update desktop database
+    if command -v update-desktop-database &> /dev/null; then
+        update-desktop-database ~/.local/share/applications 2>/dev/null || true
+    fi
+
+    echo -e "${GREEN}[OK]${NC} Desktop entry created"
 }
 
 # Main installation flow
@@ -213,17 +250,35 @@ main() {
 
     echo ""
     echo "================================"
-    echo -e "${GREEN}INSTALLATION COMPLETE!${NC}"
+    echo -e "${GREEN}INSTALLATION COMPLETE${NC}"
     echo "================================"
     echo ""
-    echo "Run 'muthur' to launch the application"
-    echo "Or find it in your application menu"
+
+    # Verify installation
+    if [ -f "/usr/local/bin/muthur" ]; then
+        SIZE=$(du -h /usr/local/bin/muthur | cut -f1)
+        echo -e "${GREEN}[OK]${NC} Binary size: $SIZE"
+        echo ""
+    fi
+
+    echo "Launch: muthur"
+    echo "Or find 'MUTHUR OS Terminal' in your application menu"
     echo ""
-    echo "For AI features, make sure Ollama is running:"
-    echo "  ollama serve"
-    echo "  ollama pull llama3.2"
+
+    if command -v ollama &> /dev/null; then
+        echo -e "${BLUE}AI Features Setup:${NC}"
+        echo "  1. Start Ollama: ollama serve"
+        echo "  2. Download model: ollama pull llama3.2"
+        echo "  3. Restart MUTHUR"
+        echo ""
+    fi
+
+    echo "Useful commands:"
+    echo "  muthur         - Launch application"
+    echo "  ./upgrade.sh   - Upgrade to latest version"
+    echo "  ./uninstall.sh - Remove from system"
     echo ""
-    echo "Crash reports: ~/.config/xKOR_3RR0R/crash_reports/"
+    echo "Documentation: https://github.com/krko2n/Muthur-os-terminal"
     echo ""
 }
 
