@@ -4,6 +4,37 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 857b1a1
+
+**v0.1.1: Fix npm peer dependency error and add auto error reporting**
+
+- Author: krkos
+- Hash: `857b1a1`
+
+**Changed files:**
+```
+README.md
+install.sh
+report-error.sh
+src-tauri/src/crash.rs
+```
+
+---
+
+## 2026-05-24 - Commit 2805382
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `2805382`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit cdb7d3e
 
 **v0.1.1: Make version highly visible in README and commits**
