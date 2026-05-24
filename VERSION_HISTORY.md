@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 661419d
+
+**v0.1.1: Move Cargo.toml to correct src-tauri location**
+
+- Author: krkos
+- Hash: `661419d`
+
+**Changed files:**
+```
+src-tauri/Cargo.toml
+```
+
+---
+
+## 2026-05-24 - Commit fd13a18
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `fd13a18`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 1e0426b
 
 **v0.1.1: Fix TypeScript build errors in CI/CD**
