@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-25 - Commit ef9d5d3
+
+**Fix banner script cleanup error**
+
+- Author: krkos
+- Hash: `ef9d5d3`
+
+**Changed files:**
+```
+create-banner.ps1
+```
+
+---
+
+## 2026-05-24 - Commit a741c71
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `a741c71`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-25 - Commit 9b5acf2
 
 **Move icon 2px left and change text to black**
