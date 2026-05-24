@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-25 - Commit db5485a
+
+**Replace icons with higher quality square version**
+
+- Author: krkos
+- Hash: `db5485a`
+
+**Changed files:**
+```
+banner.png
+src-tauri/icons/128x128.png
+src-tauri/icons/128x128@2x.png
+src-tauri/icons/32x32.png
+src-tauri/icons/create-ico-icns.ps1
+```
+
+---
+
+## 2026-05-24 - Commit 1c2dc24
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `1c2dc24`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-25 - Commit 8671c5e
 
 **Update icons with AI-generated geometric design**
