@@ -276,8 +276,12 @@ Explain git rebase
 MUTHUR uses Ollama for AI features. To enable:
 
 ```bash
-# Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
+# Install Ollama (secure method)
+curl -fsSL https://ollama.com/install.sh -o ollama_install.sh
+# IMPORTANT: Review the script before running
+cat ollama_install.sh
+# If satisfied, run it
+sh ollama_install.sh
 
 # Download AI model
 ollama pull llama3.2
@@ -288,18 +292,29 @@ ollama serve
 
 Keep `ollama serve` running in a separate terminal, then restart MUTHUR.
 
+**Security Note**: Always inspect installation scripts before executing them.
+
 ### Change AI Model
 
-Edit `src-tauri/src/ai.rs` line 18:
+Set the `MUTHUR_AI_MODEL` environment variable:
 
-```rust
-model: "llama3.2".to_string(),  // Change to: llama3.1, mixtral, etc.
+```bash
+# Temporary (current session only)
+export MUTHUR_AI_MODEL=llama3.1
+muthur
+
+# Permanent (add to ~/.bashrc or ~/.zshrc)
+echo 'export MUTHUR_AI_MODEL=llama3.1' >> ~/.bashrc
 ```
 
-Then rebuild:
-```bash
-make build
-sudo cp src-tauri/target/release/muthur-os-terminal /usr/local/bin/muthur
+Available models: `llama3.2` (default), `llama3.1`, `mixtral`, `codellama`, etc.
+
+Alternatively, create a config file at `~/.config/muthur/config.toml`:
+
+```toml
+[ai]
+model = "llama3.1"
+base_url = "http://localhost:11434"
 ```
 
 ### Customize Colors
@@ -537,6 +552,7 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before
 ## Documentation
 
 - [README.md](README.md) - This file
+- [SECURITY.md](SECURITY.md) - Security policy and best practices
 - [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - Command quick reference
 - [QUICKSTART.md](QUICKSTART.md) - 5-minute setup guide
 - [DEVELOPMENT.md](DEVELOPMENT.md) - Developer documentation
