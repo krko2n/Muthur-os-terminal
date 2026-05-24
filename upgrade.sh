@@ -15,11 +15,45 @@ echo "MUTHUR OS TERMINAL - UPGRADE"
 echo "================================"
 echo ""
 
+# Auto-install missing dependencies
+ensure_dependencies() {
+    echo -e "${YELLOW}Checking dependencies...${NC}"
+
+    MISSING=0
+
+    # Check Rust
+    if ! command -v rustc &> /dev/null; then
+        echo "Installing Rust..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --quiet
+        source "$HOME/.cargo/env"
+        MISSING=1
+    fi
+
+    # Check Node
+    if ! command -v node &> /dev/null; then
+        echo "Installing Node.js..."
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash > /dev/null 2>&1
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install 20 --silent
+        MISSING=1
+    fi
+
+    if [ $MISSING -eq 0 ]; then
+        echo -e "${GREEN}[OK]${NC} All dependencies present"
+    else
+        echo -e "${GREEN}[OK]${NC} Missing dependencies installed"
+    fi
+}
+
 # Check if muthur is installed
 if [ ! -f "/usr/local/bin/muthur" ]; then
-    echo -e "${RED}Error: MUTHUR is not installed${NC}"
-    echo "Run ./install.sh to install"
-    exit 1
+    echo -e "${YELLOW}MUTHUR is not installed${NC}"
+    echo "Running automatic installation..."
+    echo ""
+    chmod +x install-auto.sh
+    ./install-auto.sh
+    exit 0
 fi
 
 # Check if we're in the git repo

@@ -17,6 +17,10 @@ help:
 	@echo ""
 
 install:
+	@chmod +x install-auto.sh
+	@./install-auto.sh
+
+install-interactive:
 	@chmod +x install.sh
 	@./install.sh
 

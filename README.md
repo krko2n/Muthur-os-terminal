@@ -60,7 +60,7 @@ muthur
 - **Storage**: 500 MB free space
 - **GPU**: OpenGL 3.0+ support
 
-### One-Command Install
+### Fully Automatic Install (Recommended)
 
 ```bash
 git clone https://github.com/krko2n/Muthur-os-terminal.git
@@ -68,24 +68,26 @@ cd muthur-os-terminal
 make install
 ```
 
-**What happens during installation:**
+**Completely automatic - no prompts!**
 
-1. Detects your Linux distribution automatically
-2. Installs system dependencies (GTK3, WebKit, OpenSSL, etc.)
-3. Installs Rust toolchain (if not present)
-4. Installs Node.js 20 (if not present)
-5. Optionally installs Ollama for AI features
+Installs everything:
+1. System dependencies (GTK3, WebKit, OpenSSL, etc.)
+2. Rust toolchain (if not present)
+3. Node.js 20 via nvm (if not present)
+4. Ollama AI engine (automatically)
+5. GitHub CLI for error reporting
 6. Builds the application (~5-10 minutes)
 7. Installs to `/usr/local/bin/muthur`
 8. Creates desktop entry
+9. Starts Ollama service
+10. Downloads AI model in background
 
-**Alternative install methods:**
+**Interactive install (with prompts):**
 
 ```bash
-# Using the script directly
+make install-interactive
+# or
 ./install.sh
-
-# Manual step-by-step (see DEVELOPMENT.md)
 ```
 
 ### First Launch
