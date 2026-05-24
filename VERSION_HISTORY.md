@@ -4,6 +4,37 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 1e0426b
+
+**v0.1.1: Fix TypeScript build errors in CI/CD**
+
+- Author: krkos
+- Hash: `1e0426b`
+
+**Changed files:**
+```
+src/components/FileExplorer.tsx
+src/components/Globe.tsx
+src/three-types.d.ts
+tsconfig.json
+```
+
+---
+
+## 2026-05-24 - Commit 52cde42
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `52cde42`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 2b2175c
 
 **v0.1.1: Make CI tests non-blocking with continue-on-error**
