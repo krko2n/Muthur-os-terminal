@@ -191,7 +191,7 @@ Installer does:
 ### Manual Build
 ```bash
 # Install deps (Arch example)
-sudo pacman -S base-devel gtk3 webkit2gtk librsvg openssl
+sudo pacman -S base-devel gtk3 webkit2gtk-4.1 librsvg openssl
 
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
