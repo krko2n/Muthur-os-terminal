@@ -4,6 +4,36 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 706ab89
+
+**v0.1.1: Remove need for manual git pull - upgrade is fully automatic**
+
+- Author: krkos
+- Hash: `706ab89`
+
+**Changed files:**
+```
+Makefile
+README.md
+quick-upgrade.sh
+```
+
+---
+
+## 2026-05-24 - Commit 4a1d550
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `4a1d550`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 5c31347
 
 **v0.1.1: Add fully automatic installation**
