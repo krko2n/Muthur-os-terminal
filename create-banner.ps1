@@ -32,7 +32,7 @@ $iconPath = "src-tauri\icons\128x128@2x.png"
 if (Test-Path $iconPath) {
     $icon = [System.Drawing.Image]::FromFile((Resolve-Path $iconPath))
     $iconSize = 200
-    $iconX = 102
+    $iconX = ($width / 2) - 350
     $iconY = ($height - $iconSize) / 2
 
     # Glow effect - perfectly centered
@@ -55,8 +55,8 @@ $titleFont = New-Object System.Drawing.Font("Consolas", 56, [System.Drawing.Font
 $subtitleFont = New-Object System.Drawing.Font("Consolas", 20)
 $taglineFont = New-Object System.Drawing.Font("Consolas", 14)
 
-$textBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::Black)
-$textX = 350
+$textBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 0, 0, 0))
+$textX = ($width / 2) - 50
 
 # Center align text vertically
 $textStartY = 100
