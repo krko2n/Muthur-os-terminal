@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit a3097ce
+
+**v0.1.1: CRITICAL FIX - Restore CI build by reverting to npm install**
+
+- Author: krkos
+- Hash: `a3097ce`
+
+**Changed files:**
+```
+.github/workflows/build.yml
+```
+
+---
+
+## 2026-05-24 - Commit 9dc8990
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `9dc8990`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit a587680
 
 **v0.1.1: Complete React Three Fiber v9 ecosystem upgrade for React 19**
