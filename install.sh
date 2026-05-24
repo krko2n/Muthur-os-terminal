@@ -66,11 +66,10 @@ install_deps() {
                 wget \
                 file \
                 openssl \
-                appmenu-gtk-module \
                 gtk3 \
                 libappindicator-gtk3 \
                 librsvg \
-                webkit2gtk
+                webkit2gtk-4.1
             ;;
         debian)
             sudo apt update

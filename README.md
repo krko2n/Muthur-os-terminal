@@ -403,7 +403,7 @@ make verify
 sudo apt install build-essential libgtk-3-dev libwebkit2gtk-4.1-dev librsvg2-dev libssl-dev
 
 # Arch:
-sudo pacman -S base-devel gtk3 webkit2gtk librsvg openssl
+sudo pacman -S base-devel gtk3 webkit2gtk-4.1 libappindicator-gtk3 librsvg openssl
 
 # Try again
 make install
