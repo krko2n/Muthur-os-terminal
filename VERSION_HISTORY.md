@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit a587680
+
+**v0.1.1: Complete React Three Fiber v9 ecosystem upgrade for React 19**
+
+- Author: krkos
+- Hash: `a587680`
+
+**Changed files:**
+```
+.github/workflows/build.yml
+.npmrc
+UPGRADE_NOTES.md
+create-lockfile.sh
+package.json
+```
+
+---
+
+## 2026-05-24 - Commit 8f7926d
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `8f7926d`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 61c7488
 
 **v0.1.1: Upgrade @react-three/fiber to v9 for React 19 compatibility**
