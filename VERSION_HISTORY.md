@@ -4,6 +4,37 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-24 - Commit 5c31347
+
+**v0.1.1: Add fully automatic installation**
+
+- Author: krkos
+- Hash: `5c31347`
+
+**Changed files:**
+```
+Makefile
+README.md
+install-auto.sh
+upgrade.sh
+```
+
+---
+
+## 2026-05-24 - Commit 34e0fcc
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `34e0fcc`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-24 - Commit 857b1a1
 
 **v0.1.1: Fix npm peer dependency error and add auto error reporting**
