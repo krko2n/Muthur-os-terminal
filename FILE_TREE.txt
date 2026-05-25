@@ -11,6 +11,7 @@ muthur-os-terminal/
 ├── LICENSE                     # MIT License
 ├── PROJECT_SUMMARY.md          # Project overview
 ├── UI_REFERENCE.md             # Visual design reference
+├── CLAUDE.md                   # AI assistant instructions
 ├── FILE_TREE.txt               # This file
 ├── TODO.md                     # Project task list
 │
@@ -90,14 +91,14 @@ muthur-os-terminal/
 
 FILE COUNTS
 ===========
-Documentation:      10 files   (~16 KB)
+Documentation:      11 files   (~20 KB)
 Configuration:      11 files   (~6 KB)
 Scripts:             4 files   (~10 KB)
 Frontend Source:    10 files   (~1,000 lines)
 Backend Source:      5 files   (~580 lines)
 GitHub/CI:           2 files   (~100 lines)
 Examples:            1 file    (~2 KB)
-Total Source:       43 files   (~1,714 lines of code)
+Total Source:       44 files   (~1,870 lines of code)
 
 
 BUILD ARTIFACTS (after build)
