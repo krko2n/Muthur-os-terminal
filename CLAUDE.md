@@ -39,12 +39,14 @@ At the beginning of every session, read these files in order:
 - **Security first** - Validate at boundaries, avoid OWASP top 10 vulnerabilities
 
 ### Git Workflow
+- **Always** commit and push changes immediately after making them
 - **Never** run destructive git commands without user confirmation
 - **Never** skip hooks (--no-verify) unless explicitly requested
 - **Never** amend commits unless explicitly requested
 - **Always** create new commits rather than amending
 - Commit messages: Follow conventional commits style from git log
 - Use descriptive commit messages focusing on "why" not "what"
+- Push to remote after every commit: `git push origin <branch>`
 
 ### Build & CI/CD
 - CI/CD uses GitHub Actions with ubuntu-22.04 runners
