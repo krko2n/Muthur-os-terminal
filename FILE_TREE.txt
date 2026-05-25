@@ -12,6 +12,10 @@ muthur-os-terminal/
 ├── PROJECT_SUMMARY.md          # Project overview
 ├── UI_REFERENCE.md             # Visual design reference
 ├── FILE_TREE.txt               # This file
+├── TODO.md                     # Project task list
+│
+├── examples/                   # Configuration examples
+│   └── config.toml.example     # AI model configuration template
 │
 ├── package.json                # NPM dependencies
 ├── package-lock.json           # NPM lock file
@@ -86,13 +90,14 @@ muthur-os-terminal/
 
 FILE COUNTS
 ===========
-Documentation:       9 files   (~15 KB)
-Configuration:      10 files   (~5 KB)
+Documentation:      10 files   (~16 KB)
+Configuration:      11 files   (~6 KB)
 Scripts:             4 files   (~10 KB)
 Frontend Source:    10 files   (~1,000 lines)
 Backend Source:      5 files   (~580 lines)
 GitHub/CI:           2 files   (~100 lines)
-Total Source:       40 files   (~1,700 lines of code)
+Examples:            1 file    (~2 KB)
+Total Source:       43 files   (~1,714 lines of code)
 
 
 BUILD ARTIFACTS (after build)

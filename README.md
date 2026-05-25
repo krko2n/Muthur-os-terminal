@@ -317,6 +317,8 @@ model = "llama3.1"
 base_url = "http://localhost:11434"
 ```
 
+See `examples/config.toml.example` for a complete configuration template with all available options.
+
 ### Customize Colors
 
 Edit `tailwind.config.js`:

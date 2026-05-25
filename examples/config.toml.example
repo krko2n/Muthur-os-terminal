@@ -1,0 +1,61 @@
+# MUTHUR OS Terminal Configuration File
+#
+# Location: ~/.config/muthur/config.toml
+#
+# This file allows you to configure the AI model and other settings
+# for the MUTHUR OS Terminal application.
+#
+# To use this file:
+#   1. Copy it to ~/.config/muthur/config.toml
+#   2. Uncomment and modify the settings you want to change
+#   3. Restart the MUTHUR application
+
+[ai]
+# The AI model to use for command suggestions and chat
+# Default: "llama3.2"
+#
+# Common models:
+#   - llama3.2 (default, good balance of speed and capability)
+#   - llama3.1 (more capable, slower)
+#   - llama3.3 (latest version)
+#   - mistral (alternative model)
+#   - codellama (optimized for code)
+#
+# Make sure the model is installed in Ollama before using it:
+#   ollama pull <model-name>
+#
+model = "llama3.2"
+
+# The base URL for the Ollama API
+# Default: "http://localhost:11434"
+#
+# Change this if Ollama is running on a different host or port
+#
+# base_url = "http://localhost:11434"
+
+# Examples of different configurations:
+
+# Example 1: Use a more powerful model
+# [ai]
+# model = "llama3.1"
+
+# Example 2: Use Ollama on a remote server
+# [ai]
+# model = "llama3.2"
+# base_url = "http://192.168.1.100:11434"
+
+# Example 3: Use a code-specialized model
+# [ai]
+# model = "codellama"
+# base_url = "http://localhost:11434"
+
+# Note: Environment variables take precedence over config file settings
+#
+# Priority order:
+#   1. MUTHUR_AI_MODEL environment variable
+#   2. config.toml [ai] model setting
+#   3. Default: "llama3.2"
+#
+# Example environment variable usage:
+#   export MUTHUR_AI_MODEL=llama3.1
+#   muthur

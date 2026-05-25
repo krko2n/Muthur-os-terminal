@@ -128,8 +128,8 @@ install_node() {
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        nvm install 20
-        nvm use 20
+        nvm install 24
+        nvm use 24
         echo -e "${GREEN}[OK]${NC} Node.js installed"
     fi
 }
