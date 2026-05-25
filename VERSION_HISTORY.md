@@ -4,6 +4,80 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-26 - Commit 0ef2788
+
+**Update CLAUDE.md with commit-and-push workflow requirement**
+
+- Author: krkos
+- Hash: `0ef2788`
+
+**Changed files:**
+```
+CLAUDE.md
+```
+
+---
+
+## 2026-05-26 - Commit f660500
+
+**Update FILE_TREE.txt to include CLAUDE.md**
+
+- Author: krkos
+- Hash: `f660500`
+
+**Changed files:**
+```
+FILE_TREE.txt
+```
+
+---
+
+## 2026-05-26 - Commit c374688
+
+**Add CLAUDE.md with AI session management protocol**
+
+- Author: krkos
+- Hash: `c374688`
+
+**Changed files:**
+```
+CLAUDE.md
+```
+
+---
+
+## 2026-05-26 - Commit 8ee8d94
+
+**Fix Linux build failures and upgrade to Node.js 24**
+
+- Author: krkos
+- Hash: `8ee8d94`
+
+**Changed files:**
+```
+.github/workflows/build.yml
+FILE_TREE.txt
+README.md
+TODO.md
+examples/config.toml.example
+```
+
+---
+
+## 2026-05-24 - Commit a341308
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `a341308`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-25 - Commit a588aa4
 
 **Fix banner and add TODO list for next session**
