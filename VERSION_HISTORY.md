@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-26 - Commit 55ceefc
+
+**feat: design production architecture for immersive Linux shell session**
+
+- Author: krkos
+- Hash: `55ceefc`
+
+**Changed files:**
+```
+ARCHITECTURE_SUMMARY.md
+PRODUCTION_ROADMAP.md
+TODO.md
+docs/PHASE2_IMPLEMENTATION.md
+docs/PRODUCTION_ARCHITECTURE.md
+```
+
+---
+
+## 2026-05-26 - Commit 86546bb
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `86546bb`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-26 - Commit 26ba781
 
 **fix: modernize CI/CD pipeline and fix critical build failures**
