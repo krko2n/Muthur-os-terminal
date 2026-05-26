@@ -20,6 +20,9 @@
       "icons/icon.ico"
     ],
     "linux": {
+      "appimage": {
+        "bundleMediaFramework": false
+      },
       "deb": {
         "depends": []
       }

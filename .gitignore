@@ -23,7 +23,7 @@ src-tauri/target/
 .DS_Store
 
 # Tauri
-src-tauri/Cargo.lock
+# NOTE: Cargo.lock MUST be committed for binary crates (not gitignored)
 
 # Logs
 *.log

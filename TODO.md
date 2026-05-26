@@ -1,5 +1,44 @@
 # TODO List - MUTHUR OS Terminal
 
+## CRITICAL - CI/CD Issues (From 2026-05-26 Audit)
+
+### Action Required Immediately
+
+- [ ] **Generate and commit lockfiles** (BLOCKING RELEASES)
+  - Run: `npm install --legacy-peer-deps` (creates package-lock.json)
+  - Run: `cd src-tauri && cargo build` (creates Cargo.lock)
+  - Commit both files: `git add package-lock.json src-tauri/Cargo.lock`
+  - Priority: CRITICAL
+  - Blocks: All releases until fixed
+  - See: `CICD_QUICK_START.md` Step 1
+
+- [ ] **Commit CI/CD modernization changes**
+  - New workflows created: ci.yml, release.yml
+  - Old workflow deprecated: build.yml.deprecated
+  - Updated .gitignore (removed Cargo.lock exclusion)
+  - Updated tauri.conf.json (added bundleMediaFramework)
+  - Priority: CRITICAL
+  - See: `CICD_QUICK_START.md` Step 2
+
+- [ ] **Delete deprecated workflow file**
+  - Remove: .github/workflows/build.yml.deprecated
+  - Priority: HIGH
+  - See: `CICD_QUICK_START.md` Step 3
+
+- [ ] **Test new CI workflow**
+  - Make small change to trigger CI
+  - Verify "CI - Build and Test" runs successfully
+  - Priority: HIGH
+  - See: `CICD_QUICK_START.md` and `AUDIT_REPORT.md`
+
+- [ ] **Create first release with new system**
+  - Bump version to 0.1.2 in package.json, Cargo.toml, tauri.conf.json
+  - Create and push v0.1.2 tag
+  - Verify release artifacts (AppImage, Deb, Binary, SHA256SUMS)
+  - Test AppImage download and launch
+  - Priority: HIGH
+  - See: `RELEASE.md` and `CICD_QUICK_START.md`
+
 ## Security Issues (From Audit)
 
 ### Not Yet Addressed
