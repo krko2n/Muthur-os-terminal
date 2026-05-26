@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-26 - Commit 26ba781
+
+**fix: modernize CI/CD pipeline and fix critical build failures**
+
+- Author: krkos
+- Hash: `26ba781`
+
+**Changed files:**
+```
+.github/workflows/build.yml.deprecated
+.github/workflows/ci.yml
+.github/workflows/release.yml
+.gitignore
+AUDIT_REPORT.md
+```
+
+---
+
+## 2026-05-25 - Commit 0064061
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `0064061`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-26 - Commit 0ef2788
 
 **Update CLAUDE.md with commit-and-push workflow requirement**
