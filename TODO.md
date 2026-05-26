@@ -1,5 +1,81 @@
 # TODO List - MUTHUR OS Terminal
 
+## PRODUCTION ARCHITECTURE TRANSFORMATION (NEW)
+
+MUTHUR is evolving from a desktop app into a production-grade immersive Linux shell session.
+See `PRODUCTION_ROADMAP.md` and `docs/PRODUCTION_ARCHITECTURE.md` for complete details.
+
+### Phase 2: Autostart Mode (v0.2.0) - NEXT PRIORITY
+
+- [ ] **Implement CLI arguments**
+  - Add --fullscreen-force flag
+  - Add --watchdog flag
+  - Add --session-mode flag
+  - Use clap crate for argument parsing
+  - Priority: HIGH
+  - See: `docs/PHASE2_IMPLEMENTATION.md`
+
+- [ ] **Create packaging files**
+  - packaging/muthur-autostart.desktop (created)
+  - packaging/muthur.desktop (created)
+  - packaging/arch/PKGBUILD (created)
+  - Make muthur-session executable
+  - Priority: HIGH
+
+- [ ] **Add autostart documentation**
+  - Create docs/AUTOSTART.md
+  - Update README.md with autostart section
+  - Add usage examples
+  - Priority: MEDIUM
+
+- [ ] **Test autostart mode**
+  - Test on KDE, GNOME, XFCE
+  - Test enable/disable workflow
+  - Test fullscreen behavior
+  - Test Alt+Tab functionality
+  - Priority: HIGH
+
+- [ ] **Release v0.2.0**
+  - Bump version in all files
+  - Create release tag
+  - Build and test artifacts
+  - Update release notes
+  - Priority: HIGH
+
+### Phase 3: Custom Session Mode (v0.3.0) - FUTURE
+
+- [ ] **Implement session integration**
+  - Add session mode detection
+  - Create Wayland session file
+  - Test with Cage compositor
+  - Test with SDDM/greetd
+  - Priority: MEDIUM
+  - Timeline: 6-8 weeks
+
+- [ ] **Create session documentation**
+  - docs/SESSION_MODE.md
+  - docs/PHASE3_IMPLEMENTATION.md
+  - Installation guide
+  - Troubleshooting
+  - Priority: MEDIUM
+
+### Phase 4: Production Kiosk Mode (v1.0.0) - LONG TERM
+
+- [ ] **Implement systemd watchdog**
+  - Add watchdog service
+  - Health monitoring
+  - Auto-restart logic
+  - Crash recovery
+  - Priority: LOW
+  - Timeline: 3-4 months
+
+- [ ] **Performance optimization**
+  - Frontend code splitting
+  - Three.js optimization
+  - Startup time <500ms
+  - Memory usage <200MB
+  - Priority: LOW
+
 ## CRITICAL - CI/CD Issues (From 2026-05-26 Audit)
 
 ### Action Required Immediately

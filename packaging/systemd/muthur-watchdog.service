@@ -1,0 +1,34 @@
+[Unit]
+Description=MUTHUR OS Terminal Watchdog
+Documentation=https://github.com/krko2n/Muthur-os-terminal
+After=graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=notify
+ExecStartPre=/bin/sleep 0.5
+ExecStart=/usr/bin/muthur-os-terminal --watchdog --fullscreen-force
+Restart=on-failure
+RestartSec=3s
+StartLimitBurst=5
+StartLimitIntervalSec=300
+WatchdogSec=30s
+NotifyAccess=main
+TimeoutStartSec=30s
+TimeoutStopSec=10s
+
+# Resource limits
+MemoryMax=1G
+CPUQuota=200%
+
+# Security hardening
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+NoNewPrivileges=true
+
+# Fallback on repeated failures
+ExecStopPost=/bin/sh -c 'if [ "$SERVICE_RESULT" = "start-limit-hit" ]; then systemctl --user stop graphical-session.target; fi'
+
+[Install]
+WantedBy=default.target

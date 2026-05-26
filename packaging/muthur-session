@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+# MUTHUR OS Session Wrapper
+# Launches MUTHUR in fullscreen kiosk mode using Cage compositor
+#
+# Usage: Called by display manager when user selects "MUTHUR OS" session
+#
+
+set -e
+
+# Logging
+LOG_FILE="${XDG_RUNTIME_DIR:-/tmp}/muthur-session.log"
+exec 1>> "$LOG_FILE"
+exec 2>&1
+
+echo "[$(date)] MUTHUR session starting..."
+
+# Environment setup
+export XDG_SESSION_TYPE=wayland
+export XDG_CURRENT_DESKTOP=MUTHUR
+export MUTHUR_SESSION_MODE=kiosk
+
+# Check if Cage is installed
+if ! command -v cage &> /dev/null; then
+    echo "ERROR: cage compositor not found"
+    echo "Install with: pacman -S cage"
+    notify-send -u critical "MUTHUR Session Error" "cage compositor not installed"
+    exit 1
+fi
+
+# Check if MUTHUR binary exists
+if [ ! -x "/usr/bin/muthur-os-terminal" ]; then
+    echo "ERROR: muthur-os-terminal not found"
+    notify-send -u critical "MUTHUR Session Error" "MUTHUR binary not found"
+    exit 1
+fi
+
+# Wait for DRM/KMS to be ready
+sleep 0.5
+
+# Launch MUTHUR in Cage compositor
+echo "[$(date)] Launching Cage with MUTHUR..."
+exec cage -- /usr/bin/muthur-os-terminal --fullscreen-force --session-mode
+
+# If cage exits, session ends
+echo "[$(date)] MUTHUR session ended"

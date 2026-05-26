@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=MUTHUR OS
+GenericName=Immersive Terminal Session
+Comment=Boot directly into MUTHUR fullscreen environment
+Icon=muthur
+Exec=/usr/bin/muthur-session
+DesktopNames=MUTHUR

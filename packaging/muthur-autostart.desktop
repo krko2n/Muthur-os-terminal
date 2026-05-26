@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=MUTHUR OS Terminal (Autostart)
+GenericName=Futuristic Terminal Interface
+Comment=Automatically launch MUTHUR fullscreen on login
+Icon=muthur
+Exec=muthur-os-terminal --fullscreen-force
+Terminal=false
+StartupNotify=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel
+X-MATE-Autostart-enabled=true
+Categories=System;TerminalEmulator;

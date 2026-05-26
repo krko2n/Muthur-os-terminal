@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=MUTHUR OS Terminal
+GenericName=Futuristic Terminal Interface
+Comment=Terminal workspace with AI integration inspired by Alien (1979)
+Icon=muthur
+Exec=muthur-os-terminal
+Terminal=false
+StartupNotify=true
+Categories=System;TerminalEmulator;Utility;
+Keywords=terminal;shell;command;ai;assistant;muthur;

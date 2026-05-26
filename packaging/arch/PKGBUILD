@@ -1,0 +1,110 @@
+# Maintainer: MUTHUR Development <noreply@github.com>
+
+pkgname=muthur-os-terminal-bin
+pkgver=0.1.1
+pkgrel=1
+pkgdesc="Futuristic terminal interface with AI integration inspired by Alien (1979)"
+arch=('x86_64')
+url="https://github.com/krko2n/Muthur-os-terminal"
+license=('MIT')
+depends=(
+  'webkit2gtk-4.1'
+  'gtk3'
+  'mesa'
+  'systemd'
+)
+optdepends=(
+  'ollama: AI assistant integration'
+  'cage: Lightweight kiosk compositor for session mode'
+  'gamescope: Advanced compositor with FSR upscaling'
+  'greetd: Minimal login manager'
+  'sway: Tiling Wayland compositor'
+  'hyprland: Modern Wayland compositor with animations'
+)
+provides=('muthur-os-terminal')
+conflicts=('muthur-os-terminal')
+source=(
+  "muthur-os-terminal-$pkgver::https://github.com/krko2n/Muthur-os-terminal/releases/download/v$pkgver/muthur-os-terminal"
+  "muthur.desktop"
+  "muthur-autostart.desktop"
+  "config.toml.example"
+)
+sha256sums=(
+  'SKIP'  # Binary checksum
+  'SKIP'  # Desktop file
+  'SKIP'  # Autostart file
+  'SKIP'  # Config example
+)
+options=('!strip')
+
+package() {
+  # Install binary
+  install -Dm755 "$srcdir/muthur-os-terminal-$pkgver" "$pkgdir/usr/bin/muthur-os-terminal"
+
+  # Install desktop entry (for application menu)
+  install -Dm644 "$srcdir/muthur.desktop" "$pkgdir/usr/share/applications/muthur.desktop"
+
+  # Install autostart file (autostart mode - Phase 2)
+  install -Dm644 "$srcdir/muthur-autostart.desktop" "$pkgdir/etc/xdg/autostart/muthur-autostart.desktop"
+
+  # Install config example
+  install -Dm644 "$srcdir/config.toml.example" "$pkgdir/etc/muthur/config.toml.example"
+
+  # Install documentation
+  install -Dm644 "$srcdir/../../README.md" "$pkgdir/usr/share/doc/muthur-os-terminal/README.md"
+  install -Dm644 "$srcdir/../../LICENSE" "$pkgdir/usr/share/licenses/muthur-os-terminal/LICENSE"
+
+  # Create user config directory
+  install -dm755 "$pkgdir/etc/skel/.config/muthur"
+}
+
+post_install() {
+  echo ""
+  echo "=========================================="
+  echo "  MUTHUR OS Terminal installed!"
+  echo "=========================================="
+  echo ""
+  echo "Usage:"
+  echo "  Run manually:"
+  echo "    $ muthur-os-terminal"
+  echo ""
+  echo "  Autostart (enabled by default):"
+  echo "    MUTHUR will launch fullscreen on login"
+  echo "    To disable: rm ~/.config/autostart/muthur-autostart.desktop"
+  echo "    Or use your desktop settings > Autostart Applications"
+  echo ""
+  echo "  Configuration:"
+  echo "    Copy: /etc/muthur/config.toml.example"
+  echo "    To: ~/.config/muthur/config.toml"
+  echo ""
+  echo "  AI Integration:"
+  echo "    Install ollama: pacman -S ollama"
+  echo "    Start service: systemctl start ollama"
+  echo ""
+  echo "  Session Mode (Phase 3 - future):"
+  echo "    Install cage: pacman -S cage"
+  echo "    Select 'MUTHUR OS' at login screen"
+  echo ""
+  echo "Documentation:"
+  echo "  https://github.com/krko2n/Muthur-os-terminal"
+  echo ""
+}
+
+post_upgrade() {
+  echo ""
+  echo "MUTHUR OS Terminal upgraded to $pkgver"
+  echo "See release notes: https://github.com/krko2n/Muthur-os-terminal/releases/tag/v$pkgver"
+  echo ""
+}
+
+post_remove() {
+  echo ""
+  echo "MUTHUR OS Terminal removed"
+  echo ""
+  echo "To remove configuration:"
+  echo "  rm -rf ~/.config/muthur"
+  echo ""
+  echo "To remove autostart:"
+  echo "  rm ~/.config/autostart/muthur-autostart.desktop"
+  echo ""
+}
