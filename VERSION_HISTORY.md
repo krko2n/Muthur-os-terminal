@@ -4,6 +4,37 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-28 - Commit 2780554
+
+**fix: resolve installer build failures with proper Tauri build sequence**
+
+- Author: krkos
+- Hash: `2780554`
+
+**Changed files:**
+```
+docs/BUILD_FIXES.md
+install.sh
+package.json
+src-tauri/src/main.rs
+```
+
+---
+
+## 2026-05-27 - Commit 62b8628
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `62b8628`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-28 - Commit ef17324
 
 **fix: resolve TypeScript build errors and add build fix script**
