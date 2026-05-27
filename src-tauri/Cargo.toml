@@ -1,6 +1,6 @@
 [package]
 name = "muthur-os-terminal"
-version = "0.1.1"
+version = "0.0.0"
 description = "MUTHUR OS - Advanced terminal interface with AI integration"
 authors = ["MUTHUR Development"]
 license = "MIT"

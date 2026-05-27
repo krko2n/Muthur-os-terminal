@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2.0",
   "productName": "MUTHUR OS Terminal",
-  "version": "0.1.1",
-  "identifier": "com.muthur.terminal",
+  "version": "0.0.0",
+  "identifier": "com.github.krko2n.muthuros.terminal",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:5173",
@@ -11,7 +11,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["appimage", "deb"],
+    "targets": "all",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -26,6 +26,14 @@
       "deb": {
         "depends": []
       }
+    },
+    "macOS": {
+      "minimumSystemVersion": "10.13"
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
     }
   },
   "app": {
