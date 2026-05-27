@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-28 - Commit 620d1d2
+
+**docs: add simplified Linux build instructions**
+
+- Author: krkos
+- Hash: `620d1d2`
+
+**Changed files:**
+```
+LINUX_BUILD_INSTRUCTIONS.md
+```
+
+---
+
+## 2026-05-27 - Commit 70f1459
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `70f1459`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-28 - Commit 2780554
 
 **fix: resolve installer build failures with proper Tauri build sequence**
