@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-27 - Commit 95dd7ff
+
+**feat: add multi-platform CI/CD pipeline with automated releases**
+
+- Author: krkos
+- Hash: `95dd7ff`
+
+**Changed files:**
+```
+.github/workflows/release-multiplatform.yml
+RELEASE_QUICK_START.md
+docs/MULTI_PLATFORM_RELEASES.md
+docs/MULTI_PLATFORM_SUMMARY.md
+package.json
+```
+
+---
+
+## 2026-05-26 - Commit 660d814
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `660d814`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-26 - Commit 55ceefc
 
 **feat: design production architecture for immersive Linux shell session**
