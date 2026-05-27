@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-28 - Commit ef17324
+
+**fix: resolve TypeScript build errors and add build fix script**
+
+- Author: krkos
+- Hash: `ef17324`
+
+**Changed files:**
+```
+fix-build.sh
+tsconfig.json
+```
+
+---
+
+## 2026-05-27 - Commit e800609
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `e800609`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-27 - Commit 95dd7ff
 
 **feat: add multi-platform CI/CD pipeline with automated releases**
