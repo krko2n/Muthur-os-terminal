@@ -117,6 +117,15 @@ async fn ai_chat(
     Ok(response)
 }
 
+#[tauri::command]
+async fn get_current_dir() -> Result<String, String> {
+    std::env::current_dir()
+        .map_err(|e| e.to_string())?
+        .to_str()
+        .ok_or_else(|| "Invalid UTF-8 in path".to_string())
+        .map(|s| s.to_string())
+}
+
 fn main() {
     // Initialize crash handler
     crash::init_crash_handler();
@@ -144,6 +153,7 @@ fn main() {
             list_directory,
             ai_suggest_command,
             ai_chat,
+            get_current_dir,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

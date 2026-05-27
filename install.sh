@@ -160,25 +160,13 @@ build_app() {
     echo ""
 
     # Install npm dependencies
-    echo -e "${YELLOW}[1/4]${NC} Installing frontend dependencies..."
-    npm install --legacy-peer-deps --quiet
+    echo -e "${YELLOW}[1/2]${NC} Installing dependencies..."
+    npm ci --legacy-peer-deps
     echo -e "${GREEN}[OK]${NC} Dependencies installed"
 
-    # Build frontend
-    echo -e "${YELLOW}[2/4]${NC} Building frontend..."
-    npm run build --quiet
-    echo -e "${GREEN}[OK]${NC} Frontend built"
-
-    # Build Rust backend
-    echo -e "${YELLOW}[3/4]${NC} Building Rust backend (this takes longest)..."
-    cd src-tauri
-    cargo build --release --quiet
-    cd ..
-    echo -e "${GREEN}[OK]${NC} Backend built"
-
-    # Build Tauri app bundles
-    echo -e "${YELLOW}[4/4]${NC} Building application bundles..."
-    npm run tauri build --quiet 2>/dev/null || true
+    # Build with Tauri (handles frontend + backend + bundling)
+    echo -e "${YELLOW}[2/2]${NC} Building application (frontend + backend + bundles)..."
+    npm run tauri build
     echo -e "${GREEN}[OK]${NC} Build complete"
 }
 
