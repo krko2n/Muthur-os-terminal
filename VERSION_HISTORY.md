@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-28 - Commit 8573a73
+
+**docs: add manual setup guide for lockfile generation**
+
+- Author: krkos
+- Hash: `8573a73`
+
+**Changed files:**
+```
+docs/MANUAL_SETUP.md
+```
+
+---
+
+## 2026-05-28 - Commit e01b00a
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `e01b00a`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-28 - Commit 3a6ab34
 
 **docs: enhance README with professional badges and checkmark features**
