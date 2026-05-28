@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-28 - Commit 36c695d
+
+**docs: add Contributor Covenant Code of Conduct v2.1**
+
+- Author: krkos
+- Hash: `36c695d`
+
+**Changed files:**
+```
+CODE_OF_CONDUCT.md
+```
+
+---
+
+## 2026-05-27 - Commit f8f421b
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `f8f421b`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-28 - Commit 620d1d2
 
 **docs: add simplified Linux build instructions**
