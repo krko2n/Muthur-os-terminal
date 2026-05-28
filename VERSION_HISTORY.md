@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-28 - Commit 3a6ab34
+
+**docs: enhance README with professional badges and checkmark features**
+
+- Author: krkos
+- Hash: `3a6ab34`
+
+**Changed files:**
+```
+README.md
+```
+
+---
+
+## 2026-05-28 - Commit d70a539
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `d70a539`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-28 - Commit 36c695d
 
 **docs: add Contributor Covenant Code of Conduct v2.1**
