@@ -4,13 +4,42 @@
 
 ![MUTHUR OS Terminal Banner](banner.png)
 
-![Version](https://img.shields.io/badge/version-0.1.1-brightgreen.svg?style=for-the-badge)
-![Release](https://img.shields.io/github/v/release/krko2n/Muthur-os-terminal?style=for-the-badge)
+<p align="center">
+  <strong>A cinematic terminal emulator inspired by the MU/TH/UR 6000 computer from Alien (1979)</strong>
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Tauri](https://img.shields.io/badge/Tauri-2.0-blue.svg)](https://tauri.app/)
-[![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
-[![Latest Release](https://img.shields.io/github/release-date/krko2n/Muthur-os-terminal)](https://github.com/krko2n/Muthur-os-terminal/releases)
+<p align="center">
+  <a href="https://github.com/krko2n/Muthur-os-terminal/stargazers">
+    <img src="https://img.shields.io/github/stars/krko2n/Muthur-os-terminal?style=for-the-badge&logo=github&labelColor=181717&color=00ff41" alt="GitHub Stars">
+  </a>
+  <a href="https://github.com/krko2n/Muthur-os-terminal/network/members">
+    <img src="https://img.shields.io/github/forks/krko2n/Muthur-os-terminal?style=for-the-badge&logo=github&labelColor=181717&color=00ff41" alt="GitHub Forks">
+  </a>
+  <a href="https://github.com/krko2n/Muthur-os-terminal/issues">
+    <img src="https://img.shields.io/github/issues/krko2n/Muthur-os-terminal?style=for-the-badge&logo=github&labelColor=181717&color=00ff41" alt="GitHub Issues">
+  </a>
+  <a href="https://github.com/krko2n/Muthur-os-terminal/pulls">
+    <img src="https://img.shields.io/github/issues-pr/krko2n/Muthur-os-terminal?style=for-the-badge&logo=github&labelColor=181717&color=00ff41" alt="GitHub Pull Requests">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/github/license/krko2n/Muthur-os-terminal?style=for-the-badge&labelColor=181717&color=00ff41" alt="License">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/krko2n/Muthur-os-terminal/releases">
+    <img src="https://img.shields.io/github/v/release/krko2n/Muthur-os-terminal?style=for-the-badge&logo=github&labelColor=181717&color=00d4ff" alt="Latest Release">
+  </a>
+  <a href="https://tauri.app/">
+    <img src="https://img.shields.io/badge/Tauri-2.0-FFC131?style=for-the-badge&logo=tauri&labelColor=181717" alt="Tauri">
+  </a>
+  <a href="https://react.dev/">
+    <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&labelColor=181717" alt="React">
+  </a>
+  <a href="https://www.rust-lang.org/">
+    <img src="https://img.shields.io/badge/Rust-1.95-orange?style=for-the-badge&logo=rust&labelColor=181717" alt="Rust">
+  </a>
+</p>
 
 **Current Version: v0.1.1** | [Release Notes](CHANGELOG.md) | [Version History](VERSION_HISTORY.md)
 
@@ -169,51 +198,51 @@ The uninstall script will ask before removing your configuration directory, whic
 ### Core Functionality
 
 **Multi-Tab Terminal**
-- Full xterm.js terminal emulator
-- Multiple sessions in tabs
-- 256 color support
-- Clickable links
-- 10,000 line scrollback buffer
+- ✓ Full xterm.js terminal emulator
+- ✓ Multiple sessions in tabs
+- ✓ 256 color support
+- ✓ Clickable links
+- ✓ 10,000 line scrollback buffer
 
 **Real-Time System Monitoring**
-- CPU usage with live graphs
-- Memory statistics
-- Top processes by CPU usage
-- Network RX/TX statistics
-- Disk usage information
+- ✓ CPU usage with live graphs
+- ✓ Memory statistics
+- ✓ Top processes by CPU usage
+- ✓ Network RX/TX statistics
+- ✓ Disk usage information
 
 **AI Assistant (Ollama Integration)**
-- Command suggestions with `#` prefix
-- Automatic command execution
-- Error debugging and fixes
-- General Q&A assistance
+- ✓ Command suggestions with `#` prefix
+- ✓ Automatic command execution
+- ✓ Error debugging and fixes
+- ✓ General Q&A assistance
 
 **File System Explorer**
-- Full filesystem access
-- Directory navigation
-- File metadata display
-- Quick path jumping
+- ✓ Full filesystem access
+- ✓ Directory navigation
+- ✓ File metadata display
+- ✓ Quick path jumping
 
 **3D Network Visualization**
-- WebGL-powered rotating globe
-- Real-time connection status
-- Low-latency rendering
+- ✓ WebGL-powered rotating globe
+- ✓ Real-time connection status
+- ✓ Low-latency rendering
 
 ### Visual Design
 
-- Fullscreen borderless window
-- Custom cursor with glow effect
-- CRT scanline effects
-- Matrix green color scheme (`#00ff41`)
-- Retro-futuristic sci-fi aesthetic
-- Smooth animations
+- ✓ Fullscreen borderless window
+- ✓ Custom cursor with glow effect
+- ✓ CRT scanline effects
+- ✓ Matrix green color scheme (`#00ff41`)
+- ✓ Retro-futuristic sci-fi aesthetic
+- ✓ Smooth animations
 
 ### Performance
 
-- **Idle CPU**: Less than 10%
-- **Memory**: ~150 MB
-- **Startup**: 1-2 seconds
-- **Binary size**: ~18 MB
+- ✓ **Idle CPU**: Less than 10%
+- ✓ **Memory**: ~150 MB
+- ✓ **Startup**: 1-2 seconds
+- ✓ **Binary size**: ~18 MB
 
 ---
 
