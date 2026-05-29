@@ -26,7 +26,6 @@ impl From<String> for SessionId {
 
 pub struct Session {
     master: Box<dyn portable_pty::MasterPty + Send>,
-    // Child process handle - stored to keep process alive
     #[allow(dead_code)]
     child: Box<dyn portable_pty::Child + Send>,
 }
@@ -44,40 +43,30 @@ impl PtyManager {
 
     pub fn create_session(&mut self, window: Window) -> anyhow::Result<SessionId> {
         let pty_system = native_pty_system();
-
         let pty_pair = pty_system.openpty(PtySize {
             rows: 24,
             cols: 80,
             pixel_width: 0,
             pixel_height: 0,
         })?;
-
         let mut cmd = CommandBuilder::new(get_shell());
         cmd.env("TERM", "xterm-256color");
-
         let child = pty_pair.slave.spawn_command(cmd)?;
         drop(pty_pair.slave);
-
         let session_id = SessionId::new();
         let master = pty_pair.master;
         let mut reader = master.try_clone_reader()?;
-
         let sid_clone = session_id.clone();
         let window_clone = window.clone();
-
-        // Spawn reader task with batching
         task::spawn(async move {
             let mut buffer = vec![0u8; 8192];
             let mut batch_buffer = Vec::new();
             let mut last_send = std::time::Instant::now();
-
             loop {
                 match reader.read(&mut buffer) {
                     Ok(0) => break,
                     Ok(n) => {
                         batch_buffer.extend_from_slice(&buffer[..n]);
-
-                        // Batch for ~16ms or if buffer is large
                         let elapsed = last_send.elapsed().as_millis();
                         if elapsed >= 16 || batch_buffer.len() > 4096 {
                             if !batch_buffer.is_empty() {
@@ -92,28 +81,19 @@ impl PtyManager {
                 }
                 tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
             }
-
             let _ = window_clone.emit(&format!("terminal-closed-{}", sid_clone.to_string()), ());
         });
-
         self.sessions.insert(
             session_id.clone(),
-            Session {
-                master,
-                child,  // spawn_command already returns Box<dyn Child>
-            },
+            Session { master, child },
         );
-
         Ok(session_id)
     }
 
     pub fn write(&mut self, session_id: SessionId, data: &[u8]) -> anyhow::Result<()> {
-        use std::io::Write as _;
         if let Some(session) = self.sessions.get_mut(&session_id) {
-            // Clone a writer from MasterPty (doesn't consume the master)
-            let mut writer = session.master.try_clone_writer()?;
-            writer.write_all(data)?;
-            writer.flush()?;
+            // Final approach: Get a writer from the master PTY and use it.
+            session.master.writer().write_all(data)?;
             Ok(())
         } else {
             Err(anyhow::anyhow!("Session not found"))
