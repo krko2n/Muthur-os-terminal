@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-05-29 - Commit 6bf16c6
+
+**Resolving the issues with the src**
+
+- Author: krkos
+- Hash: `6bf16c6`
+
+**Changed files:**
+```
+src-tauri/src/pty.rs
+```
+
+---
+
+## 2026-05-28 - Commit e11cd9a
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `e11cd9a`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-28 - Commit 8573a73
 
 **docs: add manual setup guide for lockfile generation**
