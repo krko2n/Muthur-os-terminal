@@ -4,6 +4,36 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-03 - Commit 0bcbd96
+
+**docs: add automatic commit protocol and update .gitignore**
+
+- Author: krkos
+- Hash: `0bcbd96`
+
+**Changed files:**
+```
+.gitignore
+.gitignore-summary.md
+CLAUDE.md
+```
+
+---
+
+## 2026-05-29 - Commit 00ef8c0
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `00ef8c0`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-05-29 - Commit 6bf16c6
 
 **Resolving the issues with the src**
