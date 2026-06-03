@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-03 - Commit cd8000e
+
+**docs: add comprehensive auto-commit guide**
+
+- Author: krkos
+- Hash: `cd8000e`
+
+**Changed files:**
+```
+AUTO_COMMIT_GUIDE.md
+```
+
+---
+
+## 2026-06-03 - Commit 37fe632
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `37fe632`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-03 - Commit 0bcbd96
 
 **docs: add automatic commit protocol and update .gitignore**
