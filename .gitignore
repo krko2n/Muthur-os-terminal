@@ -34,3 +34,67 @@ crash_reports/
 Thumbs.db
 .Spotlight-V100
 .Trashes
+
+# AI Development Tools (external to MUTHUR project)
+# Ignore any AI helper tools if accidentally copied into repo
+ai_helper/
+agents/
+
+# AI Model Files (large binaries - should never be in repo)
+*.safetensors
+*.bin
+*.ckpt
+*.pt
+*.pth
+models/
+checkpoints/
+
+# AI Generated Images (temporary outputs)
+# Exception: Keep asset images in src/assets and public folders
+*.png
+*.jpg
+*.jpeg
+!src/assets/**/*.png
+!src/assets/**/*.jpg
+!src/assets/**/*.jpeg
+!public/**/*.png
+!public/**/*.jpg
+!public/**/*.jpeg
+!docs/images/**/*.png
+!docs/images/**/*.jpg
+
+# AI Testing Outputs
+test_outputs/
+outputs/
+**/test_*.png
+**/test_*.jpg
+**/final_test.*
+project_icon*.png
+
+# Python AI Tools (if accidentally added)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+ENV/
+env/
+.venv
+*.egg-info/
+
+# AI Agent Logs
+**/agent_*.log
+**/refiner.log
+**/validator.log
+**/orchestrator.log
+**/wrapper.log
+
+# AI Documentation (not MUTHUR project docs)
+hardware_audit.md
+image_generation_selection.md
+SETUP_REPORT.md
+FINAL_AUDIT_REPORT.md
+IMAGE_GEN_QUICKSTART.md
+DEPLOYMENT_REPORT.md
+INTEGRATION_GUIDE.md
+agent_orchestration.log

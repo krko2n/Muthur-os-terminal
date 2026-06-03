@@ -39,14 +39,63 @@ At the beginning of every session, read these files in order:
 - **Security first** - Validate at boundaries, avoid OWASP top 10 vulnerabilities
 
 ### Git Workflow
-- **Always** commit and push changes immediately after making them
+
+**Automatic Commit & Push Protocol**:
+- **After every significant change**, automatically commit and push to remote
+- A "significant change" includes:
+  - Adding new features or functionality
+  - Fixing bugs or issues
+  - Updating documentation (README, CLAUDE.md, etc.)
+  - Modifying configuration files
+  - Refactoring code
+  - Any change that completes a logical unit of work
+- **Exclude from auto-commit**: Trivial changes, work-in-progress, experimental code
+- **Required**: Always create a descriptive commit message
+
+**Auto-Commit Procedure**:
+1. After completing a significant change, immediately run:
+   ```bash
+   git add <changed-files>
+   git commit -m "type(scope): descriptive message"
+   git push origin <current-branch>
+   ```
+2. Verify push succeeded before moving to next task
+3. Log the commit in session notes
+
+**Commit Message Format** (Conventional Commits):
+- `feat(component): add new feature` - New functionality
+- `fix(component): resolve bug` - Bug fixes
+- `docs: update documentation` - Documentation changes
+- `refactor(component): improve code structure` - Code restructuring
+- `chore: update dependencies` - Maintenance tasks
+- `style: format code` - Formatting changes
+- `test: add tests` - Test additions
+
+**Git Safety Rules**:
 - **Never** run destructive git commands without user confirmation
 - **Never** skip hooks (--no-verify) unless explicitly requested
 - **Never** amend commits unless explicitly requested
 - **Always** create new commits rather than amending
-- Commit messages: Follow conventional commits style from git log
-- Use descriptive commit messages focusing on "why" not "what"
-- Push to remote after every commit: `git push origin <branch>`
+- **Always** push to remote immediately after commit
+- Push to remote: `git push origin <branch>`
+
+**Examples**:
+```bash
+# After adding image generation feature
+git add src/components/ImageGen.tsx
+git commit -m "feat(image): add AI image generation component"
+git push origin main
+
+# After fixing a bug
+git add src-tauri/src/terminal.rs
+git commit -m "fix(terminal): resolve cursor positioning issue"
+git push origin main
+
+# After updating docs
+git add CLAUDE.md README.md
+git commit -m "docs: add automatic commit protocol to CLAUDE.md"
+git push origin main
+```
 
 ### Build & CI/CD
 - CI/CD uses GitHub Actions with ubuntu-22.04 runners
@@ -77,11 +126,36 @@ See `examples/config.toml.example` for full configuration template.
 - Validate user input at system boundaries
 - No unsafe curl | sh patterns
 
-## Session End Protocol
+## Session Workflow
+
+### During Active Development
+
+**After EVERY significant change**:
+1. Complete the logical unit of work
+2. Test that it works
+3. **IMMEDIATELY commit and push**:
+   ```bash
+   git add <files>
+   git commit -m "type(scope): description"
+   git push origin $(git branch --show-current)
+   ```
+4. Announce to user: "Committed and pushed: [description]"
+5. Continue with next task
+
+**Key Points**:
+- Don't wait to commit multiple changes together
+- Each logical change gets its own commit
+- Always push immediately after commit
+- Never leave commits unpushed
+
+### Session End Protocol
 
 When the user says goodbye or ends the session:
-1. Review TODO.md and update any completed tasks
-2. Save important session context to memory:
+1. **Check for uncommitted changes**: Run `git status`
+2. **Commit any pending work** (if appropriate)
+3. **Push all commits**: Ensure nothing is left unpushed
+4. Review TODO.md and update any completed tasks
+5. Save important session context to memory:
    - New features or bugs discovered
    - Design decisions made
    - User preferences expressed
@@ -119,14 +193,56 @@ make clean         # Clean build artifacts
 2. Update relevant components in src/ or src-tauri/src/
 3. Test locally with `make dev`
 4. Update documentation if needed
-5. Commit with descriptive message
+5. **Auto-commit and push**:
+   ```bash
+   git add <changed-files>
+   git commit -m "feat(component): describe feature"
+   git push origin <branch>
+   ```
 
 ### Fixing Bugs
 1. Reproduce the issue
 2. Identify root cause
 3. Fix and test
 4. Update TODO.md if it was tracked
-5. Commit fix
+5. **Auto-commit and push**:
+   ```bash
+   git add <changed-files>
+   git commit -m "fix(component): describe fix"
+   git push origin <branch>
+   ```
+
+### After Any Significant Change
+**REQUIRED**: Immediately commit and push to remote
+
+**What counts as "significant"**:
+- Completed feature implementation
+- Bug fix that resolves an issue
+- Documentation update
+- Configuration change
+- Refactoring that improves code
+- Any logical unit of work completion
+
+**Do NOT auto-commit**:
+- Experimental/WIP code
+- Half-finished features
+- Temporary test files
+- Debug output
+
+**Process**:
+```bash
+# 1. Stage your changes
+git add <files>
+
+# 2. Create descriptive commit
+git commit -m "type(scope): description"
+
+# 3. Push immediately
+git push origin $(git branch --show-current)
+
+# 4. Verify
+git log -1  # Check last commit
+```
 
 ### Updating Dependencies
 1. Check compatibility (especially Tauri v2 API changes)
