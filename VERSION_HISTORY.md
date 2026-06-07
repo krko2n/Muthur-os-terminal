@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit aaa7611
+
+**fix(upgrade): disable set -e in Phase 2, source .bashrc properly**
+
+- Author: krkos
+- Hash: `aaa7611`
+
+**Changed files:**
+```
+upgrade.sh
+```
+
+---
+
+## 2026-06-07 - Commit 4c12aef
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `4c12aef`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit 67b0cae
 
 **fix(upgrade): resolve npm not found after exec and set -e killing wait**
