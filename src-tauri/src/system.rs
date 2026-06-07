@@ -65,7 +65,7 @@ impl SystemMonitor {
 
     pub fn get_stats(&mut self) -> SystemStats {
         self.system.refresh_all();
-        self.networks.refresh();
+        self.networks.refresh(false);
 
         let cpu_usage = self.system.global_cpu_usage();
 
