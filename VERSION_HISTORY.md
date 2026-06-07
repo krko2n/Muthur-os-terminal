@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit 2bc537e
+
+**feat(upgrade): professional UI with progress bars, auto-discard local changes**
+
+- Author: krkos
+- Hash: `2bc537e`
+
+**Changed files:**
+```
+upgrade.sh
+```
+
+---
+
+## 2026-06-07 - Commit a78f5dd
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `a78f5dd`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit cc854ce
 
 **fix(upgrade): rewrite as fully autonomous script with no prompts**
