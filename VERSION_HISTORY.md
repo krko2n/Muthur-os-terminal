@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit d48240f
+
+**docs(readme): show all 100 banner variants for selection**
+
+- Author: krkos
+- Hash: `d48240f`
+
+**Changed files:**
+```
+README.md
+```
+
+---
+
+## 2026-06-07 - Commit 3a1afa9
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `3a1afa9`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit 188ebe0
 
 **docs(readme): 100 banner color variants, show top 12 picks**
