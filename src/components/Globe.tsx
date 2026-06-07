@@ -1,6 +1,5 @@
 import { useRef, useState, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Line } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
 type GlobeMode = 'conflicts' | 'cyber' | 'flights';
@@ -85,14 +84,22 @@ function generateContinentOutlines(radius: number): THREE.Vector3[][] {
   return outlines;
 }
 
-function HotspotDot({ position, color, pulse }: { position: THREE.Vector3; color: string; pulse: boolean }) {
+function HotspotDot({ position, color, pulse, groupRef }: { position: THREE.Vector3; color: string; pulse: boolean; groupRef: React.RefObject<THREE.Group> }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const { camera } = useThree();
 
   useFrame(({ clock }) => {
-    if (meshRef.current && pulse) {
+    if (!meshRef.current) return;
+    if (pulse) {
       const scale = 1 + Math.sin(clock.getElapsedTime() * 3) * 0.4;
       meshRef.current.scale.setScalar(scale);
     }
+    const worldPos = new THREE.Vector3();
+    meshRef.current.getWorldPosition(worldPos);
+    const dirToCamera = new THREE.Vector3().subVectors(camera.position, new THREE.Vector3(0, 0, 0)).normalize();
+    const dotNormal = worldPos.clone().normalize();
+    const dot = dotNormal.dot(dirToCamera);
+    (meshRef.current.material as THREE.MeshBasicMaterial).opacity = dot > 0.05 ? 0.9 : 0;
   });
 
   return (
@@ -114,12 +121,58 @@ function ArcLine({ start, end, color }: { start: THREE.Vector3; end: THREE.Vecto
   return <Line points={points} color={color} lineWidth={1} transparent opacity={0.4} />;
 }
 
+const backFaceVertexShader = `
+  varying float vVisibility;
+  void main() {
+    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+    vec3 worldNormal = normalize(worldPos.xyz);
+    vec3 viewDir = normalize(cameraPosition - worldPos.xyz);
+    vVisibility = dot(worldNormal, viewDir);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const backFaceFragmentShader = `
+  uniform vec3 uColor;
+  uniform float uBaseOpacity;
+  varying float vVisibility;
+  void main() {
+    if (vVisibility < 0.0) discard;
+    float alpha = smoothstep(0.0, 0.2, vVisibility) * uBaseOpacity;
+    gl_FragColor = vec4(uColor, alpha);
+  }
+`;
+
+function OccludedLine({ points, color, opacity = 0.7, lineWidth = 1.5 }: { points: THREE.Vector3[]; color: string; opacity?: number; lineWidth?: number }) {
+  const ref = useRef<THREE.Line>(null);
+  const material = useMemo(() => {
+    const col = new THREE.Color(color);
+    return new THREE.ShaderMaterial({
+      vertexShader: backFaceVertexShader,
+      fragmentShader: backFaceFragmentShader,
+      uniforms: {
+        uColor: { value: col },
+        uBaseOpacity: { value: opacity },
+      },
+      transparent: true,
+      depthWrite: false,
+    });
+  }, [color, opacity]);
+
+  const geometry = useMemo(() => {
+    const geo = new THREE.BufferGeometry().setFromPoints(points);
+    return geo;
+  }, [points]);
+
+  return <primitive object={new THREE.Line(geometry, material)} ref={ref} />;
+}
+
 function RotatingGlobe({ mode }: { mode: GlobeMode }) {
-  const groupRef = useRef<THREE.Group>(null);
+  const groupRef = useRef<THREE.Group>(null!) as React.RefObject<THREE.Group>;
 
   useFrame((_state, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.12;
+      groupRef.current.rotation.y += delta * 0.03;
     }
   });
 
@@ -128,10 +181,10 @@ function RotatingGlobe({ mode }: { mode: GlobeMode }) {
 
   const gridLines = useMemo(() => {
     const lines: THREE.Vector3[][] = [];
-    const segments = 48;
+    const segments = 64;
 
-    for (let i = 1; i < 8; i++) {
-      const lat = (i / 8 - 0.5) * Math.PI;
+    for (let i = 1; i < 12; i++) {
+      const lat = (i / 12 - 0.5) * Math.PI;
       const points = [];
       const r = Math.cos(lat) * radius;
       const y = Math.sin(lat) * radius;
@@ -142,8 +195,8 @@ function RotatingGlobe({ mode }: { mode: GlobeMode }) {
       lines.push(points);
     }
 
-    for (let i = 0; i < 12; i++) {
-      const lng = (i / 12) * Math.PI * 2;
+    for (let i = 0; i < 18; i++) {
+      const lng = (i / 18) * Math.PI * 2;
       const points = [];
       for (let j = 0; j <= segments; j++) {
         const lat = (j / segments - 0.5) * Math.PI;
@@ -203,32 +256,24 @@ function RotatingGlobe({ mode }: { mode: GlobeMode }) {
 
   return (
     <group ref={groupRef}>
-      {/* Grid lines */}
+      {/* Grid lines (hidden on back side) */}
       {gridLines.map((points, i) => (
-        <Line key={`grid-${i}`} points={points} color="#00ff41" lineWidth={0.5} transparent opacity={0.15} />
+        <OccludedLine key={`grid-${i}`} points={points} color="#00ff41" opacity={0.12} lineWidth={0.5} />
       ))}
 
-      {/* Continent outlines */}
+      {/* Continent outlines (hidden on back side) */}
       {continentOutlines.map((points, i) => (
-        <Line key={`cont-${i}`} points={points} color="#00ff41" lineWidth={1.5} transparent opacity={0.7} />
+        <OccludedLine key={`cont-${i}`} points={points} color="#00ff41" opacity={0.8} lineWidth={1.5} />
       ))}
 
       {/* Hotspot dots */}
       {hotspots.map((h, i) => (
-        <HotspotDot key={`dot-${i}`} position={h.pos} color={h.color} pulse={mode === 'conflicts'} />
+        <HotspotDot key={`dot-${i}`} position={h.pos} color={h.color} pulse={mode === 'conflicts'} groupRef={groupRef} />
       ))}
 
       {/* Arc connections */}
       {arcs.map((a, i) => (
         <ArcLine key={`arc-${i}`} start={a.start} end={a.end} color={arcColor} />
-      ))}
-
-      {/* Glow rings for conflicts */}
-      {mode === 'conflicts' && hotspots.map((h, i) => (
-        <mesh key={`ring-${i}`} position={h.pos}>
-          <ringGeometry args={[0.06, 0.08, 16]} />
-          <meshBasicMaterial color={dotColor} transparent opacity={0.3} side={THREE.DoubleSide} />
-        </mesh>
       ))}
 
       <ambientLight intensity={0.3} />

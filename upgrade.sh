@@ -141,11 +141,31 @@ printf "  ${BOLD}║${RESET}     ${GREEN}MUTHUR OS TERMINAL${RESET} ${DIM}// UPG
 printf "  ${BOLD}╚══════════════════════════════════════════╝${RESET}\n"
 echo ""
 
-# --- Phase 1 done (pull already happened before re-exec) ---
-printf "  ${BOLD}[1/4]${RESET} ${CYAN}Synced to latest version${RESET}\n"
+# --- Overall progress bar ---
+overall_progress() {
+    local step=$1
+    local total=4
+    local label=$2
+    local detail=$3
+    local width=50
+    local filled=$((step * width / total))
+    local empty=$((width - filled))
+    local percent=$((step * 100 / total))
 
+    local bar_fill=$(printf '%*s' "$filled" | tr ' ' '=')
+    local bar_empty=$(printf '%*s' "$empty" | tr ' ' '-')
+
+    printf "\r${CLEAR_LINE}"
+    printf "  ${GREEN}[%s%s]${RESET} %3d%%\n" "$bar_fill" "$bar_empty" "$percent"
+    printf "  ${BOLD}%s${RESET}\n" "$label"
+    if [ -n "$detail" ]; then
+        printf "  ${DIM}%s${RESET}\n" "$detail"
+    fi
+}
+
+# --- Phase 1 done (pull already happened before re-exec) ---
 NEW_VERSION=$(grep '^version' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2 2>/dev/null || echo "unknown")
-printf "        ${GREEN}✓${RESET} ${DIM}Version: v%s${RESET}\n" "$NEW_VERSION"
+overall_progress 1 "[1/4] Synced to latest version" "Version: v${NEW_VERSION}"
 echo ""
 
 # --- Phase 2: Dependencies ---
@@ -184,6 +204,8 @@ fi
 # NPM install
 export PATH
 spin_task "Installing npm packages" bash -c "export PATH='$PATH' && npm ci --quiet 2>/dev/null || npm install --quiet"
+echo ""
+overall_progress 2 "[2/4] Dependencies resolved" "npm packages installed"
 echo ""
 
 # --- Phase 3: Build ---
@@ -234,6 +256,8 @@ BUILD_EXIT=$?
 
 if [[ $BUILD_EXIT -eq 0 ]]; then
     printf "\r${CLEAR_LINE}  ${GREEN}✓${RESET} Build successful\n"
+    echo ""
+    overall_progress 3 "[3/4] Build complete" "Release binary compiled"
 else
     printf "\r${CLEAR_LINE}  ${RED}✗${RESET} Build failed\n"
     printf "        ${DIM}Full log: %s${RESET}\n" "$BUILD_LOG"
