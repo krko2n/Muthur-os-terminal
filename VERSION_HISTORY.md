@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit 206f98e
+
+**fix(deps): align @types/three version with three 0.171**
+
+- Author: krkos
+- Hash: `206f98e`
+
+**Changed files:**
+```
+package.json
+```
+
+---
+
+## 2026-06-07 - Commit db52098
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `db52098`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit e0ae52a
 
 **fix(upgrade): source cargo/nvm env after exec, fix version grep pattern**
