@@ -27,7 +27,8 @@
     "react-dom": "^19.0.0",
     "three": "^0.171.0",
     "@react-three/fiber": "^9.0.10",
-    "@react-three/drei": "^9.117.3"
+    "@react-three/drei": "^9.117.3",
+    "topojson-client": "^3.1.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.0.0",
