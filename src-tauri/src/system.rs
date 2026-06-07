@@ -1,5 +1,15 @@
 use serde::{Deserialize, Serialize};
 use sysinfo::{System, Networks, Disks};
+use std::fs;
+
+#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BatteryInfo {
+    pub present: bool,
+    pub percent: u8,
+    pub charging: bool,
+    pub time_remaining: Option<String>,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SystemStats {
@@ -11,6 +21,7 @@ pub struct SystemStats {
     pub network: NetworkStats,
     pub disk: Vec<DiskInfo>,
     pub uptime: u64,
+    pub battery: Option<BatteryInfo>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -114,6 +125,41 @@ impl SystemMonitor {
             },
             disk: disks,
             uptime: System::uptime(),
+            battery: Self::get_battery_info(),
         }
+    }
+
+    fn get_battery_info() -> Option<BatteryInfo> {
+        let base = "/sys/class/power_supply/BAT0";
+        if !std::path::Path::new(base).exists() {
+            let base1 = "/sys/class/power_supply/BAT1";
+            if !std::path::Path::new(base1).exists() {
+                return None;
+            }
+            return Self::read_battery(base1);
+        }
+        Self::read_battery(base)
+    }
+
+    fn read_battery(base: &str) -> Option<BatteryInfo> {
+        let capacity = fs::read_to_string(format!("{}/capacity", base))
+            .ok()?
+            .trim()
+            .parse::<u8>()
+            .ok()?;
+
+        let status = fs::read_to_string(format!("{}/status", base))
+            .unwrap_or_default()
+            .trim()
+            .to_string();
+
+        let charging = status == "Charging" || status == "Full";
+
+        Some(BatteryInfo {
+            present: true,
+            percent: capacity,
+            charging,
+            time_remaining: None,
+        })
     }
 }

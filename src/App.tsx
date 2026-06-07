@@ -32,7 +32,7 @@ function App() {
       <CustomCursor />
 
       <div className="flex flex-col h-full">
-        <Header />
+        <Header battery={systemStats?.battery} />
 
         <div className="flex-1 flex overflow-hidden p-2 gap-2">
           <LeftPanel systemStats={systemStats} />

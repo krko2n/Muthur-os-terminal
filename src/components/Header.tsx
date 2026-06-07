@@ -1,12 +1,35 @@
 import { useEffect, useState } from 'react';
 
-export default function Header() {
+interface HeaderProps {
+  battery?: {
+    present: boolean;
+    percent: number;
+    charging: boolean;
+  } | null;
+}
+
+export default function Header({ battery }: HeaderProps) {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const getBatteryColor = (percent: number) => {
+    if (percent <= 15) return 'text-red-500';
+    if (percent <= 30) return 'text-yellow-400';
+    return 'text-muthur-primary';
+  };
+
+  const getBatteryIcon = (percent: number, charging: boolean) => {
+    if (charging) return '⚡';
+    if (percent > 75) return '████';
+    if (percent > 50) return '███░';
+    if (percent > 25) return '██░░';
+    if (percent > 10) return '█░░░';
+    return '░░░░';
+  };
 
   return (
     <div className="h-12 border-b border-muthur-border bg-muthur-panel flex items-center justify-between px-6">
@@ -16,6 +39,15 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-6">
+        {battery?.present && (
+          <div className={`text-xs font-mono flex items-center gap-1 ${getBatteryColor(battery.percent)}`}>
+            <span className="text-muthur-secondary">BAT:</span>
+            <span className="tracking-tighter">[{getBatteryIcon(battery.percent, battery.charging)}]</span>
+            <span>{battery.percent}%</span>
+            {battery.charging && <span className="text-yellow-400 animate-pulse">CHG</span>}
+          </div>
+        )}
+
         <div className="text-sm">
           <span className="text-muthur-secondary">SYSTEM:</span>{' '}
           <span className="text-muthur-primary">ONLINE</span>

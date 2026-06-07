@@ -11,10 +11,12 @@ export default function AIPanel() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   const sendMessage = async () => {
@@ -28,7 +30,6 @@ export default function AIPanel() {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
 
-      // Check if it's a command suggestion request (starts with #)
       if (userMessage.startsWith('#')) {
         const context = userMessage.substring(1).trim();
         const response = await invoke('ai_suggest_command', { context }) as string;
@@ -37,24 +38,6 @@ export default function AIPanel() {
           ...prev,
           { role: 'assistant', content: `SUGGESTED COMMAND:\n${response}` }
         ]);
-
-        // Auto-execute the command
-        setTimeout(async () => {
-          try {
-            // Get active terminal session and write command
-            const command = response.trim();
-            setMessages(prev => [
-              ...prev,
-              { role: 'system', content: `EXECUTING: ${command}` }
-            ]);
-
-            // Note: You would need to get the active session ID from Terminal component
-            // For now, this is a placeholder
-            console.log('Would execute:', command);
-          } catch (error) {
-            console.error('Failed to execute command:', error);
-          }
-        }, 500);
       } else {
         const response = await invoke('ai_chat', { message: userMessage }) as string;
         setMessages(prev => [...prev, { role: 'assistant', content: response }]);
@@ -80,10 +63,13 @@ export default function AIPanel() {
   };
 
   return (
-    <div className="panel flex-1 flex flex-col">
-      <div className="panel-header">MUTHUR AI ASSISTANT</div>
+    <div className="panel flex-1 flex flex-col min-h-0">
+      <div className="panel-header shrink-0">MUTHUR AI ASSISTANT</div>
 
-      <div className="flex-1 overflow-auto p-2 space-y-2 text-xs">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto min-h-0 p-2 space-y-2 text-xs scrollbar-thin"
+      >
         {messages.map((msg, i) => (
           <div
             key={i}
@@ -103,10 +89,9 @@ export default function AIPanel() {
             PROCESSING...
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-2 border-t border-muthur-border">
+      <div className="p-2 border-t border-muthur-border shrink-0">
         <div className="text-xs text-muthur-border mb-1">
           Tip: Use # prefix for command suggestions
         </div>

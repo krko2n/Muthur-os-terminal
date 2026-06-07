@@ -3,26 +3,14 @@ import AIPanel from './AIPanel';
 
 export default function RightPanel() {
   return (
-    <div className="w-1/4 flex flex-col gap-2">
-      {/* Network/Globe visualization */}
-      <div className="panel h-80">
-        <div className="panel-header">NETWORK STATUS</div>
-        <div className="h-full relative">
+    <div className="w-1/4 flex flex-col gap-2 min-h-0">
+      <div className="panel h-72 flex flex-col shrink-0">
+        <div className="panel-header shrink-0">GLOBAL MONITOR</div>
+        <div className="flex-1 min-h-0">
           <Globe />
-          <div className="absolute bottom-2 left-2 right-2 text-xs space-y-1">
-            <div className="flex justify-between">
-              <span className="text-muthur-secondary">STATUS:</span>
-              <span className="text-muthur-primary">CONNECTED</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muthur-secondary">LATENCY:</span>
-              <span className="text-muthur-primary">12ms</span>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* AI Assistant */}
       <AIPanel />
     </div>
   );

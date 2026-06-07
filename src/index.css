@@ -122,3 +122,21 @@ body {
   text-transform: uppercase;
   letter-spacing: 2px;
 }
+
+/* Thin scrollbar variant for panels */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #0a3622;
+  border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #00ff41;
+}

@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import Terminal from './Terminal';
 import FileExplorer from './FileExplorer';
+import Browser from './Browser';
 
 export default function CenterPanel() {
   const [activeTab, setActiveTab] = useState<'terminal' | 'browser'>('terminal');
 
   return (
     <div className="flex-1 flex flex-col gap-2">
-      {/* Main content area */}
-      <div className="panel flex-1 flex flex-col">
-        <div className="panel-header flex gap-4">
+      <div className="panel flex-1 flex flex-col min-h-0">
+        <div className="panel-header flex gap-4 shrink-0">
           <button
             onClick={() => setActiveTab('terminal')}
             className={`px-4 py-1 ${
@@ -32,19 +32,12 @@ export default function CenterPanel() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-hidden">
-          {activeTab === 'terminal' ? (
-            <Terminal />
-          ) : (
-            <div className="h-full flex items-center justify-center text-muthur-border">
-              BROWSER MODULE LOADING...
-            </div>
-          )}
+        <div className="flex-1 overflow-hidden min-h-0">
+          {activeTab === 'terminal' ? <Terminal /> : <Browser />}
         </div>
       </div>
 
-      {/* Bottom section - File Explorer */}
-      <div className="h-48">
+      <div className="h-48 shrink-0">
         <FileExplorer />
       </div>
     </div>
