@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit 3752a73
+
+**feat(docs): redesign README header with ASCII logo, colorful badges, add live page**
+
+- Author: krkos
+- Hash: `3752a73`
+
+**Changed files:**
+```
+README.md
+docs/index.html
+```
+
+---
+
+## 2026-06-07 - Commit 9229852
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `9229852`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit aaa7611
 
 **fix(upgrade): disable set -e in Phase 2, source .bashrc properly**
