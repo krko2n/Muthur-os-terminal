@@ -6,18 +6,26 @@ import * as THREE from 'three';
 type GlobeMode = 'conflicts' | 'cyber' | 'flights';
 
 const CONFLICT_ZONES: [number, number, string][] = [
-  [48.5, 37.0, 'Ukraine'],
-  [33.0, 44.0, 'Iraq/Syria'],
-  [15.5, 47.5, 'Yemen'],
-  [2.0, 45.0, 'Somalia'],
-  [12.0, 15.0, 'Sahel'],
-  [6.5, 3.4, 'Nigeria'],
-  [31.5, 35.0, 'Palestine'],
-  [33.5, 36.3, 'Lebanon'],
-  [14.5, -2.5, 'DRC'],
-  [13.7, 100.5, 'Myanmar'],
-  [34.0, 69.0, 'Afghanistan'],
-  [11.6, 43.1, 'Sudan'],
+  [50.3, 30.5, 'Ukraine-Russia'],
+  [31.9, 35.2, 'Gaza-Israel'],
+  [16.9, 96.2, 'Myanmar Civil War'],
+  [15.6, 30.8, 'Sudan Civil War'],
+  [-2.3, 23.7, 'DR Congo'],
+  [5.1, 46.2, 'Somalia'],
+  [12.5, 8.2, 'Sahel Insurgency'],
+  [9.1, 8.7, 'Nigeria'],
+  [34.7, 36.7, 'Syria'],
+  [34.8, 69.2, 'Afghanistan-Pakistan'],
+  [33.3, 73.2, 'Kashmir'],
+  [9.0, 38.7, 'Ethiopia'],
+  [12.9, 28.3, 'Yemen'],
+  [4.2, -71.9, 'Colombia'],
+  [-0.6, -78.5, 'Ecuador'],
+  [18.9, -72.3, 'Haiti'],
+  [-6.3, 29.9, 'Central Africa'],
+  [33.5, 36.3, 'Lebanon-Israel'],
+  [15.9, 99.9, 'Thailand South'],
+  [6.9, 79.9, 'Sri Lanka'],
 ];
 
 const CYBER_HOTSPOTS: [number, number, string][] = [

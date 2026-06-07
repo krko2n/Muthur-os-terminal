@@ -9,7 +9,7 @@ interface FileEntry {
 }
 
 export default function FileExplorer() {
-  const [currentPath, setCurrentPath] = useState('~');
+  const [currentPath, setCurrentPath] = useState('/home');
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -44,10 +44,12 @@ export default function FileExplorer() {
 
   const getHomeDir = async (): Promise<string> => {
     try {
-      const { homeDir } = await import('@tauri-apps/api/path');
-      return await homeDir();
+      const { invoke } = await import('@tauri-apps/api/core');
+      const dir = await invoke('get_current_dir') as string;
+      const home = dir.split('/').slice(0, 3).join('/');
+      return home || '/home';
     } catch {
-      return '/home/user';
+      return '/home';
     }
   };
 

@@ -2,7 +2,6 @@ use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use std::collections::HashMap;
 use std::io::{Read, Write};
 use tauri::{Emitter, Window};
-use tokio::task;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
@@ -60,7 +59,7 @@ impl PtyManager {
         let mut reader = master.try_clone_reader()?;
         let sid_clone = session_id.clone();
         let window_clone = window.clone();
-        task::spawn(async move {
+        std::thread::spawn(move || {
             let mut buffer = vec![0u8; 8192];
             let mut batch_buffer = Vec::new();
             let mut last_send = std::time::Instant::now();
@@ -81,7 +80,11 @@ impl PtyManager {
                     }
                     Err(_) => break,
                 }
-                tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
+                std::thread::sleep(std::time::Duration::from_millis(1));
+            }
+            if !batch_buffer.is_empty() {
+                let data = String::from_utf8_lossy(&batch_buffer).to_string();
+                let _ = window_clone.emit(&format!("terminal-output-{}", sid_clone.to_string()), data);
             }
             let _ = window_clone.emit(&format!("terminal-closed-{}", sid_clone.to_string()), ());
         });

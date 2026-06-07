@@ -48,29 +48,32 @@ pub struct DiskInfo {
 
 pub struct SystemMonitor {
     system: System,
+    networks: Networks,
 }
 
 impl SystemMonitor {
     pub fn new() -> Self {
+        let mut sys = System::new_all();
+        sys.refresh_all();
+        std::thread::sleep(std::time::Duration::from_millis(200));
+        sys.refresh_all();
         SystemMonitor {
-            system: System::new_all(),
+            system: sys,
+            networks: Networks::new_with_refreshed_list(),
         }
     }
 
-    pub fn get_stats(&self) -> SystemStats {
-        let mut sys = System::new_all();
-        sys.refresh_all();
+    pub fn get_stats(&mut self) -> SystemStats {
+        self.system.refresh_all();
+        self.networks.refresh();
 
-        // CPU usage - sysinfo 0.39: global_cpu_usage() returns f32 directly
-        let cpu_usage = sys.global_cpu_usage();
+        let cpu_usage = self.system.global_cpu_usage();
 
-        // Memory
-        let memory_used = sys.used_memory();
-        let memory_total = sys.total_memory();
+        let memory_used = self.system.used_memory();
+        let memory_total = self.system.total_memory();
         let memory_percent = (memory_used as f32 / memory_total as f32) * 100.0;
 
-        // Top processes - sysinfo 0.39: Pid is numeric type, name() returns &OsStr
-        let mut processes: Vec<ProcessInfo> = sys.processes()
+        let mut processes: Vec<ProcessInfo> = self.system.processes()
             .iter()
             .map(|(pid, process)| ProcessInfo {
                 pid: pid.as_u32(),
@@ -83,16 +86,13 @@ impl SystemMonitor {
         processes.sort_by(|a, b| b.cpu_usage.partial_cmp(&a.cpu_usage).unwrap());
         processes.truncate(10);
 
-        // Network - sysinfo 0.39: Must create Networks separately
-        let networks = Networks::new_with_refreshed_list();
         let mut total_received = 0;
         let mut total_transmitted = 0;
-        for (_interface_name, data) in &networks {
+        for (_interface_name, data) in &self.networks {
             total_received += data.received();
             total_transmitted += data.transmitted();
         }
 
-        // Disks - sysinfo 0.39: Must create Disks separately
         let disks_list = Disks::new_with_refreshed_list();
         let disks: Vec<DiskInfo> = disks_list
             .iter()

@@ -1,0 +1,12 @@
+{
+  "identifier": "default",
+  "description": "Default capabilities for MUTHUR OS Terminal",
+  "windows": ["*"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "core:event:allow-emit",
+    "core:event:allow-listen",
+    "shell:allow-open"
+  ]
+}
