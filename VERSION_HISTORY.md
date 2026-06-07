@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit cc854ce
+
+**fix(upgrade): rewrite as fully autonomous script with no prompts**
+
+- Author: krkos
+- Hash: `cc854ce`
+
+**Changed files:**
+```
+upgrade.sh
+```
+
+---
+
+## 2026-06-07 - Commit 9c8eddd
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `9c8eddd`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit e756d07
 
 **docs: restore original CLAUDE.md and append developer quality contract**
