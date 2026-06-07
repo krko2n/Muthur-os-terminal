@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit e59c94b
+
+**fix(backend): resolve portable-pty 0.9 and sysinfo 0.39 API changes**
+
+- Author: krkos
+- Hash: `e59c94b`
+
+**Changed files:**
+```
+src-tauri/src/pty.rs
+src-tauri/src/system.rs
+```
+
+---
+
+## 2026-06-07 - Commit 3d31b03
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `3d31b03`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit 7a7bbb1
 
 **docs: rewrite README with stronger project description and cleaner structure**
