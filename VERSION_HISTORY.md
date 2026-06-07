@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit fcb21b6
+
+**docs(readme): add 10 banner designs + 10 header layouts for selection**
+
+- Author: krkos
+- Hash: `fcb21b6`
+
+**Changed files:**
+```
+README.md
+banners/banner-a.svg
+banners/banner-b.svg
+banners/banner-c.svg
+banners/banner-d.svg
+```
+
+---
+
+## 2026-06-07 - Commit 6d28cca
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `6d28cca`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit 3752a73
 
 **feat(docs): redesign README header with ASCII logo, colorful badges, add live page**
