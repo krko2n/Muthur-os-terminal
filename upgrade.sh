@@ -5,6 +5,35 @@
 
 set -e
 
+# --- Self-update mechanism ---
+# After pulling new code, re-exec this script so the new version handles the build.
+# MUTHUR_UPGRADE_PHASE is set by the re-exec to skip the pull phase.
+if [ -z "$MUTHUR_UPGRADE_PHASE" ]; then
+    # Phase 1: Pull new code, then re-exec into Phase 2 (build+install)
+    if [ ! -d ".git" ]; then
+        echo "Error: Not in a git repository"
+        exit 1
+    fi
+
+    if [ ! -f "/usr/local/bin/muthur" ]; then
+        chmod +x install-auto.sh
+        ./install-auto.sh
+        exit 0
+    fi
+
+    # Discard all local changes and pull latest
+    git checkout -- . > /dev/null 2>&1
+    git clean -fd > /dev/null 2>&1
+    git fetch origin --quiet
+    git reset --hard origin/main > /dev/null 2>&1
+
+    # Re-exec the now-updated script in Phase 2
+    export MUTHUR_UPGRADE_PHASE=build
+    exec bash "$0" "$@"
+fi
+
+# --- Phase 2: Build and install (running from the NEW script) ---
+
 ESC=$'\e'
 HIDE_CURSOR="${ESC}[?25l"
 SHOW_CURSOR="${ESC}[?25h"
@@ -87,45 +116,11 @@ printf "  ${BOLD}║${RESET}     ${GREEN}MUTHUR OS TERMINAL${RESET} ${DIM}// UPG
 printf "  ${BOLD}╚══════════════════════════════════════════╝${RESET}\n"
 echo ""
 
-# --- Pre-checks ---
-if [ ! -d ".git" ]; then
-    printf "  ${RED}✗${RESET} Not in a git repository\n"
-    printf "    Run from the muthur-os-terminal directory\n"
-    exit 1
-fi
-
-if [ ! -f "/usr/local/bin/muthur" ]; then
-    printf "  ${YELLOW}!${RESET} MUTHUR not installed. Running full install...\n\n"
-    chmod +x install-auto.sh
-    ./install-auto.sh
-    exit 0
-fi
-
-# --- Phase 1: Reset & Pull ---
-printf "  ${BOLD}[1/4]${RESET} ${CYAN}Syncing to latest version${RESET}\n"
-
-CURRENT_VERSION=$(grep '"version"' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2 2>/dev/null || echo "unknown")
-printf "        ${DIM}Current: v%s${RESET}\n" "$CURRENT_VERSION"
-
-progress_bar 1 5 "Discarding local changes..."
-git checkout -- . > /dev/null 2>&1
-git clean -fd > /dev/null 2>&1
-
-progress_bar 2 5 "Fetching remote..."
-git fetch origin --quiet
-
-progress_bar 3 5 "Resetting to origin/main..."
-git reset --hard origin/main > /dev/null 2>&1
-
-progress_bar 5 5 "Synced"
-echo ""
+# --- Phase 1 done (pull already happened before re-exec) ---
+printf "  ${BOLD}[1/4]${RESET} ${CYAN}Synced to latest version${RESET}\n"
 
 NEW_VERSION=$(grep '"version"' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2 2>/dev/null || echo "unknown")
-if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
-    printf "        ${GREEN}Updated: v%s → v%s${RESET}\n" "$CURRENT_VERSION" "$NEW_VERSION"
-else
-    printf "        ${DIM}Version: v%s (rebuilding)${RESET}\n" "$NEW_VERSION"
-fi
+printf "        ${GREEN}✓${RESET} ${DIM}Version: v%s${RESET}\n" "$NEW_VERSION"
 echo ""
 
 # --- Phase 2: Dependencies ---
@@ -254,11 +249,7 @@ printf "  ${BOLD}║${RESET}  ${GREEN}✓ UPGRADE COMPLETE${RESET}              
 printf "  ${BOLD}╚══════════════════════════════════════════╝${RESET}\n"
 echo ""
 
-if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
-    printf "  ${DIM}Upgraded:${RESET} v%s ${DIM}→${RESET} v%s\n" "$CURRENT_VERSION" "$NEW_VERSION"
-else
-    printf "  ${DIM}Rebuilt:${RESET}  v%s\n" "$NEW_VERSION"
-fi
+printf "  ${DIM}Version:${RESET}  v%s\n" "$NEW_VERSION"
 printf "  ${DIM}Binary:${RESET}   %s\n" "$SIZE"
 printf "  ${DIM}Path:${RESET}     /usr/local/bin/muthur\n"
 echo ""
