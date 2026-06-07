@@ -57,6 +57,8 @@ checkpoints/
 !src/assets/**/*.png
 !src/assets/**/*.jpg
 !src/assets/**/*.jpeg
+!banner.png
+!src-tauri/icons/**/*.png
 !public/**/*.png
 !public/**/*.jpg
 !public/**/*.jpeg
