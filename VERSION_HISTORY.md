@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit e0ae52a
+
+**fix(upgrade): source cargo/nvm env after exec, fix version grep pattern**
+
+- Author: krkos
+- Hash: `e0ae52a`
+
+**Changed files:**
+```
+upgrade.sh
+```
+
+---
+
+## 2026-06-07 - Commit 8625d1d
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `8625d1d`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit 8102da9
 
 **fix(upgrade): add self-update via exec to always run the latest script**
