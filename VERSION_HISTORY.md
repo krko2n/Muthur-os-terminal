@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit 9c99d0d
+
+**fix(readme): correct banner SVG file paths**
+
+- Author: krkos
+- Hash: `9c99d0d`
+
+**Changed files:**
+```
+README.md
+```
+
+---
+
+## 2026-06-07 - Commit eb9fceb
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `eb9fceb`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit d48240f
 
 **docs(readme): show all 100 banner variants for selection**
