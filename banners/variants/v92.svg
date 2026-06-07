@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#050a0a"/><stop offset="100%" style="stop-color:#000"/></linearGradient>
+    <linearGradient id="ag" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#80deea"/><stop offset="100%" style="stop-color:#b2ebf2"/></linearGradient>
+    <filter id="g"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="G"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <g opacity="0.04" fill="#80deea" font-family="monospace" font-size="10"><text x="50" y="25">1</text><text x="50" y="65">0</text><text x="50" y="105">1</text><text x="50" y="185">0</text><text x="50" y="265">1</text><text x="130" y="45">0</text><text x="130" y="125">1</text><text x="130" y="205">0</text></g>
+  <g opacity="0.04" fill="#b2ebf2" font-family="monospace" font-size="10"><text x="1070" y="25">0</text><text x="1070" y="105">1</text><text x="1070" y="185">0</text><text x="1070" y="265">1</text><text x="1140" y="55">1</text><text x="1140" y="135">0</text><text x="1140" y="215">1</text></g>
+  <ellipse cx="600" cy="130" rx="200" ry="80" fill="#80deea" opacity="0.015" filter="url(#G)"/>
+  <g transform="translate(600,115)" filter="url(#g)">
+    <polygon points="0,-58 50,-29 50,29 0,58 -50,29 -50,-29" fill="none" stroke="url(#ag)" stroke-width="2.5"/>
+    <polygon points="0,-38 33,-19 0,0 -33,-19" fill="none" stroke="#80deea" stroke-width="2" opacity="0.85"/>
+    <polygon points="-33,-19 0,0 0,38 -33,19" fill="none" stroke="#80deea" stroke-width="2" opacity="0.6"/>
+    <polygon points="33,-19 0,0 0,38 33,19" fill="none" stroke="#b2ebf2" stroke-width="2" opacity="0.7"/>
+    <polygon points="0,-13 11,-6.5 0,0 -11,-6.5" fill="#ffffff" opacity="0.95" filter="url(#g)"/>
+    <polygon points="-11,-6.5 0,0 0,13 -11,6.5" fill="#b2ebf2" opacity="0.7"/>
+    <polygon points="11,-6.5 0,0 0,13 11,6.5" fill="#80deea" opacity="0.6"/>
+    <circle cx="0" cy="-58" r="2.5" fill="#80deea" opacity="0.8"/><circle cx="50" cy="29" r="2.5" fill="#b2ebf2" opacity="0.8"/><circle cx="-50" cy="29" r="2.5" fill="#80deea" opacity="0.8"/>
+  </g>
+  <text x="600" y="218" font-family="'Courier New',monospace" font-size="46" font-weight="bold" fill="url(#ag)" text-anchor="middle" letter-spacing="18" filter="url(#g)">MUTHUR</text>
+  <text x="600" y="252" font-family="'Courier New',monospace" font-size="13" fill="#b2ebf2" text-anchor="middle" letter-spacing="9" opacity="0.85">OS TERMINAL</text>
+  <rect x="350" y="272" width="500" height="1" fill="url(#ag)" opacity="0.25"/>
+  <text x="600" y="289" font-family="'Courier New',monospace" font-size="9" fill="#555" text-anchor="middle" letter-spacing="2">TAURI v2 // RUST // REACT 19 // OLLAMA // LINUX</text>
+</svg>

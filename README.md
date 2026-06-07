@@ -1,113 +1,82 @@
-# BANNER COLOR OPTIONS - You picked Layout 2 + Banner E style. Now pick a color (1-10).
+# Pick a banner - My top 12 from 100 variants
 
-> Just tell me the number and I will finalize the README with that banner + Layout 2.
-
----
-
-# COLOR VARIANTS (1-10)
-
-## 1 - Original Matrix Green (#00ff41) + Cyan core
-
-<img src="banners/banner-e1.svg" alt="Color 1 - Green" width="100%">
+> Layout 2 confirmed. Just tell me the number below and I finalize the README.
+> All 100 variants are in `banners/variants/` if you want to browse them all.
 
 ---
 
-## 2 - Ice Blue / Cyan (#00d4ff) + White core
+### 1 - Matrix Green (original, solid)
 
-<img src="banners/banner-e2.svg" alt="Color 2 - Cyan" width="100%">
-
----
-
-## 3 - Violet / Purple (#a855f7) + Lavender core
-
-<img src="banners/banner-e3.svg" alt="Color 3 - Purple" width="100%">
+<img src="banners/variants/v01.svg" width="100%">
 
 ---
 
-## 4 - Crimson / Red (#ff4444) + Light red core
+### 11 - Green to Cyan gradient
 
-<img src="banners/banner-e4.svg" alt="Color 4 - Red" width="100%">
-
----
-
-## 5 - Amber / Gold (#ffaa00) + Yellow core
-
-<img src="banners/banner-e5.svg" alt="Color 5 - Amber" width="100%">
+<img src="banners/variants/v11.svg" width="100%">
 
 ---
 
-## 6 - Hot Pink / Magenta (#ff006e) + Pink core
+### 13 - Green to Aqua gradient
 
-<img src="banners/banner-e6.svg" alt="Color 6 - Pink" width="100%">
-
----
-
-## 7 - Pure White / Monochrome (#ffffff) + White core
-
-<img src="banners/banner-e7.svg" alt="Color 7 - White" width="100%">
+<img src="banners/variants/v13.svg" width="100%">
 
 ---
 
-## 8 - Teal (#00bcd4) + Aqua core
+### 16 - Cyan to Green (reversed)
 
-<img src="banners/banner-e8.svg" alt="Color 8 - Teal" width="100%">
-
----
-
-## 9 - Electric Blue (#0088ff) + Light blue core
-
-<img src="banners/banner-e9.svg" alt="Color 9 - Blue" width="100%">
+<img src="banners/variants/v16.svg" width="100%">
 
 ---
 
-## 10 - Green-to-Cyan Gradient (dual tone) + White core
+### 20 - Cyan to Purple gradient
 
-<img src="banners/banner-e10.svg" alt="Color 10 - Gradient" width="100%">
+<img src="banners/variants/v20.svg" width="100%">
+
+---
+
+### 27 - Deep Purple to Electric Cyan
+
+<img src="banners/variants/v27.svg" width="100%">
+
+---
+
+### 40 - Hot Pink to Cyan (cyberpunk)
+
+<img src="banners/variants/v40.svg" width="100%">
+
+---
+
+### 81 - Magenta to Cyan (neon cyberpunk)
+
+<img src="banners/variants/v81.svg" width="100%">
+
+---
+
+### 84 - Coral Pink to Sky Blue
+
+<img src="banners/variants/v84.svg" width="100%">
+
+---
+
+### 85 - Purple to Cyan (electric)
+
+<img src="banners/variants/v85.svg" width="100%">
+
+---
+
+### 88 - Mint Green to Matrix Green
+
+<img src="banners/variants/v88.svg" width="100%">
+
+---
+
+### 99 - Deep Orange to Neon Purple (sunset)
+
+<img src="banners/variants/v99.svg" width="100%">
 
 ---
 ---
-
-# LAYOUT 2 PREVIEW (your chosen layout, shown with color 1 as example)
-
-## Layout 2 - System readout terminal block
-
-<div align="center">
-
-<br>
-
-<img src="banners/banner-e1.svg" alt="MUTHUR OS Terminal" width="100%">
-
-<br>
-
-```
- SYSTEM ONLINE ──────────────────────────────────────────────────────────
- PLATFORM: Linux (Arch | Ubuntu | Debian | Fedora)    BINARY: ~18 MB
- BACKEND:  Rust + Tauri v2                            CPU:    <10% idle
- FRONTEND: React 19 + TypeScript + Vite               RAM:    ~150 MB
- AI:       Ollama (llama3.2 default)                  STATUS: ACTIVE
- ────────────────────────────────────────────────────────────────────────
-```
-
-<p align="center">
-  <img src="https://img.shields.io/badge/MIT-License-00ff41?style=flat-square&labelColor=0d1117" alt="MIT">
-  <img src="https://img.shields.io/badge/Linux-Only-FFC131?style=flat-square&logo=linux&logoColor=white&labelColor=0d1117" alt="Linux">
-  <img src="https://img.shields.io/badge/Tauri-v2-00d4ff?style=flat-square&logo=tauri&logoColor=white&labelColor=0d1117" alt="Tauri">
-  <img src="https://img.shields.io/badge/Rust-Backend-e44d26?style=flat-square&logo=rust&logoColor=white&labelColor=0d1117" alt="Rust">
-  <img src="https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=white&labelColor=0d1117" alt="React">
-  <img src="https://img.shields.io/badge/Ollama-AI-a855f7?style=flat-square&labelColor=0d1117" alt="Ollama">
-  <img src="https://img.shields.io/github/stars/krko2n/Muthur-os-terminal?style=flat-square&labelColor=0d1117&color=f5a623" alt="Stars">
-</p>
-
-<br>
-
-**Fullscreen cinematic terminal interface for Linux.**<br>
-*Inspired by eDEX-UI and MU/TH/UR 6000 from Alien (1979).*
-
-<br>
-
-[`> INSTALL`](#installation) · [`> FEATURES`](#features) · [`> USAGE`](#usage) · [`> LIVE`](https://krko2n.github.io/Muthur-os-terminal)
-
-</div>
 
 ---
 
