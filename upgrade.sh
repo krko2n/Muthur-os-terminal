@@ -35,9 +35,20 @@ fi
 # --- Phase 2: Build and install (running from the NEW script) ---
 
 # Restore environment after exec (non-interactive shell has no .bashrc)
+# Source .bashrc first to pick up any PATH or env customizations
+[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc" 2>/dev/null || true
+
+# Explicitly ensure cargo and nvm are available
 [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+# If npm still not found, try common paths directly
+if ! command -v npm &> /dev/null; then
+    for p in /usr/local/bin /usr/bin "$HOME/.local/bin" "$HOME/.nvm/versions/node"/*/bin; do
+        [ -x "$p/npm" ] && export PATH="$p:$PATH" && break
+    done
+fi
 
 ESC=$'\e'
 HIDE_CURSOR="${ESC}[?25l"
@@ -102,8 +113,8 @@ spin_task() {
         sleep 0.08
     done
 
-    wait "$pid"
-    local exit_code=$?
+    wait "$pid" || local exit_code=$?
+    exit_code=${exit_code:-0}
 
     if [[ $exit_code -eq 0 ]]; then
         printf "\r${CLEAR_LINE}  ${GREEN}✓${RESET} %s\n" "$message"
@@ -153,8 +164,17 @@ if ! command -v node &> /dev/null; then
     fi
 fi
 
-# NPM install
-spin_task "Installing npm packages" bash -c 'npm ci --quiet 2>/dev/null || npm install --quiet'
+# Verify npm is reachable
+if ! command -v npm &> /dev/null; then
+    printf "  ${RED}✗${RESET} npm not found in PATH\n"
+    printf "    ${DIM}Install Node.js: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash${RESET}\n"
+    printf "    ${DIM}Then: nvm install 20${RESET}\n"
+    exit 1
+fi
+
+# NPM install (export PATH so sub-shell inherits node location)
+NPM_BIN=$(which npm)
+spin_task "Installing npm packages" bash -c "export PATH=\"$PATH\"; $NPM_BIN ci --quiet 2>/dev/null || $NPM_BIN install --quiet"
 echo ""
 
 # --- Phase 3: Build ---
@@ -170,7 +190,8 @@ fi
 # Clean stale bundles (keep cargo cache)
 rm -rf dist/ dist-ssr/ src-tauri/target/release/bundle/ 2>/dev/null || true
 
-# Build with live progress tracking
+# Build with live progress tracking (export PATH for background process)
+export PATH
 BUILD_LOG="/tmp/muthur_build.log"
 npm run tauri build > "$BUILD_LOG" 2>&1 &
 BUILD_PID=$!
@@ -200,8 +221,8 @@ while kill -0 "$BUILD_PID" 2>/dev/null; do
     sleep 0.1
 done
 
-wait "$BUILD_PID"
-BUILD_EXIT=$?
+wait "$BUILD_PID" || BUILD_EXIT=$?
+BUILD_EXIT=${BUILD_EXIT:-0}
 
 if [[ $BUILD_EXIT -eq 0 ]]; then
     printf "\r${CLEAR_LINE}  ${GREEN}✓${RESET} Build successful\n"
