@@ -100,3 +100,22 @@ IMAGE_GEN_QUICKSTART.md
 DEPLOYMENT_REPORT.md
 INTEGRATION_GUIDE.md
 agent_orchestration.log
+
+# Internal development files (not for end users)
+CLAUDE.md
+TODO.md
+.gitmessage
+CICD_QUICK_START.md
+PROJECT_SUMMARY.md
+VERSION_HISTORY.md
+PRODUCTION_ROADMAP.md
+create-lockfile.sh
+fix-build.sh
+generate-changelog.sh
+check-version.sh
+version-bump.sh
+test.sh
+src-tauri/icons/generate-all-icons.ps1
+src-tauri/icons/generate-icons.sh
+docs/PHASE2_IMPLEMENTATION.md
+docs/PRODUCTION_ARCHITECTURE.md
