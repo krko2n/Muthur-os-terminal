@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="788" viewBox="0 0 1400 788">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="coreGlow">
+      <feGaussianBlur stdDeviation="12" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Pure black background -->
+  <rect width="1400" height="788" fill="#000000"/>
+
+  <!-- Subtle ambient glow behind logo -->
+  <ellipse cx="700" cy="300" rx="250" ry="200" fill="#5bc0be" opacity="0.03" filter="url(#coreGlow)"/>
+
+  <!-- Outer hexagon -->
+  <g transform="translate(700, 250)" filter="url(#glow)">
+    <polygon points="0,-120 104,-60 104,60 0,120 -104,60 -104,-60" fill="none" stroke="#5bc0be" stroke-width="4" opacity="0.9"/>
+
+    <!-- Inner cube wireframe -->
+    <!-- Top face -->
+    <polygon points="0,-70 55,-38 0,-6 -55,-38" fill="none" stroke="#3a7c7a" stroke-width="2" opacity="0.7"/>
+    <!-- Left face -->
+    <polygon points="-55,-38 0,-6 0,62 -55,30" fill="none" stroke="#3a7c7a" stroke-width="2" opacity="0.5"/>
+    <!-- Right face -->
+    <polygon points="55,-38 0,-6 0,62 55,30" fill="none" stroke="#3a7c7a" stroke-width="2" opacity="0.6"/>
+
+    <!-- Inner glowing cube (core) -->
+    <g filter="url(#glow)">
+      <polygon points="0,-28 22,-14 0,0 -22,-14" fill="#5bc0be" opacity="0.6"/>
+      <polygon points="-22,-14 0,0 0,28 -22,14" fill="#4a9e9c" opacity="0.5"/>
+      <polygon points="22,-14 0,0 0,28 22,14" fill="#3d8886" opacity="0.4"/>
+    </g>
+
+    <!-- M letter on core -->
+    <text x="0" y="5" font-family="'Courier New', monospace" font-size="20" font-weight="bold" fill="#5bc0be" text-anchor="middle" opacity="0.9">M</text>
+  </g>
+
+  <!-- MUTHUR title -->
+  <text x="700" y="450" font-family="'Courier New', monospace" font-size="72" font-weight="bold" fill="#5bc0be" text-anchor="middle" letter-spacing="24" filter="url(#glow)">M U T H U R</text>
+
+  <!-- OS TERMINAL subtitle -->
+  <text x="700" y="510" font-family="'Courier New', monospace" font-size="28" fill="#5bc0be" text-anchor="middle" letter-spacing="14" opacity="0.7">O S   T E R M I N A L</text>
+
+  <!-- Horizontal divider line with dots -->
+  <circle cx="280" cy="580" r="5" fill="#5bc0be" opacity="0.8"/>
+  <line x1="285" y1="580" x2="1115" y2="580" stroke="#5bc0be" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="1120" cy="580" r="5" fill="#5bc0be" opacity="0.8"/>
+
+  <!-- Tech stack -->
+  <text x="700" y="650" font-family="'Courier New', monospace" font-size="24" fill="#5bc0be" text-anchor="middle" letter-spacing="3" opacity="0.5">TAURI v2  //  RUST  //  REACT 19  //  OLLAMA  //  LINUX</text>
+</svg>
