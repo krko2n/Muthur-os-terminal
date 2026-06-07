@@ -2,7 +2,7 @@
 
 <br>
 
-<img src="banner.svg" alt="MUTHUR OS Terminal" width="100%">
+<img src="banner.png" alt="MUTHUR OS Terminal" width="100%">
 
 <br>
 
