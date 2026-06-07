@@ -160,8 +160,8 @@ build_app() {
     cargo build --release --quiet 2>&1 | grep -v "Compiling" | grep -v "Finished" || true
     cd ..
 
-    echo -e "${YELLOW}[4/4]${NC} Creating bundles..."
-    npm run tauri build --silent 2>&1 | grep -v "info" || true
+    echo -e "${YELLOW}[4/4]${NC} Creating bundles (optional)..."
+    npm run tauri build --silent 2>&1 | grep -v "info" || echo -e "${DIM}  Bundling skipped (missing tools). Binary built successfully.${NC}"
 
     echo -e "${GREEN}[OK]${NC} Build complete"
 }

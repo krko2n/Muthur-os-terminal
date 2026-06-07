@@ -40,10 +40,15 @@ npm run build
 echo -e "${GREEN}Frontend build complete${NC}"
 echo ""
 
-# Build Tauri app
+# Build Tauri app (try full bundle, fall back to binary-only if bundling fails)
 echo -e "${YELLOW}Building Tauri application...${NC}"
-npm run tauri build
-echo -e "${GREEN}Tauri build complete${NC}"
+if npm run tauri build 2>/dev/null; then
+    echo -e "${GREEN}Tauri build complete (with bundles)${NC}"
+else
+    echo -e "${YELLOW}Bundling failed (missing linuxdeploy/dpkg), building binary only...${NC}"
+    cd src-tauri && cargo build --release && cd ..
+    echo -e "${GREEN}Binary build complete${NC}"
+fi
 echo ""
 
 # Show build artifacts

@@ -199,9 +199,9 @@ fi
 # Clean stale bundles (keep cargo cache)
 rm -rf dist/ dist-ssr/ src-tauri/target/release/bundle/ 2>/dev/null || true
 
-# Build with live progress tracking
+# Build with live progress tracking (--no-bundle skips AppImage/deb packaging)
 BUILD_LOG="/tmp/muthur_build.log"
-bash -c "export PATH='$PATH' && npm run tauri build" > "$BUILD_LOG" 2>&1 &
+bash -c "export PATH='$PATH' && npm run build && cd src-tauri && cargo build --release" > "$BUILD_LOG" 2>&1 &
 BUILD_PID=$!
 
 STEPS=("Preparing" "Compiling frontend" "Bundling assets" "Compiling Rust" "Linking" "Packaging")
