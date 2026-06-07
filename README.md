@@ -1,41 +1,57 @@
-# MUTHUR OS TERMINAL
-
 <div align="center">
+
+<br>
 
 ![MUTHUR OS Terminal Banner](banner.png)
 
-**A cinematic sci-fi terminal emulator inspired by the MU/TH/UR 6000 mainframe from Alien (1979).**
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║   ███╗   ███╗██╗   ██╗████████╗██╗  ██╗██╗   ██╗██████╗         ║
+║   ████╗ ████║██║   ██║╚══██╔══╝██║  ██║██║   ██║██╔══██╗        ║
+║   ██╔████╔██║██║   ██║   ██║   ████████║██║   ██║██████╔╝        ║
+║   ██║╚██╔╝██║██║   ██║   ██║   ██╔══██║██║   ██║██╔══██╗        ║
+║   ██║ ╚═╝ ██║╚██████╔╝   ██║   ██║  ██║╚██████╔╝██║  ██║        ║
+║   ╚═╝     ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝        ║
+║                                                                  ║
+║                    O S   T E R M I N A L                         ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+```
 
-Combining the raw power of a real terminal with system monitoring, AI assistance, and a retro-futuristic interface -- all running natively on Linux through Tauri and Rust.
+<br>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/LICENSE-MIT-00ff41?style=for-the-badge&labelColor=1a1a2e" alt="License">
+  <img src="https://img.shields.io/badge/PLATFORM-LINUX-FFC131?style=for-the-badge&logo=linux&logoColor=white&labelColor=1a1a2e" alt="Platform">
+  <img src="https://img.shields.io/badge/BUILT_WITH-TAURI_V2-00d4ff?style=for-the-badge&logo=tauri&logoColor=white&labelColor=1a1a2e" alt="Tauri">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/BACKEND-RUST-e44d26?style=for-the-badge&logo=rust&logoColor=white&labelColor=1a1a2e" alt="Rust">
+  <img src="https://img.shields.io/badge/FRONTEND-REACT_19-61dafb?style=for-the-badge&logo=react&logoColor=white&labelColor=1a1a2e" alt="React">
+  <img src="https://img.shields.io/badge/AI-OLLAMA-a855f7?style=for-the-badge&labelColor=1a1a2e" alt="Ollama">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/VERSION-0.1.0--ALPHA-00ff41?style=for-the-badge&labelColor=1a1a2e" alt="Version">
+  <img src="https://img.shields.io/badge/STATUS-ACTIVE-00ff41?style=for-the-badge&labelColor=1a1a2e" alt="Status">
   <a href="https://github.com/krko2n/Muthur-os-terminal/stargazers">
-    <img src="https://img.shields.io/github/stars/krko2n/Muthur-os-terminal?style=for-the-badge&logo=github&labelColor=0d1117&color=00ff41" alt="Stars">
-  </a>
-  <a href="https://github.com/krko2n/Muthur-os-terminal/releases">
-    <img src="https://img.shields.io/github/v/release/krko2n/Muthur-os-terminal?style=for-the-badge&logo=github&labelColor=0d1117&color=00d4ff" alt="Release">
-  </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/krko2n/Muthur-os-terminal?style=for-the-badge&labelColor=0d1117&color=00ff41" alt="License">
+    <img src="https://img.shields.io/github/stars/krko2n/Muthur-os-terminal?style=for-the-badge&logo=github&logoColor=white&labelColor=1a1a2e&color=f5a623" alt="Stars">
   </a>
 </p>
 
-<p align="center">
-  <a href="https://tauri.app/">
-    <img src="https://img.shields.io/badge/Tauri-2.0-FFC131?style=flat-square&logo=tauri&labelColor=0d1117" alt="Tauri">
-  </a>
-  <a href="https://www.rust-lang.org/">
-    <img src="https://img.shields.io/badge/Rust-1.95-orange?style=flat-square&logo=rust&labelColor=0d1117" alt="Rust">
-  </a>
-  <a href="https://react.dev/">
-    <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&labelColor=0d1117" alt="React">
-  </a>
-  <a href="https://ollama.com/">
-    <img src="https://img.shields.io/badge/Ollama-AI-white?style=flat-square&labelColor=0d1117" alt="Ollama">
-  </a>
-</p>
+<br>
 
-[Install](#installation) | [Features](#features) | [Usage](#usage) | [Configuration](#configuration) | [Contributing](#contributing)
+**A fullscreen cinematic terminal OS interface for Linux.**<br>
+**Real terminals. Live system data. Local AI. Full desktop replacement.**<br>
+*Inspired by the MU/TH/UR 6000 mainframe from Alien (1979) and eDEX-UI.*
+
+<br>
+
+[**GET STARTED**](#installation) · [**FEATURES**](#features) · [**USAGE**](#usage) · [**CONFIGURATION**](#configuration) · [**LIVE PAGE**](https://krko2n.github.io/Muthur-os-terminal)
+
+<br>
 
 </div>
 

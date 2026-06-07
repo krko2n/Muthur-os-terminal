@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUTHUR OS Terminal</title>
+    <meta name="description" content="A fullscreen cinematic terminal OS interface for Linux. Real terminals, live system data, local AI.">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0a0a0f;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(transparent, rgba(0, 255, 65, 0.2), transparent);
+            animation: scanline 6s linear infinite;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100vh); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            text-align: center;
+        }
+
+        .logo-text {
+            font-size: clamp(1.5rem, 5vw, 3rem);
+            font-weight: bold;
+            letter-spacing: 8px;
+            text-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41, 0 0 80px rgba(0, 255, 65, 0.3);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            letter-spacing: 12px;
+            color: #00d4ff;
+            text-shadow: 0 0 10px #00d4ff;
+            margin-bottom: 60px;
+        }
+
+        .hero-box {
+            border: 1px solid #0a3622;
+            background: rgba(10, 22, 18, 0.8);
+            padding: 40px;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .hero-box::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00ff41, transparent);
+        }
+
+        .hero-box h2 {
+            font-size: 18px;
+            color: #fff;
+            font-weight: normal;
+            margin-bottom: 12px;
+        }
+
+        .hero-box p {
+            font-size: 14px;
+            color: #8892a4;
+            line-height: 1.8;
+        }
+
+        .hero-box em {
+            color: #00d4ff;
+            font-style: italic;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .badge .label {
+            padding: 4px 8px;
+            background: #1a1a2e;
+            color: #8892a4;
+        }
+
+        .badge .value {
+            padding: 4px 8px;
+            font-weight: bold;
+        }
+
+        .badge.green .value { background: #00ff41; color: #000; }
+        .badge.cyan .value { background: #00d4ff; color: #000; }
+        .badge.orange .value { background: #f5a623; color: #000; }
+        .badge.purple .value { background: #a855f7; color: #fff; }
+        .badge.red .value { background: #e44d26; color: #fff; }
+        .badge.blue .value { background: #61dafb; color: #000; }
+
+        .nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 60px;
+        }
+
+        .nav a {
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 8px 16px;
+            border: 1px solid #0a3622;
+            transition: all 0.3s;
+        }
+
+        .nav a:hover {
+            border-color: #00ff41;
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+        }
+
+        .features {
+            text-align: left;
+            margin-bottom: 60px;
+        }
+
+        .features h3 {
+            color: #00d4ff;
+            font-size: 14px;
+            letter-spacing: 3px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #0a3622;
+        }
+
+        .features ul {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .features li {
+            padding: 6px 0;
+            font-size: 13px;
+            color: #8892a4;
+        }
+
+        .features li::before {
+            content: '>';
+            color: #00ff41;
+            margin-right: 10px;
+        }
+
+        .install-box {
+            border: 1px solid #0a3622;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            text-align: left;
+            margin-bottom: 60px;
+        }
+
+        .install-box code {
+            display: block;
+            font-size: 14px;
+            color: #00ff41;
+            margin: 4px 0;
+        }
+
+        .install-box .comment {
+            color: #4a5568;
+        }
+
+        .footer {
+            color: #4a5568;
+            font-size: 12px;
+            letter-spacing: 2px;
+            padding-top: 40px;
+            border-top: 1px solid #0a3622;
+        }
+
+        .footer a {
+            color: #00ff41;
+            text-decoration: none;
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.05) 0px,
+                rgba(0, 0, 0, 0.05) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanline"></div>
+    <div class="crt-overlay"></div>
+
+    <div class="container">
+        <div class="logo-text">MUTHUR</div>
+        <div class="subtitle">OS TERMINAL</div>
+
+        <div class="badges">
+            <span class="badge green"><span class="label">License</span><span class="value">MIT</span></span>
+            <span class="badge orange"><span class="label">Platform</span><span class="value">Linux</span></span>
+            <span class="badge cyan"><span class="label">Built With</span><span class="value">Tauri v2</span></span>
+            <span class="badge red"><span class="label">Backend</span><span class="value">Rust</span></span>
+            <span class="badge blue"><span class="label">Frontend</span><span class="value">React 19</span></span>
+            <span class="badge purple"><span class="label">AI</span><span class="value">Ollama</span></span>
+            <span class="badge green"><span class="label">Status</span><span class="value">Active</span></span>
+        </div>
+
+        <div class="hero-box">
+            <h2>A fullscreen cinematic terminal OS interface for Linux.</h2>
+            <p>
+                Real terminals. Live system data. Local AI. Full desktop replacement.<br>
+                <em>Inspired by the MU/TH/UR 6000 mainframe from Alien (1979) and eDEX-UI.</em>
+            </p>
+        </div>
+
+        <div class="nav">
+            <a href="https://github.com/krko2n/Muthur-os-terminal#installation">Install</a>
+            <a href="https://github.com/krko2n/Muthur-os-terminal#features">Features</a>
+            <a href="https://github.com/krko2n/Muthur-os-terminal#usage">Usage</a>
+            <a href="https://github.com/krko2n/Muthur-os-terminal/releases">Releases</a>
+            <a href="https://github.com/krko2n/Muthur-os-terminal">GitHub</a>
+        </div>
+
+        <div class="features">
+            <h3>CORE SYSTEMS</h3>
+            <ul>
+                <li>Multi-tab terminal emulator (xterm.js + PTY)</li>
+                <li>Real-time CPU, memory, network, disk monitoring</li>
+                <li>AI assistant with command auto-execution (Ollama)</li>
+                <li>3D network globe with conflict/cyber/flight modes</li>
+                <li>Integrated file explorer</li>
+                <li>Built-in web browser</li>
+                <li>Battery monitoring for laptops</li>
+            </ul>
+
+            <h3>VISUAL INTERFACE</h3>
+            <ul>
+                <li>Fullscreen borderless window</li>
+                <li>CRT scanline and flicker effects</li>
+                <li>Matrix green color scheme (#00ff41)</li>
+                <li>Custom animated cursor with glow</li>
+                <li>Retro-futuristic sci-fi panel layout</li>
+            </ul>
+
+            <h3>PERFORMANCE</h3>
+            <ul>
+                <li>Startup: 1-2 seconds</li>
+                <li>Idle CPU: less than 10%</li>
+                <li>RAM: ~150 MB</li>
+                <li>Binary: ~18 MB (vs 200 MB for Electron apps)</li>
+                <li>Input latency: sub-10ms</li>
+            </ul>
+        </div>
+
+        <div class="install-box">
+            <code class="comment"># One-command install</code>
+            <code>git clone https://github.com/krko2n/Muthur-os-terminal.git</code>
+            <code>cd muthur-os-terminal</code>
+            <code>make install</code>
+            <br>
+            <code class="comment"># Launch</code>
+            <code>muthur</code>
+        </div>
+
+        <div class="footer">
+            <p>MUTHUR://CORE v0.1.0 ALPHA</p>
+            <p>MIT License - <a href="https://github.com/krko2n/Muthur-os-terminal">GitHub Repository</a></p>
+        </div>
+    </div>
+</body>
+</html>
