@@ -4,6 +4,35 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit e8f48b6
+
+**feat(readme): add banner.png, whitelist in gitignore**
+
+- Author: krkos
+- Hash: `e8f48b6`
+
+**Changed files:**
+```
+.gitignore
+banner.png
+```
+
+---
+
+## 2026-06-07 - Commit 61b89e8
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `61b89e8`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit 8b22ae3
 
 **chore: use PNG banner, remove unused docs and files**
