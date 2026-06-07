@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#010409"/>
+    </linearGradient>
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ff41;stop-opacity:0"/>
+      <stop offset="20%" style="stop-color:#00ff41;stop-opacity:1"/>
+      <stop offset="80%" style="stop-color:#00d4ff;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <!-- Gradient top/bottom borders -->
+  <rect x="0" y="0" width="1200" height="2" fill="url(#borderGrad)" opacity="0.8"/>
+  <rect x="0" y="298" width="1200" height="2" fill="url(#borderGrad)" opacity="0.8"/>
+  <!-- Diagonal lines decoration -->
+  <g stroke="#00ff41" stroke-width="0.3" opacity="0.06">
+    <line x1="0" y1="0" x2="300" y2="300"/><line x1="100" y1="0" x2="400" y2="300"/>
+    <line x1="200" y1="0" x2="500" y2="300"/><line x1="800" y1="0" x2="1100" y2="300"/>
+    <line x1="900" y1="0" x2="1200" y2="300"/><line x1="1000" y1="0" x2="1200" y2="200"/>
+  </g>
+  <!-- Cube + Title side by side, vertically centered -->
+  <g transform="translate(420, 150)" filter="url(#glow)">
+    <polygon points="0,-48 42,-24 42,24 0,48 -42,24 -42,-24" fill="none" stroke="#00ff41" stroke-width="2.2"/>
+    <polygon points="0,-32 27,-16 0,0 -27,-16" fill="none" stroke="#00ff41" stroke-width="1.6" opacity="0.8"/>
+    <polygon points="-27,-16 0,0 0,32 -27,16" fill="none" stroke="#00ff41" stroke-width="1.6" opacity="0.6"/>
+    <polygon points="27,-16 0,0 0,32 27,16" fill="none" stroke="#00ff41" stroke-width="1.6" opacity="0.7"/>
+    <polygon points="0,-11 9,-5.5 0,0 -9,-5.5" fill="#00ffff" opacity="0.9"/>
+    <polygon points="-9,-5.5 0,0 0,11 -9,5.5" fill="#00b8d4" opacity="0.8"/>
+    <polygon points="9,-5.5 0,0 0,11 9,5.5" fill="#00acc1" opacity="0.7"/>
+  </g>
+  <!-- Title to the right of cube -->
+  <text x="520" y="128" font-family="'Courier New', monospace" font-size="62" font-weight="bold" fill="#ffffff" letter-spacing="6">MUTHUR</text>
+  <text x="520" y="165" font-family="'Courier New', monospace" font-size="16" fill="#00ff41" letter-spacing="6" filter="url(#glow)">OS TERMINAL</text>
+  <!-- Subtitle -->
+  <text x="520" y="200" font-family="'Courier New', monospace" font-size="12" fill="#666" letter-spacing="2">Cinematic fullscreen terminal interface for Linux</text>
+  <!-- Bottom tech badges as text -->
+  <g font-family="'Courier New', monospace" font-size="10" fill="#444" letter-spacing="1">
+    <text x="520" y="240">TAURI v2</text>
+    <text x="590" y="240" fill="#333">|</text>
+    <text x="605" y="240">RUST</text>
+    <text x="648" y="240" fill="#333">|</text>
+    <text x="663" y="240">REACT 19</text>
+    <text x="743" y="240" fill="#333">|</text>
+    <text x="758" y="240">OLLAMA AI</text>
+    <text x="843" y="240" fill="#333">|</text>
+    <text x="858" y="240">TYPESCRIPT</text>
+  </g>
+</svg>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ff41;stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#00ff41;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#00ff41;stop-opacity:0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <!-- Accent line top -->
+  <rect x="200" y="0" width="800" height="2" fill="url(#accent)" opacity="0.6"/>
+  <!-- Hex pattern background -->
+  <g opacity="0.04" stroke="#00ff41" stroke-width="0.5" fill="none">
+    <polygon points="100,30 120,18 140,30 140,54 120,66 100,54"/>
+    <polygon points="140,30 160,18 180,30 180,54 160,66 140,54"/>
+    <polygon points="1020,30 1040,18 1060,30 1060,54 1040,66 1020,54"/>
+    <polygon points="1060,30 1080,18 1100,30 1100,54 1080,66 1060,54"/>
+    <polygon points="100,230 120,218 140,230 140,254 120,266 100,254"/>
+    <polygon points="140,230 160,218 180,230 180,254 160,266 140,254"/>
+    <polygon points="1020,230 1040,218 1060,230 1060,254 1040,266 1020,254"/>
+    <polygon points="1060,230 1080,218 1100,230 1100,254 1080,266 1060,254"/>
+  </g>
+  <!-- Large centered cube -->
+  <g transform="translate(600, 120)" filter="url(#glow)">
+    <polygon points="0,-50 43,-25 43,25 0,50 -43,25 -43,-25" fill="none" stroke="#00ff41" stroke-width="2"/>
+    <polygon points="0,-32 28,-16 0,0 -28,-16" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.8"/>
+    <polygon points="-28,-16 0,0 0,32 -28,16" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.6"/>
+    <polygon points="28,-16 0,0 0,32 28,16" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.7"/>
+    <polygon points="0,-11 9,-5.5 0,0 -9,-5.5" fill="#00ffff" opacity="0.9"/>
+    <polygon points="-9,-5.5 0,0 0,11 -9,5.5" fill="#00b8d4" opacity="0.7"/>
+    <polygon points="9,-5.5 0,0 0,11 9,5.5" fill="#00acc1" opacity="0.6"/>
+  </g>
+  <!-- Title below cube -->
+  <text x="600" y="210" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="42" font-weight="300" fill="#ffffff" text-anchor="middle" letter-spacing="14">MUTHUR</text>
+  <text x="600" y="245" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#8b949e" text-anchor="middle" letter-spacing="6">OS TERMINAL</text>
+  <!-- Accent line bottom -->
+  <rect x="200" y="298" width="800" height="2" fill="url(#accent)" opacity="0.6"/>
+  <!-- Version pill -->
+  <rect x="540" y="260" width="120" height="20" rx="10" fill="none" stroke="#00ff41" stroke-width="0.8" opacity="0.4"/>
+  <text x="600" y="274" font-family="'Courier New', monospace" font-size="9" fill="#00ff41" text-anchor="middle" opacity="0.7">v0.1.0-alpha</text>
+</svg>

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#000000"/>
+      <stop offset="50%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#000000"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <!-- Double border -->
+  <rect x="8" y="8" width="1184" height="284" fill="none" stroke="#00ff41" stroke-width="1" opacity="0.3"/>
+  <rect x="12" y="12" width="1176" height="276" fill="none" stroke="#00ff41" stroke-width="0.5" opacity="0.15"/>
+  <!-- Left decorative lines -->
+  <g stroke="#00ff41" opacity="0.2" stroke-width="1">
+    <line x1="30" y1="50" x2="30" y2="250"/>
+    <line x1="35" y1="60" x2="35" y2="240"/>
+  </g>
+  <!-- Right decorative lines -->
+  <g stroke="#00ff41" opacity="0.2" stroke-width="1">
+    <line x1="1170" y1="50" x2="1170" y2="250"/>
+    <line x1="1165" y1="60" x2="1165" y2="240"/>
+  </g>
+  <!-- Cube logo left side -->
+  <g transform="translate(160, 150)" filter="url(#glow)">
+    <polygon points="0,-55 48,-27.5 48,27.5 0,55 -48,27.5 -48,-27.5" fill="none" stroke="#00ff41" stroke-width="2.5"/>
+    <polygon points="0,-36 30,-18 0,0 -30,-18" fill="none" stroke="#00ff41" stroke-width="1.8" opacity="0.8"/>
+    <polygon points="-30,-18 0,0 0,36 -30,18" fill="none" stroke="#00ff41" stroke-width="1.8" opacity="0.6"/>
+    <polygon points="30,-18 0,0 0,36 30,18" fill="none" stroke="#00ff41" stroke-width="1.8" opacity="0.7"/>
+    <polygon points="0,-12 10,-6 0,0 -10,-6" fill="#00ffff" opacity="0.9"/>
+    <polygon points="-10,-6 0,0 0,12 -10,6" fill="#00b8d4" opacity="0.8"/>
+    <polygon points="10,-6 0,0 0,12 10,6" fill="#00acc1" opacity="0.7"/>
+    <!-- Connection nodes -->
+    <circle cx="0" cy="-55" r="2.5" fill="#00ff41" opacity="0.7"/>
+    <circle cx="48" cy="-27.5" r="2.5" fill="#00ff41" opacity="0.7"/>
+    <circle cx="48" cy="27.5" r="2.5" fill="#00ff41" opacity="0.7"/>
+    <circle cx="0" cy="55" r="2.5" fill="#00ff41" opacity="0.7"/>
+    <circle cx="-48" cy="27.5" r="2.5" fill="#00ff41" opacity="0.7"/>
+    <circle cx="-48" cy="-27.5" r="2.5" fill="#00ff41" opacity="0.7"/>
+  </g>
+  <!-- Separator line -->
+  <line x1="260" y1="80" x2="260" y2="220" stroke="#00ff41" stroke-width="1" opacity="0.2"/>
+  <!-- Title block -->
+  <text x="700" y="115" font-family="'Courier New', monospace" font-size="60" font-weight="bold" fill="#ffffff" text-anchor="middle" letter-spacing="8">MUTHUR</text>
+  <text x="700" y="155" font-family="'Courier New', monospace" font-size="20" fill="#00ff41" text-anchor="middle" letter-spacing="6">OS TERMINAL</text>
+  <!-- Divider -->
+  <line x1="500" y1="175" x2="900" y2="175" stroke="#333" stroke-width="1"/>
+  <!-- Tagline -->
+  <text x="700" y="205" font-family="'Courier New', monospace" font-size="13" fill="#888" text-anchor="middle" letter-spacing="2">Fullscreen Cinematic Terminal for Linux</text>
+  <!-- Tech stack -->
+  <text x="700" y="240" font-family="'Courier New', monospace" font-size="11" fill="#00d4ff" text-anchor="middle" letter-spacing="1" opacity="0.7">Tauri v2  |  Rust  |  React 19  |  Ollama AI  |  TypeScript</text>
+</svg>

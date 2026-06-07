@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="100%" style="stop-color:#0d1117"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="coreGlow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <!-- Subtle grid -->
+  <g opacity="0.05" stroke="#00ff41" stroke-width="0.5">
+    <line x1="0" y1="60" x2="1200" y2="60"/><line x1="0" y1="120" x2="1200" y2="120"/>
+    <line x1="0" y1="180" x2="1200" y2="180"/><line x1="0" y1="240" x2="1200" y2="240"/>
+    <line x1="240" y1="0" x2="240" y2="300"/><line x1="480" y1="0" x2="480" y2="300"/>
+    <line x1="720" y1="0" x2="720" y2="300"/><line x1="960" y1="0" x2="960" y2="300"/>
+  </g>
+  <!-- Glow line -->
+  <rect x="100" y="149" width="1000" height="2" fill="#00ff41" opacity="0.08"/>
+  <!-- Cube logo at left -->
+  <g transform="translate(200, 150)" filter="url(#glow)">
+    <polygon points="0,-65 56,-32.5 56,32.5 0,65 -56,32.5 -56,-32.5" fill="none" stroke="#00ff41" stroke-width="2.5"/>
+    <polygon points="0,-42 36,-21 0,0 -36,-21" fill="none" stroke="#00ff41" stroke-width="1.8" opacity="0.8"/>
+    <polygon points="-36,-21 0,0 0,42 -36,21" fill="none" stroke="#00ff41" stroke-width="1.8" opacity="0.6"/>
+    <polygon points="36,-21 0,0 0,42 36,21" fill="none" stroke="#00ff41" stroke-width="1.8" opacity="0.7"/>
+    <g filter="url(#coreGlow)">
+      <polygon points="0,-14 12,-7 0,0 -12,-7" fill="#00ffff" opacity="0.9"/>
+      <polygon points="-12,-7 0,0 0,14 -12,7" fill="#00b8d4" opacity="0.8"/>
+      <polygon points="12,-7 0,0 0,14 12,7" fill="#00acc1" opacity="0.7"/>
+    </g>
+  </g>
+  <!-- Title -->
+  <text x="620" y="130" font-family="'Courier New', monospace" font-size="68" font-weight="bold" fill="#00ff41" text-anchor="middle" letter-spacing="10" filter="url(#glow)">MUTHUR</text>
+  <text x="620" y="175" font-family="'Courier New', monospace" font-size="22" fill="#00d4ff" text-anchor="middle" letter-spacing="8">OS TERMINAL</text>
+  <text x="620" y="215" font-family="'Courier New', monospace" font-size="11" fill="#666" text-anchor="middle" letter-spacing="3">CINEMATIC LINUX SHELL INTERFACE</text>
+  <text x="620" y="250" font-family="'Courier New', monospace" font-size="10" fill="#00ff41" text-anchor="middle" letter-spacing="2" opacity="0.5">TAURI v2 + RUST // REACT 19 // OLLAMA AI</text>
+  <!-- Corner brackets -->
+  <g stroke="#00ff41" stroke-width="1.5" fill="none" opacity="0.4">
+    <polyline points="12,12 12,4 20,4"/><polyline points="1188,12 1188,4 1180,4"/>
+    <polyline points="12,288 12,296 20,296"/><polyline points="1188,288 1188,296 1180,296"/>
+  </g>
+</svg>

@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#000000"/>
+      <stop offset="50%" style="stop-color:#0a0f0a"/>
+      <stop offset="100%" style="stop-color:#000000"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="bigGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <!-- Scanlines -->
+  <g opacity="0.03">
+    <rect x="0" y="0" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="3" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="6" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="9" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="12" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="15" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="18" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="21" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="24" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="27" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="30" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="33" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="36" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="39" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="42" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="45" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="48" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="51" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="54" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="57" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="60" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="63" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="66" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="69" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="72" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="75" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="78" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="81" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="84" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="87" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="90" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="93" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="96" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="99" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="102" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="105" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="108" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="111" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="114" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="117" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="120" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="123" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="126" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="129" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="132" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="135" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="138" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="141" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="144" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="147" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="150" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="153" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="156" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="159" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="162" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="165" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="168" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="171" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="174" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="177" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="180" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="183" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="186" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="189" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="192" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="195" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="198" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="201" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="204" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="207" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="210" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="213" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="216" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="219" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="222" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="225" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="228" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="231" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="234" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="237" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="240" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="243" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="246" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="249" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="252" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="255" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="258" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="261" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="264" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="267" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="270" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="273" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="276" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="279" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="282" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="285" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="288" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="291" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="294" width="1200" height="1" fill="#00ff41"/>
+    <rect x="0" y="297" width="1200" height="1" fill="#00ff41"/>
+  </g>
+  <!-- Center glow -->
+  <ellipse cx="600" cy="150" rx="300" ry="120" fill="#00ff41" opacity="0.03"/>
+  <!-- Logo centered -->
+  <g transform="translate(600, 100)" filter="url(#glow)">
+    <polygon points="0,-40 35,-20 35,20 0,40 -35,20 -35,-20" fill="none" stroke="#00ff41" stroke-width="2"/>
+    <polygon points="0,-26 22,-13 0,0 -22,-13" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.8"/>
+    <polygon points="-22,-13 0,0 0,26 -22,13" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.6"/>
+    <polygon points="22,-13 0,0 0,26 22,13" fill="none" stroke="#00ff41" stroke-width="1.5" opacity="0.7"/>
+    <polygon points="0,-9 8,-4.5 0,0 -8,-4.5" fill="#00ffff" opacity="0.9"/>
+    <polygon points="-8,-4.5 0,0 0,9 -8,4.5" fill="#00b8d4" opacity="0.7"/>
+    <polygon points="8,-4.5 0,0 0,9 8,4.5" fill="#00acc1" opacity="0.6"/>
+  </g>
+  <!-- Title below logo -->
+  <text x="600" y="185" font-family="'Courier New', monospace" font-size="52" font-weight="bold" fill="#00ff41" text-anchor="middle" letter-spacing="16" filter="url(#glow)">MUTHUR</text>
+  <text x="600" y="220" font-family="'Courier New', monospace" font-size="16" fill="#00d4ff" text-anchor="middle" letter-spacing="12">O S   T E R M I N A L</text>
+  <text x="600" y="260" font-family="'Courier New', monospace" font-size="10" fill="#555" text-anchor="middle" letter-spacing="4">CINEMATIC LINUX SHELL // TAURI v2 + RUST + REACT 19</text>
+  <!-- Top/bottom lines -->
+  <rect x="0" y="0" width="1200" height="1" fill="#00ff41" opacity="0.3"/>
+  <rect x="0" y="299" width="1200" height="1" fill="#00ff41" opacity="0.3"/>
+</svg>
