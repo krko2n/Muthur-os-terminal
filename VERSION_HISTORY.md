@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit e756d07
+
+**docs: restore original CLAUDE.md and append developer quality contract**
+
+- Author: krkos
+- Hash: `e756d07`
+
+**Changed files:**
+```
+CLAUDE.md
+```
+
+---
+
+## 2026-06-07 - Commit 4f5c094
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `4f5c094`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit ee91cc1
 
 **docs: replace CLAUDE.md with strict developer behavior contract**
