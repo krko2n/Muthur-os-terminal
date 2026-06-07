@@ -34,6 +34,11 @@ fi
 
 # --- Phase 2: Build and install (running from the NEW script) ---
 
+# Restore environment after exec (non-interactive shell has no .bashrc)
+[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
 ESC=$'\e'
 HIDE_CURSOR="${ESC}[?25l"
 SHOW_CURSOR="${ESC}[?25h"
@@ -119,7 +124,7 @@ echo ""
 # --- Phase 1 done (pull already happened before re-exec) ---
 printf "  ${BOLD}[1/4]${RESET} ${CYAN}Synced to latest version${RESET}\n"
 
-NEW_VERSION=$(grep '"version"' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2 2>/dev/null || echo "unknown")
+NEW_VERSION=$(grep '^version' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2 2>/dev/null || echo "unknown")
 printf "        ${GREEN}✓${RESET} ${DIM}Version: v%s${RESET}\n" "$NEW_VERSION"
 echo ""
 
@@ -149,11 +154,7 @@ if ! command -v node &> /dev/null; then
 fi
 
 # NPM install
-if [ -f "package-lock.json" ]; then
-    spin_task "Installing npm packages" npm ci --quiet
-else
-    spin_task "Installing npm packages" npm install --quiet
-fi
+spin_task "Installing npm packages" bash -c 'npm ci --quiet 2>/dev/null || npm install --quiet'
 echo ""
 
 # --- Phase 3: Build ---
