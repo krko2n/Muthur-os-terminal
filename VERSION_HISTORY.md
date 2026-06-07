@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit ee91cc1
+
+**docs: replace CLAUDE.md with strict developer behavior contract**
+
+- Author: krkos
+- Hash: `ee91cc1`
+
+**Changed files:**
+```
+CLAUDE.md
+```
+
+---
+
+## 2026-06-07 - Commit 0e88932
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `0e88932`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit e59c94b
 
 **fix(backend): resolve portable-pty 0.9 and sysinfo 0.39 API changes**
