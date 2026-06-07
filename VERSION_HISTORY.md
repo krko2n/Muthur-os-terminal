@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit d5655cf
+
+**feat(readme): finalize banner and header layout**
+
+- Author: krkos
+- Hash: `d5655cf`
+
+**Changed files:**
+```
+README.md
+banner.png
+banner.svg
+banners/variants/v01.svg
+banners/variants/v02.svg
+```
+
+---
+
+## 2026-06-07 - Commit 836c51d
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `836c51d`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit 9c99d0d
 
 **fix(readme): correct banner SVG file paths**
