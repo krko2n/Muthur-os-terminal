@@ -1,142 +1,266 @@
 #!/bin/bash
 
 # MUTHUR OS Terminal - Fully Autonomous Upgrade Script
+# Discards local changes, pulls latest, builds, installs. Zero prompts.
 
 set -e
 
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+ESC=$'\e'
+HIDE_CURSOR="${ESC}[?25l"
+SHOW_CURSOR="${ESC}[?25h"
+CLEAR_LINE="${ESC}[2K"
+MOVE_UP="${ESC}[1A"
 
-echo "================================"
-echo "MUTHUR OS TERMINAL - UPGRADE"
-echo "================================"
+GREEN="${ESC}[32m"
+RED="${ESC}[31m"
+YELLOW="${ESC}[33m"
+CYAN="${ESC}[36m"
+DIM="${ESC}[2m"
+BOLD="${ESC}[1m"
+RESET="${ESC}[0m"
+
+cleanup() {
+    printf "%b" "$SHOW_CURSOR"
+}
+trap cleanup EXIT INT TERM
+
+printf "%b" "$HIDE_CURSOR"
+
+# --- Progress bar renderer ---
+progress_bar() {
+    local current=$1
+    local total=$2
+    local label=$3
+    local width=40
+
+    local percent=$((current * 100 / total))
+    local filled=$((current * width / total))
+    local empty=$((width - filled))
+
+    local bar_fill=$(printf '%*s' "$filled" | tr ' ' '█')
+    local bar_empty=$(printf '%*s' "$empty" | tr ' ' '░')
+
+    local color="$RED"
+    [[ $percent -ge 40 ]] && color="$YELLOW"
+    [[ $percent -ge 75 ]] && color="$GREEN"
+
+    printf "\r${CLEAR_LINE}"
+    printf "  ${color}[%s%s]${RESET} %3d%%  ${DIM}%s${RESET}" "$bar_fill" "$bar_empty" "$percent" "$label"
+}
+
+status_line() {
+    printf "\r${CLEAR_LINE}  %b\n" "$1"
+}
+
+# --- Spinner for indeterminate tasks ---
+spin_task() {
+    local message=$1
+    shift
+    local chars=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+    local i=0
+
+    "$@" > /tmp/muthur_upgrade_out.log 2>&1 &
+    local pid=$!
+
+    while kill -0 "$pid" 2>/dev/null; do
+        printf "\r${CLEAR_LINE}  ${CYAN}%s${RESET} %s" "${chars[$((i % ${#chars[@]}))]}" "$message"
+        ((i++))
+        sleep 0.08
+    done
+
+    wait "$pid"
+    local exit_code=$?
+
+    if [[ $exit_code -eq 0 ]]; then
+        printf "\r${CLEAR_LINE}  ${GREEN}✓${RESET} %s\n" "$message"
+    else
+        printf "\r${CLEAR_LINE}  ${RED}✗${RESET} %s\n" "$message"
+        printf "    ${DIM}See /tmp/muthur_upgrade_out.log for details${RESET}\n"
+        exit $exit_code
+    fi
+}
+
+# --- Header ---
+echo ""
+printf "  ${BOLD}╔══════════════════════════════════════════╗${RESET}\n"
+printf "  ${BOLD}║${RESET}     ${GREEN}MUTHUR OS TERMINAL${RESET} ${DIM}// UPGRADE${RESET}      ${BOLD}║${RESET}\n"
+printf "  ${BOLD}╚══════════════════════════════════════════╝${RESET}\n"
 echo ""
 
-# Ensure we're in the git repo
+# --- Pre-checks ---
 if [ ! -d ".git" ]; then
-    echo -e "${RED}[FAIL]${NC} Not in a git repository"
-    echo "Please run from the muthur-os-terminal directory"
+    printf "  ${RED}✗${RESET} Not in a git repository\n"
+    printf "    Run from the muthur-os-terminal directory\n"
     exit 1
 fi
 
-# If not installed at all, run full install
 if [ ! -f "/usr/local/bin/muthur" ]; then
-    echo -e "${YELLOW}MUTHUR is not installed. Running full install...${NC}"
+    printf "  ${YELLOW}!${RESET} MUTHUR not installed. Running full install...\n\n"
     chmod +x install-auto.sh
     ./install-auto.sh
     exit 0
 fi
 
-# --- STEP 1: Pull latest version ---
-echo -e "${BLUE}[1/4]${NC} Pulling latest version..."
+# --- Phase 1: Reset & Pull ---
+printf "  ${BOLD}[1/4]${RESET} ${CYAN}Syncing to latest version${RESET}\n"
 
-CURRENT_VERSION=$(grep '"version"' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2)
-echo "  Current: v$CURRENT_VERSION"
+CURRENT_VERSION=$(grep '"version"' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2 2>/dev/null || echo "unknown")
+printf "        ${DIM}Current: v%s${RESET}\n" "$CURRENT_VERSION"
 
+progress_bar 1 5 "Discarding local changes..."
+git checkout -- . > /dev/null 2>&1
+git clean -fd > /dev/null 2>&1
+
+progress_bar 2 5 "Fetching remote..."
 git fetch origin --quiet
-LOCAL=$(git rev-parse HEAD)
-REMOTE=$(git rev-parse origin/main)
 
-if [ "$LOCAL" = "$REMOTE" ]; then
-    echo -e "  ${GREEN}Already up to date${NC}"
-    echo ""
-    echo "  Rebuilding anyway..."
-else
-    COMMITS_BEHIND=$(git rev-list --count HEAD..origin/main)
-    echo "  $COMMITS_BEHIND new commit(s) available"
-    git pull origin main --quiet
-    echo -e "  ${GREEN}[OK]${NC} Repository updated"
-fi
+progress_bar 3 5 "Resetting to origin/main..."
+git reset --hard origin/main > /dev/null 2>&1
 
-NEW_VERSION=$(grep '"version"' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2)
-echo "  Version: v$NEW_VERSION"
+progress_bar 5 5 "Synced"
 echo ""
 
-# --- STEP 2: Install/update dependencies ---
-echo -e "${BLUE}[2/4]${NC} Installing dependencies..."
+NEW_VERSION=$(grep '"version"' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2 2>/dev/null || echo "unknown")
+if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
+    printf "        ${GREEN}Updated: v%s → v%s${RESET}\n" "$CURRENT_VERSION" "$NEW_VERSION"
+else
+    printf "        ${DIM}Version: v%s (rebuilding)${RESET}\n" "$NEW_VERSION"
+fi
+echo ""
 
-# Ensure Rust is available
+# --- Phase 2: Dependencies ---
+printf "  ${BOLD}[2/4]${RESET} ${CYAN}Resolving dependencies${RESET}\n"
+
+# Ensure Rust
 if ! command -v rustc &> /dev/null; then
     if [ -f "$HOME/.cargo/env" ]; then
         source "$HOME/.cargo/env"
     else
-        echo "  Installing Rust..."
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --quiet
+        spin_task "Installing Rust toolchain" bash -c 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --quiet'
         source "$HOME/.cargo/env"
     fi
 fi
 
-# Ensure Node is available
+# Ensure Node
 if ! command -v node &> /dev/null; then
     if [ -f "$HOME/.nvm/nvm.sh" ]; then
         export NVM_DIR="$HOME/.nvm"
         . "$NVM_DIR/nvm.sh"
     else
-        echo "  Installing Node.js..."
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash > /dev/null 2>&1
+        spin_task "Installing Node.js" bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash > /dev/null 2>&1 && export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" && nvm install 20 --silent'
         export NVM_DIR="$HOME/.nvm"
         . "$NVM_DIR/nvm.sh"
-        nvm install 20 --silent
     fi
 fi
 
+# NPM install
 if [ -f "package-lock.json" ]; then
-    npm ci --quiet 2>/dev/null || npm install --quiet
+    spin_task "Installing npm packages" npm ci --quiet
 else
-    npm install --quiet
+    spin_task "Installing npm packages" npm install --quiet
 fi
-echo -e "  ${GREEN}[OK]${NC} Dependencies ready"
 echo ""
 
-# --- STEP 3: Build ---
-echo -e "${BLUE}[3/4]${NC} Building MUTHUR (5-10 minutes)..."
+# --- Phase 3: Build ---
+printf "  ${BOLD}[3/4]${RESET} ${CYAN}Building MUTHUR${RESET}\n"
+printf "        ${DIM}This may take 5-10 minutes on first build${RESET}\n"
 
-# Kill running instances before build
+# Kill running instances
 if pgrep -x "muthur-os-terminal" > /dev/null 2>&1; then
-    echo "  Stopping running instances..."
     pkill -x "muthur-os-terminal" || true
     sleep 1
 fi
 
-# Clean stale bundles only (keep cargo cache for faster rebuilds)
-rm -rf dist/ dist-ssr/ src-tauri/target/release/bundle/
+# Clean stale bundles (keep cargo cache)
+rm -rf dist/ dist-ssr/ src-tauri/target/release/bundle/ 2>/dev/null || true
 
-# Build frontend + backend together via Tauri CLI
-npm run tauri build 2>&1 | tail -5
-echo -e "  ${GREEN}[OK]${NC} Build complete"
+# Build with live progress tracking
+BUILD_LOG="/tmp/muthur_build.log"
+npm run tauri build > "$BUILD_LOG" 2>&1 &
+BUILD_PID=$!
+
+STEPS=("Preparing" "Compiling frontend" "Bundling assets" "Compiling Rust" "Linking" "Packaging")
+step_idx=0
+chars=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+spin_i=0
+
+while kill -0 "$BUILD_PID" 2>/dev/null; do
+    # Detect build phase from log
+    if [ -f "$BUILD_LOG" ]; then
+        if grep -q "Compiling muthur" "$BUILD_LOG" 2>/dev/null; then
+            step_idx=4
+        elif grep -q "Compiling " "$BUILD_LOG" 2>/dev/null; then
+            step_idx=3
+        elif grep -q "built in" "$BUILD_LOG" 2>/dev/null; then
+            step_idx=2
+        elif grep -q "building for production" "$BUILD_LOG" 2>/dev/null; then
+            step_idx=1
+        fi
+    fi
+
+    local_step="${STEPS[$step_idx]}"
+    printf "\r${CLEAR_LINE}  ${CYAN}%s${RESET} %s ${DIM}(%s)${RESET}" "${chars[$((spin_i % ${#chars[@]}))]}" "Building..." "$local_step"
+    ((spin_i++))
+    sleep 0.1
+done
+
+wait "$BUILD_PID"
+BUILD_EXIT=$?
+
+if [[ $BUILD_EXIT -eq 0 ]]; then
+    printf "\r${CLEAR_LINE}  ${GREEN}✓${RESET} Build successful\n"
+else
+    printf "\r${CLEAR_LINE}  ${RED}✗${RESET} Build failed\n"
+    printf "        ${DIM}Full log: %s${RESET}\n" "$BUILD_LOG"
+    echo ""
+    printf "  ${BOLD}Last 15 lines:${RESET}\n"
+    tail -15 "$BUILD_LOG" | sed 's/^/    /'
+    echo ""
+    exit 1
+fi
 echo ""
 
-# --- STEP 4: Install ---
-echo -e "${BLUE}[4/4]${NC} Installing..."
+# --- Phase 4: Install ---
+printf "  ${BOLD}[4/4]${RESET} ${CYAN}Installing${RESET}\n"
 
 BINARY="src-tauri/target/release/muthur-os-terminal"
 
 if [ ! -f "$BINARY" ]; then
-    echo -e "  ${RED}[FAIL]${NC} Binary not found at $BINARY"
-    echo "  Build may have failed. Check output above."
+    printf "  ${RED}✗${RESET} Binary not found at %s\n" "$BINARY"
+    printf "    Build produced no output. Check: %s\n" "$BUILD_LOG"
     exit 1
 fi
 
+progress_bar 1 3 "Copying binary..."
 sudo cp "$BINARY" /usr/local/bin/muthur
 sudo chmod +x /usr/local/bin/muthur
 
-SIZE=$(du -h /usr/local/bin/muthur | cut -f1)
-echo -e "  ${GREEN}[OK]${NC} Installed to /usr/local/bin/muthur ($SIZE)"
+progress_bar 2 3 "Verifying..."
+if [ ! -x "/usr/local/bin/muthur" ]; then
+    printf "\n  ${RED}✗${RESET} Verification failed\n"
+    exit 1
+fi
+
+progress_bar 3 3 "Done"
 echo ""
 
-# --- Done ---
-echo "================================"
-echo -e "${GREEN}UPGRADE COMPLETE${NC}"
-echo "================================"
+SIZE=$(du -h /usr/local/bin/muthur | cut -f1)
+printf "        ${DIM}Binary: /usr/local/bin/muthur (%s)${RESET}\n" "$SIZE"
 echo ""
+
+# --- Summary ---
+printf "  ${BOLD}╔══════════════════════════════════════════╗${RESET}\n"
+printf "  ${BOLD}║${RESET}  ${GREEN}✓ UPGRADE COMPLETE${RESET}                     ${BOLD}║${RESET}\n"
+printf "  ${BOLD}╚══════════════════════════════════════════╝${RESET}\n"
+echo ""
+
 if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
-    echo "  Upgraded: v$CURRENT_VERSION -> v$NEW_VERSION"
+    printf "  ${DIM}Upgraded:${RESET} v%s ${DIM}→${RESET} v%s\n" "$CURRENT_VERSION" "$NEW_VERSION"
 else
-    echo "  Rebuilt: v$NEW_VERSION"
+    printf "  ${DIM}Rebuilt:${RESET}  v%s\n" "$NEW_VERSION"
 fi
+printf "  ${DIM}Binary:${RESET}   %s\n" "$SIZE"
+printf "  ${DIM}Path:${RESET}     /usr/local/bin/muthur\n"
 echo ""
-echo "  Run 'muthur' to launch"
+printf "  Run ${BOLD}muthur${RESET} to launch.\n"
 echo ""
