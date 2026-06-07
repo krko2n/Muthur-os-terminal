@@ -3,7 +3,6 @@ use sysinfo::{System, Networks, Disks};
 use std::fs;
 
 #[derive(Debug, Serialize, Deserialize)]
-#[derive(Debug, Serialize, Deserialize)]
 pub struct BatteryInfo {
     pub present: bool,
     pub percent: u8,
