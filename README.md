@@ -32,7 +32,7 @@
 
 <br>
 
-[`> INSTALL`](#installation) · [`> FEATURES`](#features) · [`> USAGE`](#usage) · [`> LIVE`](https://krko2n.github.io/Muthur-os-terminal)
+[`> INSTALL`](#installation) · [`> REQUIREMENTS`](#requirements) · [`> FEATURES`](#features) · [`> USAGE`](#usage) · [`> LIVE`](https://krko2n.github.io/Muthur-os-terminal)
 
 </div>
 
@@ -96,12 +96,28 @@ Think of it as a spiritual successor to [eDEX-UI](https://github.com/GitSquared/
 
 ### Requirements
 
-| Requirement | Details |
+**Minimum:**
+
+| Component | Requirement |
 |---|---|
-| OS | Linux (Arch, Ubuntu/Debian, Fedora) |
-| RAM | 2 GB minimum, 4 GB recommended |
+| OS | Linux (Arch, Ubuntu 22.04+, Debian 12+, Fedora 38+) |
+| CPU | Dual-core x86_64 |
+| RAM | 2 GB |
 | Storage | 500 MB free |
-| GPU | OpenGL 3.0+ |
+| GPU | OpenGL 3.0 compatible |
+| Display | 1280x720 |
+
+**Recommended:**
+
+| Component | Requirement |
+|---|---|
+| OS | Arch Linux / Ubuntu 24.04 |
+| CPU | Quad-core x86_64 |
+| RAM | 4 GB+ |
+| Storage | 1 GB free |
+| GPU | Dedicated GPU with OpenGL 4.0+ |
+| Display | 1920x1080 (fullscreen) |
+| Optional | [Ollama](https://ollama.com/) installed for AI features |
 
 ### One-Command Install
 
