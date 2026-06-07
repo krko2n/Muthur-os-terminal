@@ -4,6 +4,34 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit 7a7bbb1
+
+**docs: rewrite README with stronger project description and cleaner structure**
+
+- Author: krkos
+- Hash: `7a7bbb1`
+
+**Changed files:**
+```
+README.md
+```
+
+---
+
+## 2026-06-03 - Commit 16a05eb
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `16a05eb`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-03 - Commit cd8000e
 
 **docs: add comprehensive auto-commit guide**
