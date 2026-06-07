@@ -6,10 +6,7 @@
 set -e
 
 # --- Self-update mechanism ---
-# After pulling new code, re-exec this script so the new version handles the build.
-# MUTHUR_UPGRADE_PHASE is set by the re-exec to skip the pull phase.
 if [ -z "$MUTHUR_UPGRADE_PHASE" ]; then
-    # Phase 1: Pull new code, then re-exec into Phase 2 (build+install)
     if [ ! -d ".git" ]; then
         echo "Error: Not in a git repository"
         exit 1
@@ -21,291 +18,224 @@ if [ -z "$MUTHUR_UPGRADE_PHASE" ]; then
         exit 0
     fi
 
-    # Discard all local changes and pull latest
     git checkout -- . > /dev/null 2>&1
     git clean -fd > /dev/null 2>&1
     git fetch origin --quiet
     git reset --hard origin/main > /dev/null 2>&1
 
-    # Re-exec the now-updated script in Phase 2
     export MUTHUR_UPGRADE_PHASE=build
     exec bash "$0" "$@"
 fi
 
-# --- Phase 2: Build and install (running from the NEW script) ---
-
-# Disable set -e for Phase 2: we handle errors explicitly
+# --- Phase 2: Build and install ---
 set +e
 
-# Restore environment after exec (non-interactive shell has no .bashrc)
-if [ -f "$HOME/.bashrc" ]; then
-    source "$HOME/.bashrc" 2>/dev/null
-fi
-if [ -f "$HOME/.cargo/env" ]; then
-    source "$HOME/.cargo/env"
-fi
+if [ -f "$HOME/.bashrc" ]; then source "$HOME/.bashrc" 2>/dev/null; fi
+if [ -f "$HOME/.cargo/env" ]; then source "$HOME/.cargo/env"; fi
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
-if [ -s "$NVM_DIR/nvm.sh" ]; then
-    . "$NVM_DIR/nvm.sh"
-fi
+if [ -s "$NVM_DIR/nvm.sh" ]; then . "$NVM_DIR/nvm.sh"; fi
 
-# If npm still not found, try common paths directly
 if ! command -v npm &> /dev/null; then
     for p in /usr/local/bin /usr/bin "$HOME/.local/bin" "$HOME/.nvm/versions/node"/*/bin; do
-        if [ -x "$p/npm" ]; then
-            export PATH="$p:$PATH"
-            break
-        fi
+        if [ -x "$p/npm" ]; then export PATH="$p:$PATH"; break; fi
     done
 fi
 
 ESC=$'\e'
-HIDE_CURSOR="${ESC}[?25l"
-SHOW_CURSOR="${ESC}[?25h"
-CLEAR_LINE="${ESC}[2K"
-MOVE_UP="${ESC}[1A"
-
+HIDE="${ESC}[?25l"
+SHOW="${ESC}[?25h"
+CL="${ESC}[2K"
+UP="${ESC}[1A"
 GREEN="${ESC}[32m"
 RED="${ESC}[31m"
-YELLOW="${ESC}[33m"
 CYAN="${ESC}[36m"
 DIM="${ESC}[2m"
 BOLD="${ESC}[1m"
-RESET="${ESC}[0m"
+RST="${ESC}[0m"
 
-cleanup() {
-    printf "%b" "$SHOW_CURSOR"
-}
+cleanup() { printf "%b" "$SHOW"; }
 trap cleanup EXIT INT TERM
+printf "%b" "$HIDE"
 
-printf "%b" "$HIDE_CURSOR"
+START_TIME=$SECONDS
 
-# --- Progress bar renderer ---
-progress_bar() {
-    local current=$1
-    local total=$2
-    local label=$3
-    local width=40
-
-    local percent=$((current * 100 / total))
-    local filled=$((current * width / total))
+# --- Progress bar (GIF style): timer | ####.... | percent ---
+# Updates in place: 2 lines (bar + status). Call draw_bar then draw_status.
+draw_bar() {
+    local percent=$1
+    local width=50
+    local filled=$((percent * width / 100))
     local empty=$((width - filled))
+    local elapsed=$(( SECONDS - START_TIME ))
+    local mins=$(printf "%02d" $((elapsed / 60)))
+    local secs=$(printf "%02d" $((elapsed % 60)))
 
-    local bar_fill=$(printf '%*s' "$filled" | tr ' ' '█')
-    local bar_empty=$(printf '%*s' "$empty" | tr ' ' '░')
+    local bar_fill=$(printf '%*s' "$filled" | tr ' ' '#')
+    local bar_empty=$(printf '%*s' "$empty" | tr ' ' '.')
 
-    local color="$RED"
-    [[ $percent -ge 40 ]] && color="$YELLOW"
-    [[ $percent -ge 75 ]] && color="$GREEN"
-
-    printf "\r${CLEAR_LINE}"
-    printf "  ${color}[%s%s]${RESET} %3d%%  ${DIM}%s${RESET}" "$bar_fill" "$bar_empty" "$percent" "$label"
+    printf "\r${CL}  ${GREEN}${mins}:${secs}${RST}  ${RED}%s${RST}${DIM}%s${RST}  ${GREEN}%d%%${RST}" "$bar_fill" "$bar_empty" "$percent"
 }
 
-status_line() {
-    printf "\r${CLEAR_LINE}  %b\n" "$1"
+draw_status() {
+    printf "\n${CL}  ${DIM}%s${RST}" "$1"
 }
 
-# --- Spinner for indeterminate tasks ---
-spin_task() {
-    local message=$1
-    shift
-    local chars=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
-    local i=0
-
-    "$@" > /tmp/muthur_upgrade_out.log 2>&1 &
-    local pid=$!
-
-    while kill -0 "$pid" 2>/dev/null; do
-        printf "\r${CLEAR_LINE}  ${CYAN}%s${RESET} %s" "${chars[$((i % ${#chars[@]}))]}" "$message"
-        ((i++))
-        sleep 0.08
-    done
-
-    wait "$pid"
-    local exit_code=$?
-
-    if [[ $exit_code -eq 0 ]]; then
-        printf "\r${CLEAR_LINE}  ${GREEN}✓${RESET} %s\n" "$message"
-    else
-        printf "\r${CLEAR_LINE}  ${RED}✗${RESET} %s\n" "$message"
-        printf "    ${DIM}See /tmp/muthur_upgrade_out.log for details${RESET}\n"
-        exit $exit_code
-    fi
+clear_bar() {
+    printf "\r${CL}${UP}\r${CL}"
 }
 
 # --- Header ---
 echo ""
-printf "  ${BOLD}╔══════════════════════════════════════════╗${RESET}\n"
-printf "  ${BOLD}║${RESET}     ${GREEN}MUTHUR OS TERMINAL${RESET} ${DIM}// UPGRADE${RESET}      ${BOLD}║${RESET}\n"
-printf "  ${BOLD}╚══════════════════════════════════════════╝${RESET}\n"
+printf "  ${BOLD}╔══════════════════════════════════════════╗${RST}\n"
+printf "  ${BOLD}║${RST}     ${GREEN}MUTHUR OS TERMINAL${RST} ${DIM}// UPGRADE${RST}      ${BOLD}║${RST}\n"
+printf "  ${BOLD}╚══════════════════════════════════════════╝${RST}\n"
 echo ""
 
-# --- Overall progress bar ---
-overall_progress() {
-    local step=$1
-    local total=4
-    local label=$2
-    local detail=$3
-    local width=50
-    local filled=$((step * width / total))
-    local empty=$((width - filled))
-    local percent=$((step * 100 / total))
+# --- [1/4] Sync ---
+draw_bar 5
+draw_status "Syncing to latest version..."
+sleep 0.3
 
-    local bar_fill=$(printf '%*s' "$filled" | tr ' ' '=')
-    local bar_empty=$(printf '%*s' "$empty" | tr ' ' '-')
-
-    printf "\r${CLEAR_LINE}"
-    printf "  ${GREEN}[%s%s]${RESET} %3d%%\n" "$bar_fill" "$bar_empty" "$percent"
-    printf "  ${BOLD}%s${RESET}\n" "$label"
-    if [ -n "$detail" ]; then
-        printf "  ${DIM}%s${RESET}\n" "$detail"
-    fi
-}
-
-# --- Phase 1 done (pull already happened before re-exec) ---
 NEW_VERSION=$(grep '^version' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2 2>/dev/null || echo "unknown")
-overall_progress 1 "[1/4] Synced to latest version" "Version: v${NEW_VERSION}"
-echo ""
+clear_bar
+draw_bar 10
+draw_status "[1/4] Synced - v${NEW_VERSION}"
+sleep 0.5
 
-# --- Phase 2: Dependencies ---
-printf "  ${BOLD}[2/4]${RESET} ${CYAN}Resolving dependencies${RESET}\n"
+# --- [2/4] Dependencies ---
+clear_bar
+draw_bar 15
+draw_status "[2/4] Checking Rust toolchain..."
 
-# Ensure Rust
 if ! command -v rustc &> /dev/null; then
     if [ -f "$HOME/.cargo/env" ]; then
         source "$HOME/.cargo/env"
     else
-        spin_task "Installing Rust toolchain" bash -c 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --quiet'
+        clear_bar; draw_bar 15; draw_status "[2/4] Installing Rust..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --quiet > /dev/null 2>&1
         source "$HOME/.cargo/env"
     fi
 fi
 
-# Ensure Node
+clear_bar; draw_bar 20; draw_status "[2/4] Checking Node.js..."
+
 if ! command -v node &> /dev/null; then
     if [ -f "$HOME/.nvm/nvm.sh" ]; then
-        export NVM_DIR="$HOME/.nvm"
-        . "$NVM_DIR/nvm.sh"
+        export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"
     else
-        spin_task "Installing Node.js" bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash > /dev/null 2>&1 && export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" && nvm install 20 --silent'
-        export NVM_DIR="$HOME/.nvm"
-        . "$NVM_DIR/nvm.sh"
+        clear_bar; draw_bar 20; draw_status "[2/4] Installing Node.js..."
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash > /dev/null 2>&1
+        export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"; nvm install 20 --silent > /dev/null 2>&1
     fi
 fi
 
-# Verify npm is reachable
 if ! command -v npm &> /dev/null; then
-    printf "  ${RED}✗${RESET} npm not found in PATH\n"
-    printf "    ${DIM}Install Node.js: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash${RESET}\n"
-    printf "    ${DIM}Then: nvm install 20${RESET}\n"
+    clear_bar; draw_bar 0
+    printf "\n\n  ${RED}npm not found.${RST} Install Node.js first.\n"
     exit 1
 fi
 
-# NPM install
+clear_bar; draw_bar 25; draw_status "[2/4] Installing npm packages..."
+
 export PATH
-spin_task "Installing npm packages" bash -c "export PATH='$PATH' && npm ci --quiet 2>/dev/null || npm install --quiet"
-echo ""
-overall_progress 2 "[2/4] Dependencies resolved" "npm packages installed"
-echo ""
+npm ci --quiet 2>/dev/null || npm install --quiet 2>/dev/null
+clear_bar; draw_bar 30; draw_status "[2/4] Dependencies resolved"
+sleep 0.3
 
-# --- Phase 3: Build ---
-printf "  ${BOLD}[3/4]${RESET} ${CYAN}Building MUTHUR${RESET}\n"
-printf "        ${DIM}This may take 5-10 minutes on first build${RESET}\n"
+# --- [3/4] Build ---
+clear_bar; draw_bar 32; draw_status "[3/4] Building frontend..."
 
-# Kill running instances
+BUILD_LOG="/tmp/muthur_build.log"
+
 if pgrep -x "muthur-os-terminal" > /dev/null 2>&1; then
     pkill -x "muthur-os-terminal" || true
     sleep 1
 fi
 
-# Clean stale bundles (keep cargo cache)
 rm -rf dist/ dist-ssr/ src-tauri/target/release/bundle/ 2>/dev/null || true
 
-# Build with live progress tracking (--no-bundle skips AppImage/deb packaging)
-BUILD_LOG="/tmp/muthur_build.log"
+# Build frontend + backend in background
 bash -c "export PATH='$PATH' && npm run build && cd src-tauri && cargo build --release" > "$BUILD_LOG" 2>&1 &
 BUILD_PID=$!
 
-STEPS=("Preparing" "Compiling frontend" "Bundling assets" "Compiling Rust" "Linking" "Packaging")
-step_idx=0
-chars=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
-spin_i=0
-
+# Animate progress bar during build (30% -> 90%)
+build_percent=32
 while kill -0 "$BUILD_PID" 2>/dev/null; do
-    # Detect build phase from log
+    # Detect phase from log
+    status="Compiling..."
     if [ -f "$BUILD_LOG" ]; then
         if grep -q "Compiling muthur" "$BUILD_LOG" 2>/dev/null; then
-            step_idx=4
+            status="Linking muthur-os-terminal..."
+            [[ $build_percent -lt 85 ]] && build_percent=85
         elif grep -q "Compiling " "$BUILD_LOG" 2>/dev/null; then
-            step_idx=3
+            # Count compiled crates for progress
+            local_count=$(grep -c "Compiling " "$BUILD_LOG" 2>/dev/null || echo "0")
+            status="Compiling crate ${local_count}..."
+            new_pct=$((35 + local_count / 2))
+            [[ $new_pct -gt $build_percent && $new_pct -lt 85 ]] && build_percent=$new_pct
         elif grep -q "built in" "$BUILD_LOG" 2>/dev/null; then
-            step_idx=2
-        elif grep -q "building for production" "$BUILD_LOG" 2>/dev/null; then
-            step_idx=1
+            status="Frontend built, starting Rust..."
+            [[ $build_percent -lt 35 ]] && build_percent=35
+        elif grep -q "vite" "$BUILD_LOG" 2>/dev/null; then
+            status="Bundling frontend assets..."
+            [[ $build_percent -lt 33 ]] && build_percent=33
         fi
     fi
 
-    local_step="${STEPS[$step_idx]}"
-    printf "\r${CLEAR_LINE}  ${CYAN}%s${RESET} %s ${DIM}(%s)${RESET}" "${chars[$((spin_i % ${#chars[@]}))]}" "Building..." "$local_step"
-    ((spin_i++))
-    sleep 0.1
+    clear_bar
+    draw_bar $build_percent
+    draw_status "[3/4] ${status}"
+    sleep 0.2
 done
 
 wait "$BUILD_PID"
 BUILD_EXIT=$?
 
 if [[ $BUILD_EXIT -eq 0 ]]; then
-    printf "\r${CLEAR_LINE}  ${GREEN}✓${RESET} Build successful\n"
-    echo ""
-    overall_progress 3 "[3/4] Build complete" "Release binary compiled"
+    clear_bar; draw_bar 90; draw_status "[3/4] Build successful"
+    sleep 0.3
 else
-    printf "\r${CLEAR_LINE}  ${RED}✗${RESET} Build failed\n"
-    printf "        ${DIM}Full log: %s${RESET}\n" "$BUILD_LOG"
-    echo ""
-    printf "  ${BOLD}Last 15 lines:${RESET}\n"
+    clear_bar; draw_bar $build_percent
+    printf "\n\n  ${RED}Build failed.${RST} Log: ${BUILD_LOG}\n\n"
+    printf "  ${BOLD}Last 15 lines:${RST}\n"
     tail -15 "$BUILD_LOG" | sed 's/^/    /'
     echo ""
     exit 1
 fi
-echo ""
 
-# --- Phase 4: Install ---
-printf "  ${BOLD}[4/4]${RESET} ${CYAN}Installing${RESET}\n"
+# --- [4/4] Install ---
+clear_bar; draw_bar 92; draw_status "[4/4] Installing binary..."
 
 BINARY="src-tauri/target/release/muthur-os-terminal"
-
 if [ ! -f "$BINARY" ]; then
-    printf "  ${RED}✗${RESET} Binary not found at %s\n" "$BINARY"
-    printf "    Build produced no output. Check: %s\n" "$BUILD_LOG"
+    printf "\n\n  ${RED}Binary not found.${RST} Check: ${BUILD_LOG}\n"
     exit 1
 fi
 
-progress_bar 1 3 "Copying binary..."
 sudo cp "$BINARY" /usr/local/bin/muthur
 sudo chmod +x /usr/local/bin/muthur
 
-progress_bar 2 3 "Verifying..."
+clear_bar; draw_bar 97; draw_status "[4/4] Verifying..."
+sleep 0.2
+
 if [ ! -x "/usr/local/bin/muthur" ]; then
-    printf "\n  ${RED}✗${RESET} Verification failed\n"
+    printf "\n\n  ${RED}Verification failed.${RST}\n"
     exit 1
 fi
 
-progress_bar 3 3 "Done"
-echo ""
+clear_bar; draw_bar 100; draw_status "[4/4] Complete"
+sleep 0.3
 
+# --- Done ---
 SIZE=$(du -h /usr/local/bin/muthur | cut -f1)
-printf "        ${DIM}Binary: /usr/local/bin/muthur (%s)${RESET}\n" "$SIZE"
+printf "\n\n"
+printf "  ${BOLD}╔══════════════════════════════════════════╗${RST}\n"
+printf "  ${BOLD}║${RST}  ${GREEN}UPGRADE COMPLETE${RST}                       ${BOLD}║${RST}\n"
+printf "  ${BOLD}╚══════════════════════════════════════════╝${RST}\n"
 echo ""
-
-# --- Summary ---
-printf "  ${BOLD}╔══════════════════════════════════════════╗${RESET}\n"
-printf "  ${BOLD}║${RESET}  ${GREEN}✓ UPGRADE COMPLETE${RESET}                     ${BOLD}║${RESET}\n"
-printf "  ${BOLD}╚══════════════════════════════════════════╝${RESET}\n"
+printf "  ${DIM}Version:${RST}  v%s\n" "$NEW_VERSION"
+printf "  ${DIM}Binary:${RST}   %s\n" "$SIZE"
+printf "  ${DIM}Path:${RST}     /usr/local/bin/muthur\n"
 echo ""
-
-printf "  ${DIM}Version:${RESET}  v%s\n" "$NEW_VERSION"
-printf "  ${DIM}Binary:${RESET}   %s\n" "$SIZE"
-printf "  ${DIM}Path:${RESET}     /usr/local/bin/muthur\n"
-echo ""
-printf "  Run ${BOLD}muthur${RESET} to launch.\n"
+printf "  Run ${BOLD}muthur${RST} to launch.\n"
 echo ""

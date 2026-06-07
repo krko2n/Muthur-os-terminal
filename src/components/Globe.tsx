@@ -1,5 +1,6 @@
 import { useRef, useState, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Line } from '@react-three/drei';
 import * as THREE from 'three';
 
 type GlobeMode = 'conflicts' | 'cyber' | 'flights';
