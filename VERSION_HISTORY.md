@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit 8b22ae3
+
+**chore: use PNG banner, remove unused docs and files**
+
+- Author: krkos
+- Hash: `8b22ae3`
+
+**Changed files:**
+```
+.gitignore-summary.md
+AI_ICON_PROMPT.md
+ARCHITECTURE_SUMMARY.md
+AUDIT_REPORT.md
+AUTO_COMMIT_GUIDE.md
+```
+
+---
+
+## 2026-06-07 - Commit 907efb7
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `907efb7`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit d5655cf
 
 **feat(readme): finalize banner and header layout**
