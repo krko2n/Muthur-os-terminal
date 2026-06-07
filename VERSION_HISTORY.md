@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit 188ebe0
+
+**docs(readme): 100 banner color variants, show top 12 picks**
+
+- Author: krkos
+- Hash: `188ebe0`
+
+**Changed files:**
+```
+README.md
+banners/banner-a.svg
+banners/banner-b.svg
+banners/banner-c.svg
+banners/banner-d.svg
+```
+
+---
+
+## 2026-06-07 - Commit ea80b3d
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `ea80b3d`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit 8f89dc7
 
 **docs(readme): add 10 color variants of Banner E for final selection**
