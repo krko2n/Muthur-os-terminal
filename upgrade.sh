@@ -34,19 +34,28 @@ fi
 
 # --- Phase 2: Build and install (running from the NEW script) ---
 
-# Restore environment after exec (non-interactive shell has no .bashrc)
-# Source .bashrc first to pick up any PATH or env customizations
-[ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc" 2>/dev/null || true
+# Disable set -e for Phase 2: we handle errors explicitly
+set +e
 
-# Explicitly ensure cargo and nvm are available
-[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+# Restore environment after exec (non-interactive shell has no .bashrc)
+if [ -f "$HOME/.bashrc" ]; then
+    source "$HOME/.bashrc" 2>/dev/null
+fi
+if [ -f "$HOME/.cargo/env" ]; then
+    source "$HOME/.cargo/env"
+fi
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+    . "$NVM_DIR/nvm.sh"
+fi
 
 # If npm still not found, try common paths directly
 if ! command -v npm &> /dev/null; then
     for p in /usr/local/bin /usr/bin "$HOME/.local/bin" "$HOME/.nvm/versions/node"/*/bin; do
-        [ -x "$p/npm" ] && export PATH="$p:$PATH" && break
+        if [ -x "$p/npm" ]; then
+            export PATH="$p:$PATH"
+            break
+        fi
     done
 fi
 
@@ -113,8 +122,8 @@ spin_task() {
         sleep 0.08
     done
 
-    wait "$pid" || local exit_code=$?
-    exit_code=${exit_code:-0}
+    wait "$pid"
+    local exit_code=$?
 
     if [[ $exit_code -eq 0 ]]; then
         printf "\r${CLEAR_LINE}  ${GREEN}✓${RESET} %s\n" "$message"
@@ -172,9 +181,9 @@ if ! command -v npm &> /dev/null; then
     exit 1
 fi
 
-# NPM install (export PATH so sub-shell inherits node location)
-NPM_BIN=$(which npm)
-spin_task "Installing npm packages" bash -c "export PATH=\"$PATH\"; $NPM_BIN ci --quiet 2>/dev/null || $NPM_BIN install --quiet"
+# NPM install
+export PATH
+spin_task "Installing npm packages" bash -c "export PATH='$PATH' && npm ci --quiet 2>/dev/null || npm install --quiet"
 echo ""
 
 # --- Phase 3: Build ---
@@ -190,10 +199,9 @@ fi
 # Clean stale bundles (keep cargo cache)
 rm -rf dist/ dist-ssr/ src-tauri/target/release/bundle/ 2>/dev/null || true
 
-# Build with live progress tracking (export PATH for background process)
-export PATH
+# Build with live progress tracking
 BUILD_LOG="/tmp/muthur_build.log"
-npm run tauri build > "$BUILD_LOG" 2>&1 &
+bash -c "export PATH='$PATH' && npm run tauri build" > "$BUILD_LOG" 2>&1 &
 BUILD_PID=$!
 
 STEPS=("Preparing" "Compiling frontend" "Bundling assets" "Compiling Rust" "Linking" "Packaging")
@@ -221,8 +229,8 @@ while kill -0 "$BUILD_PID" 2>/dev/null; do
     sleep 0.1
 done
 
-wait "$BUILD_PID" || BUILD_EXIT=$?
-BUILD_EXIT=${BUILD_EXIT:-0}
+wait "$BUILD_PID"
+BUILD_EXIT=$?
 
 if [[ $BUILD_EXIT -eq 0 ]]; then
     printf "\r${CLEAR_LINE}  ${GREEN}✓${RESET} Build successful\n"
