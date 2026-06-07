@@ -26,6 +26,7 @@ impl From<String> for SessionId {
 
 pub struct Session {
     master: Box<dyn portable_pty::MasterPty + Send>,
+    writer: Box<dyn Write + Send>,
     #[allow(dead_code)]
     child: Box<dyn portable_pty::Child + Send>,
 }
@@ -55,6 +56,7 @@ impl PtyManager {
         drop(pty_pair.slave);
         let session_id = SessionId::new();
         let master = pty_pair.master;
+        let writer = master.take_writer()?;
         let mut reader = master.try_clone_reader()?;
         let sid_clone = session_id.clone();
         let window_clone = window.clone();
@@ -85,15 +87,14 @@ impl PtyManager {
         });
         self.sessions.insert(
             session_id.clone(),
-            Session { master, child },
+            Session { master, writer, child },
         );
         Ok(session_id)
     }
 
     pub fn write(&mut self, session_id: SessionId, data: &[u8]) -> anyhow::Result<()> {
         if let Some(session) = self.sessions.get_mut(&session_id) {
-            // Final approach: Get a writer from the master PTY and use it.
-            session.master.writer().write_all(data)?;
+            session.writer.write_all(data)?;
             Ok(())
         } else {
             Err(anyhow::anyhow!("Session not found"))

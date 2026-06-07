@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sysinfo::{System, Networks, Disks, Pid};
+use sysinfo::{System, Networks, Disks};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SystemStats {
@@ -113,7 +113,7 @@ impl SystemMonitor {
                 transmitted: total_transmitted,
             },
             disk: disks,
-            uptime: System::uptime().unwrap_or(0),  // sysinfo 0.39: returns Option<u64>
+            uptime: System::uptime(),
         }
     }
 }
