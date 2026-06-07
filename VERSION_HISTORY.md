@@ -4,6 +4,38 @@ Complete changelog generated from git commits.
 
 ---
 
+## 2026-06-07 - Commit 31b1873
+
+**feat: add battery indicator, scrollable AI chat, working browser, enhanced globe**
+
+- Author: krkos
+- Hash: `31b1873`
+
+**Changed files:**
+```
+src-tauri/src/system.rs
+src/App.tsx
+src/components/AIPanel.tsx
+src/components/Browser.tsx
+src/components/CenterPanel.tsx
+```
+
+---
+
+## 2026-06-07 - Commit e97190f
+
+**docs: auto-update version history [skip ci]**
+
+- Author: github-actions[bot]
+- Hash: `e97190f`
+
+**Changed files:**
+```
+VERSION_HISTORY.md
+```
+
+---
+
 ## 2026-06-07 - Commit 2bc537e
 
 **feat(upgrade): professional UI with progress bars, auto-discard local changes**
