@@ -5,17 +5,6 @@ import { feature } from 'topojson-client';
 
 type GlobeMode = 'conflicts' | 'cyber' | 'flights';
 
-const WORLD_TOPO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
-const UCDP_API_URL = 'https://ucdpapi.pcr.uu.se/api/gedevents/24.1?pagesize=500&page=0';
-
-interface ConflictEvent {
-  latitude: number;
-  longitude: number;
-  country: string;
-  type_of_violence: number;
-  best: number;
-}
-
 interface ConflictArea {
   lat: number;
   lng: number;
@@ -119,7 +108,7 @@ function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; world
 
   useFrame((_state, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.025;
+      groupRef.current.rotation.y += delta * 0.03;
     }
   });
 
@@ -159,7 +148,7 @@ function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; world
   return (
     <group ref={groupRef}>
       {gridLines.map((points, i) => (
-        <OccludedLine key={`grid-${i}`} points={points} color="#00ff41" opacity={0.08} />
+        <OccludedLine key={`grid-${i}`} points={points} color="#00ff41" opacity={0.06} />
       ))}
 
       {worldLines.map((points, i) => (
@@ -195,73 +184,79 @@ export default function Globe() {
   const [mode, setMode] = useState<GlobeMode>('conflicts');
   const [worldLines, setWorldLines] = useState<THREE.Vector3[][]>([]);
   const [conflicts, setConflicts] = useState<ConflictArea[]>([]);
-  const [conflictStats, setConflictStats] = useState<{ total: number; countries: number } | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [status, setStatus] = useState('LOADING...');
 
   useEffect(() => {
-    fetch(WORLD_TOPO_URL)
-      .then(res => res.json())
-      .then(topo => {
-        const geo = feature(topo, topo.objects.countries) as any;
-        const lines: THREE.Vector3[][] = [];
-        const radius = 2;
-
-        for (const f of geo.features) {
-          const coords = f.geometry.type === 'Polygon'
-            ? [f.geometry.coordinates]
-            : f.geometry.coordinates;
-
-          for (const polygon of coords) {
-            for (const ring of polygon) {
-              if (ring.length < 3) continue;
-              const points = ring.map(([lng, lat]: [number, number]) =>
-                latLngToVector3(lat, lng, radius)
-              );
-              lines.push(points);
-            }
-          }
-        }
-        setWorldLines(lines);
-      })
-      .catch((e) => { setLoadError('Map data unavailable'); console.error(e); });
+    loadGlobeData();
   }, []);
 
-  useEffect(() => {
-    fetch(UCDP_API_URL)
-      .then(res => res.json())
-      .then(data => {
-        if (data.Result) {
-          const events: ConflictEvent[] = data.Result.map((e: any) => ({
-            latitude: parseFloat(e.latitude),
-            longitude: parseFloat(e.longitude),
-            country: e.country,
-            type_of_violence: e.type_of_violence,
-            best: parseInt(e.best) || 1,
-          }));
+  const loadGlobeData = async () => {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
 
+      setStatus('FETCHING MAP...');
+      const topoJson = await invoke('fetch_json', {
+        url: 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
+      }) as string;
+
+      const topo = JSON.parse(topoJson);
+      const geo = feature(topo, topo.objects.countries) as any;
+      const lines: THREE.Vector3[][] = [];
+      const radius = 2;
+
+      for (const f of geo.features) {
+        const coords = f.geometry.type === 'Polygon'
+          ? [f.geometry.coordinates]
+          : f.geometry.coordinates;
+
+        for (const polygon of coords) {
+          for (const ring of polygon) {
+            if (ring.length < 3) continue;
+            const points = ring.map(([lng, lat]: [number, number]) =>
+              latLngToVector3(lat, lng, radius)
+            );
+            lines.push(points);
+          }
+        }
+      }
+      setWorldLines(lines);
+      setStatus('MAP LOADED');
+
+      // Load conflicts
+      setStatus('FETCHING CONFLICT DATA...');
+      try {
+        const conflictJson = await invoke('fetch_json', {
+          url: 'https://ucdpapi.pcr.uu.se/api/gedevents/24.1?pagesize=500&page=0'
+        }) as string;
+
+        const data = JSON.parse(conflictJson);
+        if (data.Result) {
           const grouped: Map<string, ConflictArea> = new Map();
-          for (const evt of events) {
-            const key = `${Math.round(evt.latitude)},${Math.round(evt.longitude)}`;
+          for (const e of data.Result) {
+            const lat = parseFloat(e.latitude);
+            const lng = parseFloat(e.longitude);
+            const key = `${Math.round(lat)},${Math.round(lng)}`;
             const existing = grouped.get(key);
             if (existing) {
-              existing.count += evt.best;
+              existing.count += parseInt(e.best) || 1;
             } else {
-              grouped.set(key, { lat: evt.latitude, lng: evt.longitude, count: evt.best, country: evt.country });
+              grouped.set(key, { lat, lng, count: parseInt(e.best) || 1, country: e.country });
             }
           }
-
           const areas = Array.from(grouped.values())
             .sort((a, b) => b.count - a.count)
             .slice(0, 40);
-
           setConflicts(areas);
-
-          const countries = new Set(events.map(e => e.country));
-          setConflictStats({ total: events.length, countries: countries.size });
+          setStatus(`${data.Result.length} EVENTS`);
         }
-      })
-      .catch((e) => { console.error('UCDP fetch failed:', e); });
-  }, []);
+      } catch {
+        setStatus('MAP ONLY (API UNAVAILABLE)');
+      }
+    } catch (err) {
+      console.error('Globe load error:', err);
+      setStatus('OFFLINE');
+    }
+  };
 
   const modeLabels: Record<GlobeMode, string> = {
     conflicts: 'CONFLICTS',
@@ -272,34 +267,29 @@ export default function Globe() {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex-1 min-h-0">
-        <Canvas
-          camera={{ position: [0, 0.5, 5.5], fov: 45 }}
-          gl={{ alpha: true, antialias: true }}
-          style={{ background: 'transparent' }}
-        >
-          <RotatingGlobe mode={mode} worldLines={worldLines} conflicts={conflicts} />
-        </Canvas>
+        {worldLines.length > 0 ? (
+          <Canvas
+            camera={{ position: [0, 0.5, 5.5], fov: 45 }}
+            gl={{ alpha: true, antialias: true }}
+            style={{ background: 'transparent' }}
+          >
+            <RotatingGlobe mode={mode} worldLines={worldLines} conflicts={conflicts} />
+          </Canvas>
+        ) : (
+          <div className="flex items-center justify-center h-full text-muthur-border text-[10px]">
+            {status}
+          </div>
+        )}
       </div>
 
-      {/* Info overlay */}
-      {mode === 'conflicts' && conflictStats && (
-        <div className="px-2 py-1 text-[10px] text-muthur-border font-mono">
-          {conflictStats.total} events / {conflictStats.countries} countries / {conflicts.length} zones
-        </div>
-      )}
-
-      {loadError && (
-        <div className="px-2 text-[10px] text-red-500">{loadError}</div>
-      )}
-
-      <div className="flex gap-1 px-2 pb-1 justify-center shrink-0">
+      <div className="flex gap-1 px-1 pb-1 justify-center shrink-0">
         {(Object.keys(modeLabels) as GlobeMode[]).map((m) => (
           <button
             key={m}
             onClick={() => setMode(m)}
-            className={`px-2 py-0.5 text-[10px] font-mono border transition-colors ${
+            className={`px-2 py-0.5 text-[9px] font-mono border transition-colors ${
               mode === m
-                ? 'text-red-500 border-current bg-red-500/10'
+                ? 'text-red-500 border-red-500 bg-red-500/10'
                 : 'text-muthur-border border-muthur-border hover:text-muthur-secondary'
             }`}
           >

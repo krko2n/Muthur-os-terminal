@@ -127,6 +127,27 @@ async fn get_current_dir() -> Result<String, String> {
 }
 
 #[tauri::command]
+async fn fetch_json(url: String) -> Result<String, String> {
+    let client = reqwest::Client::builder()
+        .user_agent("MUTHUR/0.1")
+        .timeout(std::time::Duration::from_secs(15))
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let response = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| format!("Request failed: {}", e))?;
+
+    if !response.status().is_success() {
+        return Err(format!("HTTP {}", response.status().as_u16()));
+    }
+
+    response.text().await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn fetch_url(url: String) -> Result<String, String> {
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (X11; Linux x86_64) MUTHUR/0.1")
@@ -260,6 +281,7 @@ fn main() {
             ai_suggest_command,
             ai_chat,
             get_current_dir,
+            fetch_json,
             fetch_url,
         ])
         .run(tauri::generate_context!())

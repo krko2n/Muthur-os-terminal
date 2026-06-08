@@ -9,7 +9,7 @@ interface FileEntry {
 }
 
 export default function FileExplorer() {
-  const [currentPath, setCurrentPath] = useState('/home');
+  const [currentPath, setCurrentPath] = useState('');
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -21,8 +21,7 @@ export default function FileExplorer() {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
       const dir = await invoke('get_current_dir') as string;
-      const home = dir.replace(/\\/g, '/');
-      loadDirectory(home);
+      loadDirectory(dir);
     } catch {
       loadDirectory('/home');
     }
@@ -61,74 +60,91 @@ export default function FileExplorer() {
     }
   };
 
-  const formatSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-    return `${(bytes / 1024 / 1024 / 1024).toFixed(1)} GB`;
+  const getFileIcon = (entry: FileEntry): string => {
+    if (entry.is_dir) {
+      return `
+ ___
+|   |
+|___|`;
+    }
+    const ext = entry.name.split('.').pop()?.toLowerCase() || '';
+    if (['ts', 'tsx', 'js', 'jsx'].includes(ext)) {
+      return `
+ .js
+|---|
+|___|`;
+    }
+    if (['json', 'toml', 'yaml', 'yml'].includes(ext)) {
+      return `
+ { }
+|---|
+|___|`;
+    }
+    if (['md', 'txt', 'doc'].includes(ext)) {
+      return `
+ ...
+|---|
+|___|`;
+    }
+    return `
+ ---
+|   |
+|___|`;
   };
 
   return (
     <div className="panel h-full flex flex-col">
       <div className="panel-header flex items-center justify-between">
-        <span>FILE SYSTEM</span>
+        <span>FILESYSTEM</span>
+        <span className="text-muthur-border font-normal text-[10px]">
+          {currentPath}
+        </span>
+      </div>
+
+      {/* Navigation bar */}
+      <div className="flex items-center gap-2 px-2 py-1 border-b border-muthur-border">
         <button
           onClick={goUp}
-          className="px-2 py-0.5 text-xs bg-muthur-border hover:bg-muthur-primary hover:text-black transition-colors"
+          className="px-2 py-0.5 text-[10px] bg-muthur-border hover:bg-muthur-primary hover:text-black transition-colors text-muthur-primary"
         >
           ^ UP
         </button>
-      </div>
-
-      <div className="p-2 border-b border-muthur-border">
         <input
           type="text"
           value={currentPath}
           onChange={(e) => setCurrentPath(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && loadDirectory(currentPath)}
-          className="w-full bg-muthur-panel border border-muthur-border px-2 py-1 text-xs text-muthur-primary focus:outline-none focus:border-muthur-primary"
+          className="flex-1 bg-muthur-bg border border-muthur-border px-2 py-0.5 text-[10px] text-muthur-primary focus:outline-none focus:border-muthur-primary"
         />
       </div>
 
-      <div className="flex-1 overflow-auto scrollbar-thin">
+      {/* File Grid */}
+      <div className="flex-1 overflow-auto p-2 scrollbar-thin">
         {loading ? (
-          <div className="flex items-center justify-center h-full text-muthur-border">
+          <div className="flex items-center justify-center h-full text-muthur-border text-xs">
             LOADING...
           </div>
         ) : (
-          <table className="w-full text-xs">
-            <thead className="sticky top-0 bg-muthur-panel border-b border-muthur-border">
-              <tr className="text-muthur-secondary">
-                <th className="text-left p-2">NAME</th>
-                <th className="text-right p-2">SIZE</th>
-                <th className="text-right p-2">MODIFIED</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((entry, i) => (
-                <tr
-                  key={i}
-                  onClick={() => handleEntryClick(entry)}
-                  className={`hover:bg-muthur-border cursor-pointer ${
-                    entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'
-                  }`}
-                >
-                  <td className="p-2">
-                    <span className="text-muthur-border mr-1">{entry.is_dir ? '[DIR]' : '[---]'}</span>
-                    {entry.name}
-                  </td>
-                  <td className="text-right p-2">
-                    {entry.is_dir ? '-' : formatSize(entry.size)}
-                  </td>
-                  <td className="text-right p-2">
-                    {entry.modified
-                      ? new Date(entry.modified * 1000).toLocaleDateString()
-                      : '-'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="grid grid-cols-6 gap-2 lg:grid-cols-8 xl:grid-cols-10">
+            {entries.map((entry, i) => (
+              <div
+                key={i}
+                onClick={() => handleEntryClick(entry)}
+                className={`
+                  flex flex-col items-center p-1 rounded cursor-pointer
+                  hover:bg-muthur-border/30 transition-colors text-center
+                  ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}
+                `}
+              >
+                <pre className="text-[8px] leading-tight opacity-70 mb-0.5">
+                  {getFileIcon(entry)}
+                </pre>
+                <span className="text-[9px] truncate w-full font-mono">
+                  {entry.name.length > 12 ? entry.name.slice(0, 10) + '..' : entry.name}
+                </span>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

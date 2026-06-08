@@ -15,7 +15,7 @@ export default {
         'muthur-panel': '#0a1612',
       },
       fontFamily: {
-        'mono': ['"Courier New"', 'monospace'],
+        'mono': ['"Share Tech Mono"', '"Courier New"', 'monospace'],
         'tech': ['"Share Tech Mono"', 'monospace'],
       },
       animation: {
@@ -25,13 +25,16 @@ export default {
       },
       keyframes: {
         scanline: {
-          '0%': { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(100%)' },
+          '0%': { transform: 'translateY(-100vh)' },
+          '100%': { transform: 'translateY(100vh)' },
         },
         flicker: {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.96' },
+          '50%': { opacity: '0.97' },
         },
+      },
+      boxShadow: {
+        'key-active': '0 0 8px #00ff41, 0 0 16px rgba(0, 255, 65, 0.3)',
       },
     },
   },

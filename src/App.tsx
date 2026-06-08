@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import LeftPanel from './components/LeftPanel';
 import CenterPanel from './components/CenterPanel';
 import RightPanel from './components/RightPanel';
+import BottomPanel from './components/BottomPanel';
 import CustomCursor from './components/CustomCursor';
 
 function App() {
@@ -29,10 +30,16 @@ function App() {
       <div className="scanline" />
       <CustomCursor />
 
-      <div className="flex h-full p-2 gap-2">
-        <LeftPanel systemStats={systemStats} />
-        <CenterPanel />
-        <RightPanel />
+      <div className="flex flex-col h-full p-1 gap-1">
+        {/* Top section: left panel + center terminal + right panel */}
+        <div className="flex flex-1 gap-1 min-h-0">
+          <LeftPanel systemStats={systemStats} />
+          <CenterPanel />
+          <RightPanel />
+        </div>
+
+        {/* Bottom section: filesystem + keyboard */}
+        <BottomPanel />
       </div>
     </div>
   );

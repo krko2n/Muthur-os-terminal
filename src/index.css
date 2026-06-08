@@ -6,6 +6,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  cursor: none !important;
 }
 
 body {
@@ -13,7 +14,6 @@ body {
   background: #000;
   color: #00ff41;
   overflow: hidden;
-  cursor: none;
 }
 
 #root {
@@ -22,48 +22,29 @@ body {
   overflow: hidden;
 }
 
-/* Show text cursor on inputs and terminal */
-input, textarea, [contenteditable] {
-  cursor: text !important;
-}
-
-.xterm {
-  cursor: text !important;
-}
-
-button, [role="button"], a {
-  cursor: none !important;
-}
-
-/* Custom cursor - crosshair style */
+/* Custom cursor - circle with dot center */
 .custom-cursor {
   position: fixed;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #00ff41;
+  border-radius: 50%;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 99999;
   transition: transform 0.08s ease;
-}
-
-.custom-cursor::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: #00ff41;
-  box-shadow: 0 0 4px #00ff41;
+  box-shadow: 0 0 6px #00ff41, inset 0 0 3px rgba(0, 255, 65, 0.3);
 }
 
 .custom-cursor::after {
   content: '';
   position: absolute;
+  top: 50%;
   left: 50%;
-  top: 0;
-  width: 1px;
-  height: 100%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 3px;
   background: #00ff41;
+  border-radius: 50%;
   box-shadow: 0 0 4px #00ff41;
 }
 
@@ -74,21 +55,21 @@ button, [role="button"], a {
   left: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(transparent, rgba(0, 255, 65, 0.3), transparent);
+  background: linear-gradient(transparent, rgba(0, 255, 65, 0.2), transparent);
   animation: scanline 8s linear infinite;
   pointer-events: none;
   z-index: 9998;
 }
 
-/* CRT flicker */
+/* CRT flicker - subtle */
 .crt-flicker {
   animation: flicker 0.15s infinite;
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -96,12 +77,12 @@ button, [role="button"], a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #00ff41;
-  border-radius: 4px;
+  background: #0a3622;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00d4ff;
+  background: #00ff41;
 }
 
 /* Terminal styling */
@@ -129,22 +110,22 @@ button, [role="button"], a {
 
 /* Panel styling */
 .panel {
-  background: rgba(10, 22, 18, 0.85);
+  background: rgba(10, 22, 18, 0.9);
   border: 1px solid #0a3622;
-  backdrop-filter: blur(4px);
 }
 
 .panel-header {
-  background: rgba(0, 255, 65, 0.1);
+  background: rgba(0, 255, 65, 0.05);
   border-bottom: 1px solid #0a3622;
-  padding: 8px 12px;
-  font-size: 12px;
+  padding: 4px 8px;
+  font-size: 10px;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;
+  color: #00ff41;
 }
 
-/* Thin scrollbar variant for panels */
+/* Thin scrollbar variant */
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
 }
@@ -160,6 +141,11 @@ button, [role="button"], a {
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #00ff41;
+}
+
+/* Keyboard key active glow */
+.shadow-key-active {
+  box-shadow: 0 0 8px #00ff41, 0 0 16px rgba(0, 255, 65, 0.3);
 }
 
 @keyframes scanline {
