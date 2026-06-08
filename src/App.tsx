@@ -69,7 +69,7 @@ function App() {
       <div className="flex flex-col h-full">
         {/* Top section */}
         <div className="flex flex-1 min-h-0">
-          <div style={{ width: `${leftWidth}%` }} className="shrink-0 overflow-hidden">
+          <div style={{ width: `${leftWidth}%` }} className="shrink-0 overflow-hidden min-w-0">
             <LeftPanel systemStats={systemStats} />
           </div>
 
@@ -87,7 +87,7 @@ function App() {
             onMouseDown={() => startDrag('right')}
           />
 
-          <div style={{ width: `${rightWidth}%` }} className="shrink-0 overflow-hidden">
+          <div style={{ width: `${rightWidth}%` }} className="shrink-0 overflow-hidden min-w-0">
             <RightPanel />
           </div>
         </div>

@@ -19,7 +19,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
   };
 
   return (
-    <div className="h-full flex flex-col p-3 gap-3 overflow-auto scrollbar-thin">
+    <div className="h-full flex flex-col p-3 gap-3 overflow-hidden">
       {/* Clock */}
       <div className="shrink-0">
         <div className="text-5xl font-mono tabular-nums text-muthur-primary text-glow leading-none text-center">
@@ -102,7 +102,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
           <span className="w-8 text-right">CPU</span>
           <span className="w-10 text-right">MEM</span>
         </div>
-        <div className="flex-1 overflow-auto scrollbar-thin">
+        <div className="flex-1 overflow-hidden">
           {systemStats?.processes?.slice(0, 10).map((proc: any, i: number) => (
             <div key={i} className="flex text-xs py-px">
               <span className="w-10 text-muthur-secondary opacity-50 tabular-nums">{proc.pid}</span>

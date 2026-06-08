@@ -19,7 +19,7 @@ tokio = { version = "1.40", features = ["full"] }
 portable-pty = "0.9"
 uuid = { version = "1.10", features = ["v4", "serde"] }
 chrono = "0.4"
-reqwest = { version = "0.13", features = ["json"] }
+reqwest = { version = "0.13", features = ["json", "rustls-tls", "charset", "http2"] }
 sysinfo = "0.39"
 anyhow = "1.0"
 thiserror = "2.0"

@@ -3,79 +3,81 @@ import { useEffect, useState, useCallback } from 'react';
 interface KeyDef {
   code: string;
   lower: string;
-  upper: string;
+  shift: string;
   w: number;
+  isLetter?: boolean;
+  isModifier?: boolean;
 }
 
 const ROWS: KeyDef[][] = [
   [
-    { code: 'Escape', lower: 'esc', upper: 'ESC', w: 1.3 },
-    { code: 'Backquote', lower: '`', upper: '~', w: 1 },
-    { code: 'Digit1', lower: '1', upper: '!', w: 1 },
-    { code: 'Digit2', lower: '2', upper: '@', w: 1 },
-    { code: 'Digit3', lower: '3', upper: '#', w: 1 },
-    { code: 'Digit4', lower: '4', upper: '$', w: 1 },
-    { code: 'Digit5', lower: '5', upper: '%', w: 1 },
-    { code: 'Digit6', lower: '6', upper: '^', w: 1 },
-    { code: 'Digit7', lower: '7', upper: '&', w: 1 },
-    { code: 'Digit8', lower: '8', upper: '*', w: 1 },
-    { code: 'Digit9', lower: '9', upper: '(', w: 1 },
-    { code: 'Digit0', lower: '0', upper: ')', w: 1 },
-    { code: 'Minus', lower: '-', upper: '_', w: 1 },
-    { code: 'Equal', lower: '=', upper: '+', w: 1 },
-    { code: 'Backspace', lower: 'back', upper: 'BACK', w: 2 },
+    { code: 'Escape', lower: 'esc', shift: 'esc', w: 1.3, isModifier: true },
+    { code: 'Backquote', lower: '`', shift: '~', w: 1 },
+    { code: 'Digit1', lower: '1', shift: '!', w: 1 },
+    { code: 'Digit2', lower: '2', shift: '@', w: 1 },
+    { code: 'Digit3', lower: '3', shift: '#', w: 1 },
+    { code: 'Digit4', lower: '4', shift: '$', w: 1 },
+    { code: 'Digit5', lower: '5', shift: '%', w: 1 },
+    { code: 'Digit6', lower: '6', shift: '^', w: 1 },
+    { code: 'Digit7', lower: '7', shift: '&', w: 1 },
+    { code: 'Digit8', lower: '8', shift: '*', w: 1 },
+    { code: 'Digit9', lower: '9', shift: '(', w: 1 },
+    { code: 'Digit0', lower: '0', shift: ')', w: 1 },
+    { code: 'Minus', lower: '-', shift: '_', w: 1 },
+    { code: 'Equal', lower: '=', shift: '+', w: 1 },
+    { code: 'Backspace', lower: 'back', shift: 'back', w: 2, isModifier: true },
   ],
   [
-    { code: 'Tab', lower: 'tab', upper: 'TAB', w: 1.5 },
-    { code: 'KeyQ', lower: 'q', upper: 'Q', w: 1 },
-    { code: 'KeyW', lower: 'w', upper: 'W', w: 1 },
-    { code: 'KeyE', lower: 'e', upper: 'E', w: 1 },
-    { code: 'KeyR', lower: 'r', upper: 'R', w: 1 },
-    { code: 'KeyT', lower: 't', upper: 'T', w: 1 },
-    { code: 'KeyY', lower: 'y', upper: 'Y', w: 1 },
-    { code: 'KeyU', lower: 'u', upper: 'U', w: 1 },
-    { code: 'KeyI', lower: 'i', upper: 'I', w: 1 },
-    { code: 'KeyO', lower: 'o', upper: 'O', w: 1 },
-    { code: 'KeyP', lower: 'p', upper: 'P', w: 1 },
-    { code: 'BracketLeft', lower: '[', upper: '{', w: 1 },
-    { code: 'BracketRight', lower: ']', upper: '}', w: 1 },
-    { code: 'Enter', lower: 'enter', upper: 'ENTER', w: 2.5 },
+    { code: 'Tab', lower: 'tab', shift: 'tab', w: 1.5, isModifier: true },
+    { code: 'KeyQ', lower: 'q', shift: 'Q', w: 1, isLetter: true },
+    { code: 'KeyW', lower: 'w', shift: 'W', w: 1, isLetter: true },
+    { code: 'KeyE', lower: 'e', shift: 'E', w: 1, isLetter: true },
+    { code: 'KeyR', lower: 'r', shift: 'R', w: 1, isLetter: true },
+    { code: 'KeyT', lower: 't', shift: 'T', w: 1, isLetter: true },
+    { code: 'KeyY', lower: 'y', shift: 'Y', w: 1, isLetter: true },
+    { code: 'KeyU', lower: 'u', shift: 'U', w: 1, isLetter: true },
+    { code: 'KeyI', lower: 'i', shift: 'I', w: 1, isLetter: true },
+    { code: 'KeyO', lower: 'o', shift: 'O', w: 1, isLetter: true },
+    { code: 'KeyP', lower: 'p', shift: 'P', w: 1, isLetter: true },
+    { code: 'BracketLeft', lower: '[', shift: '{', w: 1 },
+    { code: 'BracketRight', lower: ']', shift: '}', w: 1 },
+    { code: 'Enter', lower: 'enter', shift: 'enter', w: 2.5, isModifier: true },
   ],
   [
-    { code: 'CapsLock', lower: 'caps', upper: 'CAPS', w: 1.8 },
-    { code: 'KeyA', lower: 'a', upper: 'A', w: 1 },
-    { code: 'KeyS', lower: 's', upper: 'S', w: 1 },
-    { code: 'KeyD', lower: 'd', upper: 'D', w: 1 },
-    { code: 'KeyF', lower: 'f', upper: 'F', w: 1 },
-    { code: 'KeyG', lower: 'g', upper: 'G', w: 1 },
-    { code: 'KeyH', lower: 'h', upper: 'H', w: 1 },
-    { code: 'KeyJ', lower: 'j', upper: 'J', w: 1 },
-    { code: 'KeyK', lower: 'k', upper: 'K', w: 1 },
-    { code: 'KeyL', lower: 'l', upper: 'L', w: 1 },
-    { code: 'Semicolon', lower: ';', upper: ':', w: 1 },
-    { code: 'Quote', lower: "'", upper: '"', w: 1 },
-    { code: 'Backslash', lower: '\\', upper: '|', w: 1 },
+    { code: 'CapsLock', lower: 'caps', shift: 'caps', w: 1.8, isModifier: true },
+    { code: 'KeyA', lower: 'a', shift: 'A', w: 1, isLetter: true },
+    { code: 'KeyS', lower: 's', shift: 'S', w: 1, isLetter: true },
+    { code: 'KeyD', lower: 'd', shift: 'D', w: 1, isLetter: true },
+    { code: 'KeyF', lower: 'f', shift: 'F', w: 1, isLetter: true },
+    { code: 'KeyG', lower: 'g', shift: 'G', w: 1, isLetter: true },
+    { code: 'KeyH', lower: 'h', shift: 'H', w: 1, isLetter: true },
+    { code: 'KeyJ', lower: 'j', shift: 'J', w: 1, isLetter: true },
+    { code: 'KeyK', lower: 'k', shift: 'K', w: 1, isLetter: true },
+    { code: 'KeyL', lower: 'l', shift: 'L', w: 1, isLetter: true },
+    { code: 'Semicolon', lower: ';', shift: ':', w: 1 },
+    { code: 'Quote', lower: "'", shift: '"', w: 1 },
+    { code: 'Backslash', lower: '\\', shift: '|', w: 1 },
   ],
   [
-    { code: 'ShiftLeft', lower: 'shift', upper: 'SHIFT', w: 2.2 },
-    { code: 'KeyZ', lower: 'z', upper: 'Z', w: 1 },
-    { code: 'KeyX', lower: 'x', upper: 'X', w: 1 },
-    { code: 'KeyC', lower: 'c', upper: 'C', w: 1 },
-    { code: 'KeyV', lower: 'v', upper: 'V', w: 1 },
-    { code: 'KeyB', lower: 'b', upper: 'B', w: 1 },
-    { code: 'KeyN', lower: 'n', upper: 'N', w: 1 },
-    { code: 'KeyM', lower: 'm', upper: 'M', w: 1 },
-    { code: 'Comma', lower: ',', upper: '<', w: 1 },
-    { code: 'Period', lower: '.', upper: '>', w: 1 },
-    { code: 'Slash', lower: '/', upper: '?', w: 1 },
-    { code: 'ShiftRight', lower: 'shift', upper: 'SHIFT', w: 2.8 },
+    { code: 'ShiftLeft', lower: 'shift', shift: 'shift', w: 2.2, isModifier: true },
+    { code: 'KeyZ', lower: 'z', shift: 'Z', w: 1, isLetter: true },
+    { code: 'KeyX', lower: 'x', shift: 'X', w: 1, isLetter: true },
+    { code: 'KeyC', lower: 'c', shift: 'C', w: 1, isLetter: true },
+    { code: 'KeyV', lower: 'v', shift: 'V', w: 1, isLetter: true },
+    { code: 'KeyB', lower: 'b', shift: 'B', w: 1, isLetter: true },
+    { code: 'KeyN', lower: 'n', shift: 'N', w: 1, isLetter: true },
+    { code: 'KeyM', lower: 'm', shift: 'M', w: 1, isLetter: true },
+    { code: 'Comma', lower: ',', shift: '<', w: 1 },
+    { code: 'Period', lower: '.', shift: '>', w: 1 },
+    { code: 'Slash', lower: '/', shift: '?', w: 1 },
+    { code: 'ShiftRight', lower: 'shift', shift: 'shift', w: 2.8, isModifier: true },
   ],
   [
-    { code: 'ControlLeft', lower: 'ctrl', upper: 'CTRL', w: 1.5 },
-    { code: 'Fn', lower: 'fn', upper: 'FN', w: 1 },
-    { code: 'Space', lower: '', upper: '', w: 9 },
-    { code: 'AltRight', lower: 'alt gr', upper: 'ALT GR', w: 1.5 },
-    { code: 'ControlRight', lower: 'ctrl', upper: 'CTRL', w: 1.5 },
+    { code: 'ControlLeft', lower: 'ctrl', shift: 'ctrl', w: 1.5, isModifier: true },
+    { code: 'Fn', lower: 'fn', shift: 'fn', w: 1, isModifier: true },
+    { code: 'Space', lower: '', shift: '', w: 9, isModifier: true },
+    { code: 'AltRight', lower: 'alt gr', shift: 'alt gr', w: 1.5, isModifier: true },
+    { code: 'ControlRight', lower: 'ctrl', shift: 'ctrl', w: 1.5, isModifier: true },
   ],
 ];
 
@@ -108,7 +110,22 @@ export default function Keyboard() {
     };
   }, [handleKeyDown, handleKeyUp]);
 
-  const isUpper = capsLock || shiftHeld;
+  const getLabel = (keyDef: KeyDef): string => {
+    if (keyDef.isModifier) return keyDef.lower;
+    if (keyDef.isLetter) {
+      // CapsLock or Shift capitalizes letters
+      return (capsLock || shiftHeld) ? keyDef.shift : keyDef.lower;
+    }
+    // Number row and symbols: only Shift changes them (not CapsLock)
+    return shiftHeld ? keyDef.shift : keyDef.lower;
+  };
+
+  const getChar = (keyDef: KeyDef): string => {
+    if (keyDef.isLetter) {
+      return (capsLock || shiftHeld) ? keyDef.shift : keyDef.lower;
+    }
+    return shiftHeld ? keyDef.shift : keyDef.lower;
+  };
 
   const isActive = (code: string) => {
     if (activeKeys.has(code)) return true;
@@ -116,8 +133,7 @@ export default function Keyboard() {
     return false;
   };
 
-  const handleClick = async (keyDef: KeyDef) => {
-    // Simulate keypress to terminal
+  const handleClick = (keyDef: KeyDef) => {
     if (keyDef.code === 'ShiftLeft' || keyDef.code === 'ShiftRight') {
       setShiftHeld(prev => !prev);
       return;
@@ -133,15 +149,13 @@ export default function Keyboard() {
     else if (keyDef.code === 'Tab') char = '\t';
     else if (keyDef.code === 'Backspace') char = '\x7f';
     else if (keyDef.code === 'Escape') char = '\x1b';
-    else if (keyDef.code.startsWith('Control') || keyDef.code === 'Fn' || keyDef.code.startsWith('Alt')) return;
-    else char = isUpper ? keyDef.upper : keyDef.lower;
+    else if (keyDef.isModifier) return;
+    else char = getChar(keyDef);
 
-    if (char && char.length === 1 || char === '\r' || char === '\t' || char === '\x7f' || char === '\x1b') {
-      // Dispatch to active terminal via custom event
+    if (char) {
       window.dispatchEvent(new CustomEvent('virtual-key', { detail: char }));
     }
 
-    // Visual feedback
     setActiveKeys(prev => new Set(prev).add(keyDef.code));
     setTimeout(() => {
       setActiveKeys(prev => {
@@ -158,7 +172,7 @@ export default function Keyboard() {
         <div key={ri} className="flex gap-[0.3vw] my-[0.3vh]">
           {row.map((keyDef, ki) => {
             const active = isActive(keyDef.code);
-            const label = isUpper ? keyDef.upper : keyDef.lower;
+            const label = getLabel(keyDef);
             return (
               <div
                 key={`${ri}-${ki}`}
@@ -167,11 +181,10 @@ export default function Keyboard() {
                   flex items-center justify-center
                   rounded-sm transition-all duration-75
                   font-mono select-none
-                  ${active
+                  ${active || (keyDef.code === 'CapsLock' && capsLock)
                     ? 'key-active'
                     : 'border border-[rgba(0,255,65,0.25)] text-muthur-primary opacity-80 hover:opacity-100 hover:border-[rgba(0,255,65,0.5)]'
                   }
-                  ${(keyDef.code === 'CapsLock' && capsLock) ? 'key-active' : ''}
                 `}
                 style={{
                   width: `${keyDef.w * 2.8}vw`,

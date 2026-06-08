@@ -18,7 +18,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  cursor: none !important;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='%2300ff41' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%2300ff41'/%3E%3C/svg%3E") 10 10, crosshair !important;
 }
 
 body {
