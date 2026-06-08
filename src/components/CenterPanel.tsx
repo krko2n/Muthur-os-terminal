@@ -37,7 +37,7 @@ export default function CenterPanel() {
         </div>
       </div>
 
-      <div className="h-48 shrink-0">
+      <div className="h-64 shrink-0">
         <FileExplorer />
       </div>
     </div>

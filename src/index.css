@@ -22,28 +22,49 @@ body {
   overflow: hidden;
 }
 
-/* Custom cursor */
+/* Show text cursor on inputs and terminal */
+input, textarea, [contenteditable] {
+  cursor: text !important;
+}
+
+.xterm {
+  cursor: text !important;
+}
+
+button, [role="button"], a {
+  cursor: none !important;
+}
+
+/* Custom cursor - crosshair style */
 .custom-cursor {
   position: fixed;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #00ff41;
-  border-radius: 50%;
+  width: 24px;
+  height: 24px;
   pointer-events: none;
   z-index: 9999;
-  transition: transform 0.1s ease;
+  transition: transform 0.08s ease;
+}
+
+.custom-cursor::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #00ff41;
+  box-shadow: 0 0 4px #00ff41;
 }
 
 .custom-cursor::after {
   content: '';
   position: absolute;
-  top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  width: 4px;
-  height: 4px;
+  top: 0;
+  width: 1px;
+  height: 100%;
   background: #00ff41;
-  border-radius: 50%;
+  box-shadow: 0 0 4px #00ff41;
 }
 
 /* Scanline effect */
@@ -139,4 +160,14 @@ body {
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #00ff41;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100vh); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.97; }
 }

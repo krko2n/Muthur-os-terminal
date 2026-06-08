@@ -126,6 +126,112 @@ async fn get_current_dir() -> Result<String, String> {
         .map(|s| s.to_string())
 }
 
+#[tauri::command]
+async fn fetch_url(url: String) -> Result<String, String> {
+    let client = reqwest::Client::builder()
+        .user_agent("Mozilla/5.0 (X11; Linux x86_64) MUTHUR/0.1")
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let response = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| format!("Request failed: {}", e))?;
+
+    let status = response.status();
+    if !status.is_success() {
+        return Err(format!("HTTP {}: {}", status.as_u16(), status.canonical_reason().unwrap_or("Unknown")));
+    }
+
+    let body = response.text().await.map_err(|e| e.to_string())?;
+
+    Ok(html_to_text(&body))
+}
+
+fn html_to_text(html: &str) -> String {
+    let mut result = String::new();
+    let mut in_tag = false;
+    let mut in_script = false;
+    let mut in_style = false;
+    let mut tag_name = String::new();
+    let mut collecting_tag = false;
+
+    for ch in html.chars() {
+        match ch {
+            '<' => {
+                in_tag = true;
+                collecting_tag = true;
+                tag_name.clear();
+            }
+            '>' => {
+                in_tag = false;
+                collecting_tag = false;
+                let lower = tag_name.to_lowercase();
+                if lower == "script" { in_script = true; }
+                else if lower == "/script" { in_script = false; }
+                else if lower == "style" { in_style = true; }
+                else if lower == "/style" { in_style = false; }
+                else if lower == "br" || lower == "br/" || lower == "p" || lower == "/p"
+                    || lower == "div" || lower == "/div" || lower == "li"
+                    || lower == "h1" || lower == "h2" || lower == "h3"
+                    || lower == "h4" || lower == "h5" || lower == "h6"
+                    || lower == "tr" || lower == "/tr" {
+                    result.push('\n');
+                } else if lower == "td" || lower == "th" {
+                    result.push_str("  ");
+                }
+            }
+            _ => {
+                if in_tag {
+                    if collecting_tag && ch != ' ' && ch != '/' {
+                        tag_name.push(ch);
+                    } else {
+                        collecting_tag = false;
+                    }
+                } else if !in_script && !in_style {
+                    result.push(ch);
+                }
+            }
+        }
+    }
+
+    // Decode common HTML entities
+    let result = result
+        .replace("&amp;", "&")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&quot;", "\"")
+        .replace("&#39;", "'")
+        .replace("&nbsp;", " ");
+
+    // Collapse excessive whitespace
+    let mut cleaned = String::new();
+    let mut prev_newline = false;
+    for line in result.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            if !prev_newline {
+                cleaned.push('\n');
+                prev_newline = true;
+            }
+        } else {
+            cleaned.push_str(trimmed);
+            cleaned.push('\n');
+            prev_newline = false;
+        }
+    }
+
+    // Limit output size
+    if cleaned.len() > 50000 {
+        cleaned.truncate(50000);
+        cleaned.push_str("\n\n[--- OUTPUT TRUNCATED ---]");
+    }
+
+    cleaned
+}
+
 fn main() {
     // Initialize crash handler
     crash::init_crash_handler();
@@ -154,6 +260,7 @@ fn main() {
             ai_suggest_command,
             ai_chat,
             get_current_dir,
+            fetch_url,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

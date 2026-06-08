@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Header from './components/Header';
 import LeftPanel from './components/LeftPanel';
 import CenterPanel from './components/CenterPanel';
 import RightPanel from './components/RightPanel';
@@ -9,7 +8,6 @@ function App() {
   const [systemStats, setSystemStats] = useState<any>(null);
 
   useEffect(() => {
-    // Update system stats every 2 seconds
     const updateStats = async () => {
       try {
         const { invoke } = await import('@tauri-apps/api/core');
@@ -31,14 +29,10 @@ function App() {
       <div className="scanline" />
       <CustomCursor />
 
-      <div className="flex flex-col h-full">
-        <Header battery={systemStats?.battery} />
-
-        <div className="flex-1 flex overflow-hidden p-2 gap-2">
-          <LeftPanel systemStats={systemStats} />
-          <CenterPanel />
-          <RightPanel />
-        </div>
+      <div className="flex h-full p-2 gap-2">
+        <LeftPanel systemStats={systemStats} />
+        <CenterPanel />
+        <RightPanel />
       </div>
     </div>
   );

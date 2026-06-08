@@ -1,12 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 
 export default function Browser() {
   const [url, setUrl] = useState('https://duckduckgo.com');
   const [inputUrl, setInputUrl] = useState('https://duckduckgo.com');
-  const [loading, setLoading] = useState(true);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [content, setContent] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const navigate = (targetUrl: string) => {
+  const navigate = async (targetUrl: string) => {
     let normalized = targetUrl.trim();
     if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
       if (normalized.includes('.') && !normalized.includes(' ')) {
@@ -18,6 +19,17 @@ export default function Browser() {
     setUrl(normalized);
     setInputUrl(normalized);
     setLoading(true);
+    setError(null);
+
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      const result = await invoke('fetch_url', { url: normalized }) as string;
+      setContent(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setContent(null);
+    }
+    setLoading(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -30,22 +42,16 @@ export default function Browser() {
     <div className="h-full flex flex-col">
       <div className="flex gap-2 p-2 border-b border-muthur-border shrink-0">
         <button
-          onClick={() => iframeRef.current?.contentWindow?.history.back()}
+          onClick={() => navigate(url)}
           className="px-2 py-0.5 text-xs text-muthur-secondary hover:text-muthur-primary border border-muthur-border hover:border-muthur-primary transition-colors"
         >
-          &lt;
-        </button>
-        <button
-          onClick={() => iframeRef.current?.contentWindow?.history.forward()}
-          className="px-2 py-0.5 text-xs text-muthur-secondary hover:text-muthur-primary border border-muthur-border hover:border-muthur-primary transition-colors"
-        >
-          &gt;
+          &lt;-
         </button>
         <button
           onClick={() => navigate(url)}
           className="px-2 py-0.5 text-xs text-muthur-secondary hover:text-muthur-primary border border-muthur-border hover:border-muthur-primary transition-colors"
         >
-          ↻
+          [R]
         </button>
         <input
           type="text"
@@ -63,20 +69,38 @@ export default function Browser() {
         </button>
       </div>
 
-      <div className="flex-1 relative">
+      <div className="flex-1 overflow-auto p-2 text-xs font-mono scrollbar-thin">
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-muthur-bg z-10">
-            <span className="text-muthur-border animate-pulse text-xs">LOADING MODULE...</span>
+          <div className="flex items-center justify-center h-full">
+            <span className="text-muthur-border animate-pulse">FETCHING {url}...</span>
           </div>
         )}
-        <iframe
-          ref={iframeRef}
-          src={url}
-          className="w-full h-full border-0 bg-black"
-          onLoad={() => setLoading(false)}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-          title="MUTHUR Browser"
-        />
+        {error && (
+          <div className="text-red-500 p-4">
+            <pre className="whitespace-pre-wrap">ERROR: {error}</pre>
+            <div className="mt-4 text-muthur-border">
+              Note: Some sites block direct requests.
+              Try searching or accessing simpler pages.
+            </div>
+          </div>
+        )}
+        {!loading && !error && content && (
+          <div className="text-muthur-primary whitespace-pre-wrap break-words leading-relaxed">
+            {content}
+          </div>
+        )}
+        {!loading && !error && !content && (
+          <div className="flex flex-col items-center justify-center h-full text-muthur-border gap-4">
+            <pre className="text-muthur-primary text-center">{`
+  __  __ _   _ _____ _   _ _   _ ____
+ |  \\/  | | | |_   _| | | | | | |  _ \\
+ | |\\/| | | | | | | | |_| | | | | |_) |
+ | |  | | |_| | | | |  _  | |_| |  _ <
+ |_|  |_|\\___/  |_| |_| |_|\\___/|_| \\_\\
+            `}</pre>
+            <span>Enter a URL or search term above</span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -61,30 +61,15 @@ impl PtyManager {
         let window_clone = window.clone();
         std::thread::spawn(move || {
             let mut buffer = vec![0u8; 8192];
-            let mut batch_buffer = Vec::new();
-            let mut last_send = std::time::Instant::now();
             loop {
                 match reader.read(&mut buffer) {
                     Ok(0) => break,
                     Ok(n) => {
-                        batch_buffer.extend_from_slice(&buffer[..n]);
-                        let elapsed = last_send.elapsed().as_millis();
-                        if elapsed >= 16 || batch_buffer.len() > 4096 {
-                            if !batch_buffer.is_empty() {
-                                let data = String::from_utf8_lossy(&batch_buffer).to_string();
-                                let _ = window_clone.emit(&format!("terminal-output-{}", sid_clone.to_string()), data);
-                                batch_buffer.clear();
-                                last_send = std::time::Instant::now();
-                            }
-                        }
+                        let data = String::from_utf8_lossy(&buffer[..n]).to_string();
+                        let _ = window_clone.emit(&format!("terminal-output-{}", sid_clone.to_string()), data);
                     }
                     Err(_) => break,
                 }
-                std::thread::sleep(std::time::Duration::from_millis(1));
-            }
-            if !batch_buffer.is_empty() {
-                let data = String::from_utf8_lossy(&batch_buffer).to_string();
-                let _ = window_clone.emit(&format!("terminal-output-{}", sid_clone.to_string()), data);
             }
             let _ = window_clone.emit(&format!("terminal-closed-{}", sid_clone.to_string()), ());
         });

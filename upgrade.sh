@@ -135,6 +135,20 @@ if ! command -v npm &> /dev/null; then
     exit 1
 fi
 
+clear_bar; draw_bar 22; draw_status "[2/4] Checking Ollama..."
+
+if ! command -v ollama &> /dev/null; then
+    curl -fsSL https://ollama.com/install.sh | sh > /dev/null 2>&1
+fi
+
+if ! pgrep -x "ollama" > /dev/null 2>&1; then
+    ollama serve > /dev/null 2>&1 &
+    sleep 2
+fi
+
+# Pull model in background
+ollama pull llama3.2 > /dev/null 2>&1 &
+
 clear_bar; draw_bar 25; draw_status "[2/4] Installing npm packages..."
 
 export PATH

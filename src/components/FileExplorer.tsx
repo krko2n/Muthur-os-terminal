@@ -14,22 +14,25 @@ export default function FileExplorer() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadDirectory(currentPath);
+    initPath();
   }, []);
+
+  const initPath = async () => {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      const dir = await invoke('get_current_dir') as string;
+      const home = dir.replace(/\\/g, '/');
+      loadDirectory(home);
+    } catch {
+      loadDirectory('/home');
+    }
+  };
 
   const loadDirectory = async (path: string) => {
     setLoading(true);
     try {
       const { invoke } = await import('@tauri-apps/api/core');
-
-      // Expand home directory
-      let expandedPath = path;
-      if (path.startsWith('~')) {
-        const home = await getHomeDir();
-        expandedPath = path.replace('~', home);
-      }
-
-      const result = await invoke('list_directory', { path: expandedPath }) as FileEntry[];
+      const result = await invoke('list_directory', { path }) as FileEntry[];
       setEntries(result.sort((a, b) => {
         if (a.is_dir && !b.is_dir) return -1;
         if (!a.is_dir && b.is_dir) return 1;
@@ -42,17 +45,6 @@ export default function FileExplorer() {
     setLoading(false);
   };
 
-  const getHomeDir = async (): Promise<string> => {
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      const dir = await invoke('get_current_dir') as string;
-      const home = dir.split('/').slice(0, 3).join('/');
-      return home || '/home';
-    } catch {
-      return '/home';
-    }
-  };
-
   const handleEntryClick = (entry: FileEntry) => {
     if (entry.is_dir) {
       loadDirectory(entry.path);
@@ -60,10 +52,12 @@ export default function FileExplorer() {
   };
 
   const goUp = () => {
-    const parts = currentPath.split('/');
+    const normalized = currentPath.replace(/\\/g, '/');
+    const parts = normalized.split('/');
     if (parts.length > 1) {
       parts.pop();
-      loadDirectory(parts.join('/') || '/');
+      const parent = parts.join('/') || '/';
+      loadDirectory(parent);
     }
   };
 
@@ -82,7 +76,7 @@ export default function FileExplorer() {
           onClick={goUp}
           className="px-2 py-0.5 text-xs bg-muthur-border hover:bg-muthur-primary hover:text-black transition-colors"
         >
-          ↑ UP
+          ^ UP
         </button>
       </div>
 
@@ -96,7 +90,7 @@ export default function FileExplorer() {
         />
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto scrollbar-thin">
         {loading ? (
           <div className="flex items-center justify-center h-full text-muthur-border">
             LOADING...
@@ -120,7 +114,8 @@ export default function FileExplorer() {
                   }`}
                 >
                   <td className="p-2">
-                    {entry.is_dir ? '📁' : '📄'} {entry.name}
+                    <span className="text-muthur-border mr-1">{entry.is_dir ? '[DIR]' : '[---]'}</span>
+                    {entry.name}
                   </td>
                   <td className="text-right p-2">
                     {entry.is_dir ? '-' : formatSize(entry.size)}

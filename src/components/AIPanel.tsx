@@ -19,6 +19,22 @@ export default function AIPanel() {
     }
   }, [messages]);
 
+  useEffect(() => {
+    checkAiStatus();
+  }, []);
+
+  const checkAiStatus = async () => {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('ai_chat', { message: 'ping' });
+    } catch {
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: 'WARNING: AI backend not responding.\nEnsure Ollama is running: ollama serve\nAnd model is pulled: ollama pull llama3.2'
+      }]);
+    }
+  };
+
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
@@ -43,11 +59,18 @@ export default function AIPanel() {
         setMessages(prev => [...prev, { role: 'assistant', content: response }]);
       }
     } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      let hint = '';
+      if (errMsg.includes('Connection refused') || errMsg.includes('connection')) {
+        hint = '\n\nFix: Run "ollama serve" in a terminal.';
+      } else if (errMsg.includes('model')) {
+        hint = '\n\nFix: Run "ollama pull llama3.2" to download the model.';
+      }
       setMessages(prev => [
         ...prev,
         {
           role: 'system',
-          content: `ERROR: ${error instanceof Error ? error.message : 'AI service unavailable'}`
+          content: `ERROR: ${errMsg}${hint}`
         }
       ]);
     }

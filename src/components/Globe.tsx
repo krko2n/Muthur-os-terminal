@@ -16,6 +16,13 @@ interface ConflictEvent {
   best: number;
 }
 
+interface ConflictArea {
+  lat: number;
+  lng: number;
+  count: number;
+  country: string;
+}
+
 function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector3 {
   const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lng + 180) * (Math.PI / 180);
@@ -91,7 +98,7 @@ function OccludedDot({ position, color, size = 0.03 }: { position: THREE.Vector3
   );
 }
 
-function ConflictArea({ center, radius: areaRadius, color, globeRadius }: { center: [number, number]; radius: number; color: string; globeRadius: number }) {
+function ConflictCircle({ center, radius: areaRadius, color, globeRadius }: { center: [number, number]; radius: number; color: string; globeRadius: number }) {
   const points = useMemo(() => {
     const pts: THREE.Vector3[] = [];
     const segments = 24;
@@ -107,7 +114,7 @@ function ConflictArea({ center, radius: areaRadius, color, globeRadius }: { cent
   return <OccludedLine points={points} color={color} opacity={0.6} />;
 }
 
-function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; worldLines: THREE.Vector3[][]; conflicts: ConflictEvent[] }) {
+function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; worldLines: THREE.Vector3[][]; conflicts: ConflictArea[] }) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((_state, delta) => {
@@ -149,23 +156,6 @@ function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; world
     return lines;
   }, []);
 
-  const conflictAreas = useMemo(() => {
-    if (mode !== 'conflicts') return [];
-    const grouped: Map<string, { lat: number; lng: number; count: number }> = new Map();
-    for (const evt of conflicts) {
-      const key = `${Math.round(evt.latitude)},${Math.round(evt.longitude)}`;
-      const existing = grouped.get(key);
-      if (existing) {
-        existing.count += evt.best;
-      } else {
-        grouped.set(key, { lat: evt.latitude, lng: evt.longitude, count: evt.best });
-      }
-    }
-    return Array.from(grouped.values())
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 40);
-  }, [conflicts, mode]);
-
   return (
     <group ref={groupRef}>
       {gridLines.map((points, i) => (
@@ -176,8 +166,8 @@ function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; world
         <OccludedLine key={`world-${i}`} points={points} color="#00ff41" opacity={0.7} />
       ))}
 
-      {mode === 'conflicts' && conflictAreas.map((area, i) => (
-        <ConflictArea
+      {mode === 'conflicts' && conflicts.map((area, i) => (
+        <ConflictCircle
           key={`conflict-${i}`}
           center={[area.lat, area.lng]}
           radius={Math.min(3, 0.8 + Math.log(area.count + 1) * 0.4)}
@@ -186,7 +176,7 @@ function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; world
         />
       ))}
 
-      {mode === 'conflicts' && conflictAreas.map((area, i) => (
+      {mode === 'conflicts' && conflicts.map((area, i) => (
         <OccludedDot
           key={`cdot-${i}`}
           position={latLngToVector3(area.lat, area.lng, radius * 1.01)}
@@ -204,7 +194,9 @@ function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; world
 export default function Globe() {
   const [mode, setMode] = useState<GlobeMode>('conflicts');
   const [worldLines, setWorldLines] = useState<THREE.Vector3[][]>([]);
-  const [conflicts, setConflicts] = useState<ConflictEvent[]>([]);
+  const [conflicts, setConflicts] = useState<ConflictArea[]>([]);
+  const [conflictStats, setConflictStats] = useState<{ total: number; countries: number } | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(WORLD_TOPO_URL)
@@ -231,7 +223,7 @@ export default function Globe() {
         }
         setWorldLines(lines);
       })
-      .catch(() => {});
+      .catch((e) => { setLoadError('Map data unavailable'); console.error(e); });
   }, []);
 
   useEffect(() => {
@@ -246,22 +238,35 @@ export default function Globe() {
             type_of_violence: e.type_of_violence,
             best: parseInt(e.best) || 1,
           }));
-          setConflicts(events);
+
+          const grouped: Map<string, ConflictArea> = new Map();
+          for (const evt of events) {
+            const key = `${Math.round(evt.latitude)},${Math.round(evt.longitude)}`;
+            const existing = grouped.get(key);
+            if (existing) {
+              existing.count += evt.best;
+            } else {
+              grouped.set(key, { lat: evt.latitude, lng: evt.longitude, count: evt.best, country: evt.country });
+            }
+          }
+
+          const areas = Array.from(grouped.values())
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 40);
+
+          setConflicts(areas);
+
+          const countries = new Set(events.map(e => e.country));
+          setConflictStats({ total: events.length, countries: countries.size });
         }
       })
-      .catch(() => {});
+      .catch((e) => { console.error('UCDP fetch failed:', e); });
   }, []);
 
   const modeLabels: Record<GlobeMode, string> = {
     conflicts: 'CONFLICTS',
     cyber: 'CYBER',
     flights: 'FLIGHTS',
-  };
-
-  const modeColors: Record<GlobeMode, string> = {
-    conflicts: 'text-red-500',
-    cyber: 'text-fuchsia-400',
-    flights: 'text-cyan-400',
   };
 
   return (
@@ -276,6 +281,17 @@ export default function Globe() {
         </Canvas>
       </div>
 
+      {/* Info overlay */}
+      {mode === 'conflicts' && conflictStats && (
+        <div className="px-2 py-1 text-[10px] text-muthur-border font-mono">
+          {conflictStats.total} events / {conflictStats.countries} countries / {conflicts.length} zones
+        </div>
+      )}
+
+      {loadError && (
+        <div className="px-2 text-[10px] text-red-500">{loadError}</div>
+      )}
+
       <div className="flex gap-1 px-2 pb-1 justify-center shrink-0">
         {(Object.keys(modeLabels) as GlobeMode[]).map((m) => (
           <button
@@ -283,7 +299,7 @@ export default function Globe() {
             onClick={() => setMode(m)}
             className={`px-2 py-0.5 text-[10px] font-mono border transition-colors ${
               mode === m
-                ? `${modeColors[m]} border-current bg-current/10`
+                ? 'text-red-500 border-current bg-red-500/10'
                 : 'text-muthur-border border-muthur-border hover:text-muthur-secondary'
             }`}
           >

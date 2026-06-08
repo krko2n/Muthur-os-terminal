@@ -134,22 +134,28 @@ install_node() {
     fi
 }
 
-# Install Ollama (optional but recommended)
+# Install Ollama and pull model
 install_ollama() {
     if command -v ollama &> /dev/null; then
         echo -e "${GREEN}[OK]${NC} Ollama already installed"
     else
         echo ""
-        read -p "Install Ollama for AI features? (y/N) " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            echo ""
-            echo -e "${YELLOW}Installing Ollama...${NC}"
-            curl -fsSL https://ollama.com/install.sh | sh
-            echo -e "${GREEN}[OK]${NC} Ollama installed"
-            echo -e "${BLUE}Tip: Run 'ollama pull llama3.2' to download the AI model${NC}"
-        fi
+        echo -e "${YELLOW}Installing Ollama for AI features...${NC}"
+        curl -fsSL https://ollama.com/install.sh | sh
+        echo -e "${GREEN}[OK]${NC} Ollama installed"
     fi
+
+    # Ensure ollama service is running
+    if ! pgrep -x "ollama" > /dev/null 2>&1; then
+        echo -e "${YELLOW}Starting Ollama service...${NC}"
+        ollama serve > /dev/null 2>&1 &
+        sleep 2
+    fi
+
+    # Pull the default model
+    echo -e "${YELLOW}Pulling AI model (llama3.2)...${NC}"
+    ollama pull llama3.2 2>/dev/null || echo -e "${YELLOW}Model pull failed - you can retry with: ollama pull llama3.2${NC}"
+    echo -e "${GREEN}[OK]${NC} AI setup complete"
 }
 
 # Build the application

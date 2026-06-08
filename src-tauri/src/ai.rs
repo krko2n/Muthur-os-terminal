@@ -85,17 +85,29 @@ impl OllamaClient {
     }
 
     fn get_config_path() -> Option<PathBuf> {
-        let home = std::env::var("HOME").ok()?;
-        let path = PathBuf::from(home)
+        let home = std::env::var("HOME")
+            .or_else(|_| std::env::var("USERPROFILE"))
+            .ok()?;
+        let path = PathBuf::from(&home)
             .join(".config")
             .join("muthur")
             .join("config.toml");
 
         if path.exists() {
-            Some(path)
-        } else {
-            None
+            return Some(path);
         }
+
+        // Windows fallback: %APPDATA%\muthur\config.toml
+        if let Ok(appdata) = std::env::var("APPDATA") {
+            let win_path = PathBuf::from(appdata)
+                .join("muthur")
+                .join("config.toml");
+            if win_path.exists() {
+                return Some(win_path);
+            }
+        }
+
+        None
     }
 
     pub async fn suggest_command(&self, context: &str, error: Option<&str>) -> anyhow::Result<String> {
