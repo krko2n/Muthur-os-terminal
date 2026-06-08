@@ -85,6 +85,8 @@ export default function Keyboard() {
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
   const [capsLock, setCapsLock] = useState(false);
   const [shiftHeld, setShiftHeld] = useState(false);
+  // Sticky shift: when shift is clicked on virtual keyboard, it stays until next key
+  const [stickyShift, setStickyShift] = useState(false);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     setActiveKeys(prev => new Set(prev).add(e.code));
@@ -110,21 +112,21 @@ export default function Keyboard() {
     };
   }, [handleKeyDown, handleKeyUp]);
 
+  const isShifted = shiftHeld || stickyShift;
+
   const getLabel = (keyDef: KeyDef): string => {
     if (keyDef.isModifier) return keyDef.lower;
     if (keyDef.isLetter) {
-      // CapsLock or Shift capitalizes letters
-      return (capsLock || shiftHeld) ? keyDef.shift : keyDef.lower;
+      return (capsLock || isShifted) ? keyDef.shift : keyDef.lower;
     }
-    // Number row and symbols: only Shift changes them (not CapsLock)
-    return shiftHeld ? keyDef.shift : keyDef.lower;
+    return isShifted ? keyDef.shift : keyDef.lower;
   };
 
   const getChar = (keyDef: KeyDef): string => {
     if (keyDef.isLetter) {
-      return (capsLock || shiftHeld) ? keyDef.shift : keyDef.lower;
+      return (capsLock || isShifted) ? keyDef.shift : keyDef.lower;
     }
-    return shiftHeld ? keyDef.shift : keyDef.lower;
+    return isShifted ? keyDef.shift : keyDef.lower;
   };
 
   const isActive = (code: string) => {
@@ -134,12 +136,17 @@ export default function Keyboard() {
   };
 
   const handleClick = (keyDef: KeyDef) => {
+    // Toggle sticky shift
     if (keyDef.code === 'ShiftLeft' || keyDef.code === 'ShiftRight') {
-      setShiftHeld(prev => !prev);
+      setStickyShift(prev => !prev);
       return;
     }
     if (keyDef.code === 'CapsLock') {
       setCapsLock(prev => !prev);
+      return;
+    }
+    // Skip other modifiers that don't produce characters
+    if (keyDef.code.startsWith('Control') || keyDef.code === 'Fn' || keyDef.code.startsWith('Alt')) {
       return;
     }
 
@@ -149,13 +156,18 @@ export default function Keyboard() {
     else if (keyDef.code === 'Tab') char = '\t';
     else if (keyDef.code === 'Backspace') char = '\x7f';
     else if (keyDef.code === 'Escape') char = '\x1b';
-    else if (keyDef.isModifier) return;
     else char = getChar(keyDef);
 
     if (char) {
       window.dispatchEvent(new CustomEvent('virtual-key', { detail: char }));
     }
 
+    // Release sticky shift after typing one character
+    if (stickyShift) {
+      setStickyShift(false);
+    }
+
+    // Visual feedback
     setActiveKeys(prev => new Set(prev).add(keyDef.code));
     setTimeout(() => {
       setActiveKeys(prev => {
@@ -167,37 +179,42 @@ export default function Keyboard() {
   };
 
   return (
-    <div className="h-full flex flex-col justify-center items-center py-[0.5vh]">
-      {ROWS.map((row, ri) => (
-        <div key={ri} className="flex gap-[0.3vw] my-[0.3vh]">
-          {row.map((keyDef, ki) => {
-            const active = isActive(keyDef.code);
-            const label = getLabel(keyDef);
-            return (
-              <div
-                key={`${ri}-${ki}`}
-                onClick={() => handleClick(keyDef)}
-                className={`
-                  flex items-center justify-center
-                  rounded-sm transition-all duration-75
-                  font-mono select-none
-                  ${active || (keyDef.code === 'CapsLock' && capsLock)
-                    ? 'key-active'
-                    : 'border border-[rgba(0,255,65,0.25)] text-muthur-primary opacity-80 hover:opacity-100 hover:border-[rgba(0,255,65,0.5)]'
-                  }
-                `}
-                style={{
-                  width: `${keyDef.w * 2.8}vw`,
-                  height: '2.6vw',
-                  fontSize: keyDef.w > 1.5 ? '0.7vw' : '0.9vw',
-                }}
-              >
-                {label}
-              </div>
-            );
-          })}
-        </div>
-      ))}
+    <div className="h-full w-full flex flex-col justify-between p-[0.5vw]">
+      {ROWS.map((row, ri) => {
+        const totalW = row.reduce((sum, k) => sum + k.w, 0);
+        return (
+          <div key={ri} className="flex flex-1 gap-[0.2vw] items-stretch">
+            {row.map((keyDef, ki) => {
+              const active = isActive(keyDef.code);
+              const label = getLabel(keyDef);
+              const isShiftKey = keyDef.code === 'ShiftLeft' || keyDef.code === 'ShiftRight';
+              const isCapsKey = keyDef.code === 'CapsLock';
+              const highlighted = active || (isShiftKey && stickyShift) || (isCapsKey && capsLock);
+              return (
+                <div
+                  key={`${ri}-${ki}`}
+                  onClick={() => handleClick(keyDef)}
+                  className={`
+                    flex items-center justify-center
+                    rounded-sm transition-all duration-75
+                    font-mono select-none my-[0.15vw]
+                    ${highlighted
+                      ? 'key-active'
+                      : 'border border-[rgba(0,255,65,0.25)] text-muthur-primary opacity-80 hover:opacity-100 hover:border-[rgba(0,255,65,0.5)]'
+                    }
+                  `}
+                  style={{
+                    flex: `${keyDef.w / totalW}`,
+                    fontSize: keyDef.w > 1.5 ? '0.7vw' : '0.9vw',
+                  }}
+                >
+                  {label}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 }
