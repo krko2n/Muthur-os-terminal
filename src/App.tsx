@@ -7,9 +7,9 @@ import CustomCursor from './components/CustomCursor';
 
 function App() {
   const [systemStats, setSystemStats] = useState<any>(null);
-  const [leftWidth, setLeftWidth] = useState(17);
-  const [rightWidth, setRightWidth] = useState(17);
-  const [bottomHeight, setBottomHeight] = useState(30);
+  const [leftWidth, setLeftWidth] = useState(22);
+  const [rightWidth, setRightWidth] = useState(22);
+  const [bottomHeight, setBottomHeight] = useState(35);
   const dragging = useRef<'left' | 'right' | 'bottom' | null>(null);
 
   useEffect(() => {
@@ -34,14 +34,11 @@ function App() {
     const vh = window.innerHeight;
 
     if (dragging.current === 'left') {
-      const pct = Math.max(10, Math.min(30, (e.clientX / vw) * 100));
-      setLeftWidth(pct);
+      setLeftWidth(Math.max(15, Math.min(30, (e.clientX / vw) * 100)));
     } else if (dragging.current === 'right') {
-      const pct = Math.max(10, Math.min(30, ((vw - e.clientX) / vw) * 100));
-      setRightWidth(pct);
+      setRightWidth(Math.max(15, Math.min(30, ((vw - e.clientX) / vw) * 100)));
     } else if (dragging.current === 'bottom') {
-      const pct = Math.max(20, Math.min(45, ((vh - e.clientY) / vh) * 100));
-      setBottomHeight(pct);
+      setBottomHeight(Math.max(25, Math.min(50, ((vh - e.clientY) / vh) * 100)));
     }
   }, []);
 
@@ -72,44 +69,36 @@ function App() {
       <div className="flex flex-col h-full">
         {/* Top section */}
         <div className="flex flex-1 min-h-0">
-          {/* Left panel */}
           <div style={{ width: `${leftWidth}%` }} className="shrink-0 overflow-hidden">
             <LeftPanel systemStats={systemStats} />
           </div>
 
-          {/* Left resize handle */}
           <div
-            className="w-[3px] shrink-0 hover:bg-[rgba(0,255,65,0.3)] transition-colors active:bg-muthur-primary"
+            className="w-[3px] shrink-0 hover:bg-[rgba(0,255,65,0.3)] transition-colors"
             onMouseDown={() => startDrag('left')}
-            style={{ cursor: 'none' }}
           />
 
-          {/* Center */}
           <div className="flex-1 min-w-0 min-h-0">
             <CenterPanel />
           </div>
 
-          {/* Right resize handle */}
           <div
-            className="w-[3px] shrink-0 hover:bg-[rgba(0,255,65,0.3)] transition-colors active:bg-muthur-primary"
+            className="w-[3px] shrink-0 hover:bg-[rgba(0,255,65,0.3)] transition-colors"
             onMouseDown={() => startDrag('right')}
-            style={{ cursor: 'none' }}
           />
 
-          {/* Right panel */}
           <div style={{ width: `${rightWidth}%` }} className="shrink-0 overflow-hidden">
             <RightPanel />
           </div>
         </div>
 
-        {/* Bottom resize handle */}
+        {/* Bottom resize */}
         <div
-          className="h-[3px] shrink-0 hover:bg-[rgba(0,255,65,0.3)] transition-colors active:bg-muthur-primary"
+          className="h-[3px] shrink-0 hover:bg-[rgba(0,255,65,0.3)] transition-colors"
           onMouseDown={() => startDrag('bottom')}
-          style={{ cursor: 'none' }}
         />
 
-        {/* Bottom section */}
+        {/* Bottom */}
         <div style={{ height: `${bottomHeight}vh` }} className="shrink-0 overflow-hidden">
           <BottomPanel />
         </div>

@@ -16,10 +16,13 @@ export default function Terminal() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [sessions, setSessions] = useState<TerminalSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [browserInput, setBrowserInput] = useState('');
+  const [browserLoading, setBrowserLoading] = useState(false);
+  const [browserContent, setBrowserContent] = useState<string | null>(null);
+  const browserContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     createNewSession('shell');
-
     return () => {
       sessions.forEach(session => {
         session.terminal.dispose();
@@ -28,7 +31,6 @@ export default function Terminal() {
     };
   }, []);
 
-  // Listen for virtual keyboard input
   useEffect(() => {
     const handleVirtualKey = (e: Event) => {
       const char = (e as CustomEvent).detail;
@@ -51,6 +53,22 @@ export default function Terminal() {
   };
 
   const createNewSession = async (type: 'shell' | 'browser') => {
+    if (type === 'browser') {
+      const id = `browser-${Date.now()}`;
+      const sessionNum = sessions.length + 1;
+      const fakeSession: TerminalSession = {
+        id,
+        terminal: null as any,
+        fitAddon: null as any,
+        name: `WEB-${sessionNum}`,
+        type: 'browser',
+      };
+      setSessions(prev => [...prev, fakeSession]);
+      setActiveSessionId(id);
+      setBrowserContent(null);
+      return;
+    }
+
     if (!containerRef.current) return;
 
     try {
@@ -89,7 +107,6 @@ export default function Terminal() {
 
       const fitAddon = new FitAddon();
       const webLinksAddon = new WebLinksAddon();
-
       terminal.loadAddon(fitAddon);
       terminal.loadAddon(webLinksAddon);
 
@@ -121,11 +138,7 @@ export default function Terminal() {
         fitAddon.fit();
         const dims = fitAddon.proposeDimensions();
         if (dims) {
-          invoke('resize_terminal', {
-            sessionId,
-            cols: dims.cols,
-            rows: dims.rows,
-          }).catch(console.error);
+          invoke('resize_terminal', { sessionId, cols: dims.cols, rows: dims.rows }).catch(console.error);
         }
       });
       resizeObserver.observe(terminalContainer);
@@ -135,26 +148,14 @@ export default function Terminal() {
         id: sessionId,
         terminal,
         fitAddon,
-        name: type === 'browser' ? `WEB-${sessionNum}` : `TERM-${sessionNum}`,
-        type,
+        name: `TERM-${sessionNum}`,
+        type: 'shell',
       };
 
       setSessions(prev => [...prev, newSession]);
       setActiveSessionId(sessionId);
-
       terminalContainer.style.display = 'block';
       terminal.focus();
-
-      // If browser type, launch a text browser command
-      if (type === 'browser') {
-        setTimeout(() => {
-          invoke('write_to_terminal', {
-            sessionId,
-            data: 'echo "MUTHUR BROWSER - Type a URL to fetch:"\n',
-          });
-        }, 500);
-      }
-
     } catch (error) {
       console.error('Failed to create terminal session:', error);
     }
@@ -164,9 +165,7 @@ export default function Terminal() {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
       await invoke('close_terminal_session', { sessionId });
-    } catch (error) {
-      console.error('Failed to cleanup session:', error);
-    }
+    } catch {}
   };
 
   const switchSession = (sessionId: string) => {
@@ -175,12 +174,15 @@ export default function Terminal() {
       (container as HTMLElement).style.display = 'none';
     });
 
-    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
-    if (sessionIndex >= 0 && containers) {
-      (containers[sessionIndex] as HTMLElement).style.display = 'block';
-      sessions[sessionIndex].terminal.focus();
+    const session = sessions.find(s => s.id === sessionId);
+    if (session?.type === 'shell') {
+      const shellSessions = sessions.filter(s => s.type === 'shell');
+      const idx = shellSessions.indexOf(session);
+      if (idx >= 0 && containers && containers[idx]) {
+        (containers[idx] as HTMLElement).style.display = 'block';
+        session.terminal.focus();
+      }
     }
-
     setActiveSessionId(sessionId);
   };
 
@@ -188,8 +190,10 @@ export default function Terminal() {
     const session = sessions.find(s => s.id === sessionId);
     if (!session) return;
 
-    session.terminal.dispose();
-    await cleanupSession(sessionId);
+    if (session.type === 'shell') {
+      session.terminal.dispose();
+      await cleanupSession(sessionId);
+    }
 
     const newSessions = sessions.filter(s => s.id !== sessionId);
     setSessions(newSessions);
@@ -201,50 +205,105 @@ export default function Terminal() {
     }
   };
 
+  const navigateBrowser = async (url: string) => {
+    let normalized = url.trim();
+    if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+      if (normalized.includes('.') && !normalized.includes(' ')) {
+        normalized = 'https://' + normalized;
+      } else {
+        normalized = `https://duckduckgo.com/html/?q=${encodeURIComponent(normalized)}`;
+      }
+    }
+    setBrowserInput(normalized);
+    setBrowserLoading(true);
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      const result = await invoke('fetch_url', { url: normalized }) as string;
+      setBrowserContent(result);
+    } catch (e) {
+      setBrowserContent(`ERROR: ${e}\n\nCould not fetch: ${normalized}`);
+    }
+    setBrowserLoading(false);
+  };
+
+  const activeSession = sessions.find(s => s.id === activeSessionId);
+  const isBrowser = activeSession?.type === 'browser';
+
   return (
     <div className="h-full flex flex-col">
-      {/* Tab bar */}
-      <div className="flex items-center gap-[0.3vw] px-[0.5vh] py-[0.3vh] border-b border-[rgba(0,255,65,0.1)]">
+      {/* Tab bar - large, same level */}
+      <div className="flex items-center px-2 py-1 border-b border-[rgba(0,255,65,0.15)] shrink-0">
         {sessions.map(session => (
           <div
             key={session.id}
-            className={`flex items-center gap-[0.5vh] px-[0.8vh] py-[0.2vh] text-[1.2vh] transition-colors ${
+            className={`flex items-center gap-2 px-3 py-1 text-sm transition-colors mr-1 ${
               activeSessionId === session.id
-                ? 'text-muthur-primary border-b border-muthur-primary'
+                ? 'text-muthur-primary border-b-2 border-muthur-primary'
                 : 'text-muthur-secondary opacity-50 hover:opacity-80'
             }`}
             onClick={() => switchSession(session.id)}
           >
-            <span>{session.name}</span>
+            <span className="font-mono">{session.name}</span>
             <span
-              onClick={(e) => {
-                e.stopPropagation();
-                closeSession(session.id);
-              }}
-              className="opacity-40 hover:opacity-100 hover:text-[#ff006e]"
+              onClick={(e) => { e.stopPropagation(); closeSession(session.id); }}
+              className="text-xs opacity-40 hover:opacity-100 hover:text-[#ff006e] ml-1"
             >
               x
             </span>
           </div>
         ))}
-        <div className="flex gap-[0.3vw] ml-auto">
+        <div className="flex gap-1 ml-auto">
           <button
             onClick={() => createNewSession('shell')}
-            className="px-[0.6vh] py-[0.2vh] text-[1vh] border border-[rgba(0,255,65,0.2)] text-muthur-primary opacity-60 hover:opacity-100 transition-colors"
+            className="px-2 py-0.5 text-xs border border-[rgba(0,255,65,0.25)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] transition-colors"
           >
             + shell
           </button>
           <button
             onClick={() => createNewSession('browser')}
-            className="px-[0.6vh] py-[0.2vh] text-[1vh] border border-[rgba(0,255,65,0.2)] text-muthur-secondary opacity-60 hover:opacity-100 transition-colors"
+            className="px-2 py-0.5 text-xs border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:bg-[rgba(0,255,65,0.1)] transition-colors"
           >
             + web
           </button>
         </div>
       </div>
 
-      {/* Terminal container */}
-      <div ref={containerRef} className="flex-1 overflow-hidden" />
+      {/* Content */}
+      {isBrowser ? (
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* URL bar */}
+          <div className="flex gap-2 p-2 border-b border-[rgba(0,255,65,0.1)] shrink-0">
+            <input
+              type="text"
+              value={browserInput}
+              onChange={(e) => setBrowserInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && navigateBrowser(browserInput)}
+              placeholder="Enter URL or search..."
+              className="flex-1 bg-transparent border border-[rgba(0,255,65,0.2)] px-2 py-1 text-sm text-muthur-primary font-mono focus:outline-none focus:border-[rgba(0,255,65,0.5)]"
+            />
+            <button
+              onClick={() => navigateBrowser(browserInput)}
+              className="px-3 py-1 text-sm border border-[rgba(0,255,65,0.3)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)]"
+            >
+              GO
+            </button>
+          </div>
+          {/* Browser content */}
+          <div ref={browserContentRef} className="flex-1 overflow-auto p-3 text-sm font-mono scrollbar-thin">
+            {browserLoading ? (
+              <div className="text-muthur-secondary opacity-50 animate-pulse">Fetching...</div>
+            ) : browserContent ? (
+              <pre className="whitespace-pre-wrap break-words text-muthur-secondary leading-relaxed">{browserContent}</pre>
+            ) : (
+              <div className="text-muthur-secondary opacity-30 text-center mt-8">
+                Enter a URL or search term above
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div ref={containerRef} className="flex-1 overflow-hidden" />
+      )}
     </div>
   );
 }

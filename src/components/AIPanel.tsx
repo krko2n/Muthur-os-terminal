@@ -7,7 +7,7 @@ interface Message {
 
 export default function AIPanel() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'system', content: 'MUTHUR 6000 INTERFACE\nMODEL: MU/TH/UR 182\nSTATUS: ACTIVE\n\nAwaiting crew input...' }
+    { role: 'system', content: 'MUTHUR AI online.\nReady to help with anything you need.\n\nCommands:\n  web <query> - search the internet\n  fetch <url> - get page content\n  # <context> - suggest a command' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -108,8 +108,8 @@ export default function AIPanel() {
                 : 'text-muthur-secondary'
             }`}
           >
-            {msg.role === 'user' && <span className="opacity-40">CREW &gt; </span>}
-            {msg.role === 'assistant' && <span className="opacity-40">MUTHUR &gt; </span>}
+            {msg.role === 'user' && <span className="opacity-40">&gt; </span>}
+            {msg.role === 'assistant' && <span className="opacity-40 text-muthur-primary">MUTHUR: </span>}
             <span className="whitespace-pre-wrap break-words">{msg.content}</span>
           </div>
         ))}
@@ -130,7 +130,7 @@ export default function AIPanel() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Interface with MUTHUR..."
+            placeholder="Ask anything..."
             className="flex-1 bg-transparent border border-[rgba(0,255,65,0.2)] px-[0.5vh] py-[0.3vh] text-[1.3vh] text-muthur-primary focus:outline-none focus:border-[rgba(0,255,65,0.5)]"
             disabled={loading}
           />

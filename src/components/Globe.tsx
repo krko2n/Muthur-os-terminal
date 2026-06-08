@@ -190,71 +190,76 @@ export default function Globe() {
     loadGlobeData();
   }, []);
 
-  const loadGlobeData = async () => {
+  const fetchData = async (url: string): Promise<any> => {
+    // Try frontend fetch first (CSP disabled)
+    try {
+      const res = await fetch(url);
+      if (res.ok) return await res.json();
+    } catch {}
+    // Fallback to backend proxy
     try {
       const { invoke } = await import('@tauri-apps/api/core');
+      const text = await invoke('fetch_json', { url }) as string;
+      return JSON.parse(text);
+    } catch {}
+    return null;
+  };
 
-      setStatus('FETCHING MAP...');
-      const topoJson = await invoke('fetch_json', {
-        url: 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
-      }) as string;
+  const loadGlobeData = async () => {
+    setStatus('FETCHING MAP...');
+    const topo = await fetchData('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
 
-      const topo = JSON.parse(topoJson);
-      const geo = feature(topo, topo.objects.countries) as any;
-      const lines: THREE.Vector3[][] = [];
-      const radius = 2;
+    if (!topo) {
+      setStatus('MAP UNAVAILABLE');
+      return;
+    }
 
-      for (const f of geo.features) {
-        const coords = f.geometry.type === 'Polygon'
-          ? [f.geometry.coordinates]
-          : f.geometry.coordinates;
+    const geo = feature(topo, topo.objects.countries) as any;
+    const lines: THREE.Vector3[][] = [];
+    const radius = 2;
 
-        for (const polygon of coords) {
-          for (const ring of polygon) {
-            if (ring.length < 3) continue;
-            const points = ring.map(([lng, lat]: [number, number]) =>
-              latLngToVector3(lat, lng, radius)
-            );
-            lines.push(points);
-          }
+    for (const f of geo.features) {
+      const coords = f.geometry.type === 'Polygon'
+        ? [f.geometry.coordinates]
+        : f.geometry.coordinates;
+
+      for (const polygon of coords) {
+        for (const ring of polygon) {
+          if (ring.length < 3) continue;
+          const points = ring.map(([lng, lat]: [number, number]) =>
+            latLngToVector3(lat, lng, radius)
+          );
+          lines.push(points);
         }
       }
-      setWorldLines(lines);
-      setStatus('MAP LOADED');
+    }
+    setWorldLines(lines);
+    setStatus('MAP LOADED');
 
-      // Load conflicts
-      setStatus('FETCHING CONFLICT DATA...');
-      try {
-        const conflictJson = await invoke('fetch_json', {
-          url: 'https://ucdpapi.pcr.uu.se/api/gedevents/24.1?pagesize=500&page=0'
-        }) as string;
+    // Load conflicts
+    setStatus('LOADING EVENTS...');
+    const data = await fetchData('https://ucdpapi.pcr.uu.se/api/gedevents/24.1?pagesize=500&page=0');
 
-        const data = JSON.parse(conflictJson);
-        if (data.Result) {
-          const grouped: Map<string, ConflictArea> = new Map();
-          for (const e of data.Result) {
-            const lat = parseFloat(e.latitude);
-            const lng = parseFloat(e.longitude);
-            const key = `${Math.round(lat)},${Math.round(lng)}`;
-            const existing = grouped.get(key);
-            if (existing) {
-              existing.count += parseInt(e.best) || 1;
-            } else {
-              grouped.set(key, { lat, lng, count: parseInt(e.best) || 1, country: e.country });
-            }
-          }
-          const areas = Array.from(grouped.values())
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 40);
-          setConflicts(areas);
-          setStatus(`${data.Result.length} EVENTS`);
+    if (data?.Result) {
+      const grouped: Map<string, ConflictArea> = new Map();
+      for (const e of data.Result) {
+        const lat = parseFloat(e.latitude);
+        const lng = parseFloat(e.longitude);
+        const key = `${Math.round(lat)},${Math.round(lng)}`;
+        const existing = grouped.get(key);
+        if (existing) {
+          existing.count += parseInt(e.best) || 1;
+        } else {
+          grouped.set(key, { lat, lng, count: parseInt(e.best) || 1, country: e.country });
         }
-      } catch {
-        setStatus('MAP ONLY (API UNAVAILABLE)');
       }
-    } catch (err) {
-      console.error('Globe load error:', err);
-      setStatus('OFFLINE');
+      const areas = Array.from(grouped.values())
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 40);
+      setConflicts(areas);
+      setStatus(`${data.Result.length} EVENTS`);
+    } else {
+      setStatus('MAP ONLY');
     }
   };
 
