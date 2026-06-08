@@ -7,15 +7,15 @@ interface Message {
 
 export default function AIPanel() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'system', content: '7-Alpha-1 (MUTHUR AI Interface)\n\nUser Authentication: Successful\nConnection Established\n\nAvailable functions:\n\n1. Data Retrieval\n2. Information Synthesis\n3. Command Assistance\n\nUse # prefix for command suggestions.' }
+    { role: 'system', content: 'MUTHUR AI Interface Active\nConnection Established\n\nType a message or use # for command suggestions.' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -24,7 +24,7 @@ export default function AIPanel() {
 
     const userMessage = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: `> ${userMessage}` }]);
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setLoading(true);
 
     try {
@@ -33,26 +33,17 @@ export default function AIPanel() {
       if (userMessage.startsWith('#')) {
         const context = userMessage.substring(1).trim();
         const response = await invoke('ai_suggest_command', { context }) as string;
-        setMessages(prev => [
-          ...prev,
-          { role: 'assistant', content: `COMMAND:\n${response}` }
-        ]);
+        setMessages(prev => [...prev, { role: 'assistant', content: response }]);
       } else {
         const response = await invoke('ai_chat', { message: userMessage }) as string;
         setMessages(prev => [...prev, { role: 'assistant', content: response }]);
       }
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : String(error);
-      let hint = '';
-      if (errMsg.includes('onnect') || errMsg.includes('refused')) {
-        hint = '\n\nRun: ollama serve';
-      } else if (errMsg.includes('model') || errMsg.includes('not found')) {
-        hint = '\n\nRun: ollama pull llama3.2';
-      }
-      setMessages(prev => [
-        ...prev,
-        { role: 'system', content: `ERR: ${errMsg}${hint}` }
-      ]);
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: `ERR: ${errMsg}\n${errMsg.includes('onnect') ? 'Run: ollama serve' : ''}`
+      }]);
     }
 
     setLoading(false);
@@ -66,51 +57,48 @@ export default function AIPanel() {
   };
 
   return (
-    <div className="panel flex-1 flex flex-col min-h-0">
-      <div className="panel-header shrink-0">MUTHUR AI</div>
+    <div className="flex flex-col min-h-0 flex-1">
+      <div className="text-[1.1vh] tracking-widest opacity-60 mb-[0.3vh]">MUTHUR AI</div>
 
       <div
-        ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto min-h-0 p-3 space-y-3 text-xs scrollbar-thin"
+        ref={containerRef}
+        className="flex-1 overflow-y-auto min-h-0 scrollbar-thin space-y-[0.8vh]"
       >
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={
+            className={`text-[1.1vh] leading-relaxed ${
               msg.role === 'user'
-                ? 'text-muthur-primary font-bold'
+                ? 'text-muthur-primary'
                 : msg.role === 'system'
-                ? 'text-muthur-secondary'
+                ? 'text-muthur-secondary opacity-70'
                 : 'text-muthur-secondary'
-            }
+            }`}
           >
-            <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-relaxed">
-              {msg.content}
-            </pre>
+            {msg.role === 'user' && <span className="opacity-50">&gt; </span>}
+            <span className="whitespace-pre-wrap break-words">{msg.content}</span>
           </div>
         ))}
         {loading && (
-          <div className="text-muthur-border animate-pulse">
-            PROCESSING...
-          </div>
+          <div className="text-[1.1vh] opacity-30 animate-pulse">...</div>
         )}
       </div>
 
-      <div className="p-2 border-t border-muthur-border shrink-0">
-        <div className="flex gap-2">
+      <div className="mt-[0.5vh] shrink-0">
+        <div className="flex gap-[0.5vh]">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask MUTHUR..."
-            className="flex-1 bg-muthur-bg border border-muthur-border px-2 py-1 text-xs text-muthur-primary focus:outline-none focus:border-muthur-primary font-mono"
+            className="flex-1 bg-transparent border-b border-[rgba(0,255,65,0.3)] px-[0.3vh] py-[0.2vh] text-[1.1vh] text-muthur-primary focus:outline-none focus:border-muthur-primary"
             disabled={loading}
           />
           <button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
-            className="px-3 py-1 bg-muthur-primary text-black text-xs font-bold hover:bg-muthur-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-[0.8vh] py-[0.2vh] text-[1.1vh] border border-[rgba(0,255,65,0.3)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] disabled:opacity-20 transition-colors"
           >
             &gt;
           </button>

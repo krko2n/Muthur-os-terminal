@@ -60,52 +60,34 @@ export default function FileExplorer() {
     }
   };
 
-  const getFileIcon = (entry: FileEntry): string => {
-    if (entry.is_dir) {
-      return `
- ___
-|   |
-|___|`;
-    }
-    const ext = entry.name.split('.').pop()?.toLowerCase() || '';
-    if (['ts', 'tsx', 'js', 'jsx'].includes(ext)) {
-      return `
- .js
-|---|
-|___|`;
-    }
-    if (['json', 'toml', 'yaml', 'yml'].includes(ext)) {
-      return `
- { }
-|---|
-|___|`;
-    }
-    if (['md', 'txt', 'doc'].includes(ext)) {
-      return `
- ...
-|---|
-|___|`;
-    }
-    return `
- ---
-|   |
-|___|`;
+  const formatSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes}B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}K`;
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)}M`;
+    return `${(bytes / 1024 / 1024 / 1024).toFixed(1)}G`;
+  };
+
+  const formatDate = (ts: number): string => {
+    if (!ts) return '--';
+    const d = new Date(ts * 1000);
+    return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
 
   return (
-    <div className="panel h-full flex flex-col">
-      <div className="panel-header flex items-center justify-between">
-        <span>FILESYSTEM</span>
-        <span className="text-muthur-border font-normal text-[10px]">
+    <div className="h-full flex flex-col">
+      {/* Title bar with path */}
+      <div className="flex items-center justify-between px-[0.8vh] py-[0.4vh] border-b border-[rgba(0,255,65,0.15)]">
+        <span className="text-[1.1vh] tracking-widest opacity-60">FILESYSTEM</span>
+        <span className="text-[1vh] text-muthur-secondary opacity-50 truncate ml-4">
           {currentPath}
         </span>
       </div>
 
-      {/* Navigation bar */}
-      <div className="flex items-center gap-2 px-2 py-1 border-b border-muthur-border">
+      {/* Controls */}
+      <div className="flex items-center gap-[0.5vh] px-[0.8vh] py-[0.3vh] border-b border-[rgba(0,255,65,0.1)]">
         <button
           onClick={goUp}
-          className="px-2 py-0.5 text-[10px] bg-muthur-border hover:bg-muthur-primary hover:text-black transition-colors text-muthur-primary"
+          className="px-[1vh] py-[0.2vh] text-[1vh] border border-[rgba(0,255,65,0.3)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] transition-colors"
         >
           ^ UP
         </button>
@@ -114,33 +96,39 @@ export default function FileExplorer() {
           value={currentPath}
           onChange={(e) => setCurrentPath(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && loadDirectory(currentPath)}
-          className="flex-1 bg-muthur-bg border border-muthur-border px-2 py-0.5 text-[10px] text-muthur-primary focus:outline-none focus:border-muthur-primary"
+          className="flex-1 bg-transparent border-b border-[rgba(0,255,65,0.2)] px-[0.5vh] py-[0.2vh] text-[1vh] text-muthur-primary focus:outline-none focus:border-muthur-primary"
         />
       </div>
 
-      {/* File Grid */}
-      <div className="flex-1 overflow-auto p-2 scrollbar-thin">
+      {/* File list - vertical tree view */}
+      <div className="flex-1 overflow-auto scrollbar-thin px-[0.5vh] py-[0.3vh]">
         {loading ? (
-          <div className="flex items-center justify-center h-full text-muthur-border text-xs">
+          <div className="flex items-center justify-center h-full text-[1.2vh] opacity-30">
             LOADING...
           </div>
         ) : (
-          <div className="grid grid-cols-6 gap-2 lg:grid-cols-8 xl:grid-cols-10">
+          <div className="space-y-0">
             {entries.map((entry, i) => (
               <div
                 key={i}
                 onClick={() => handleEntryClick(entry)}
-                className={`
-                  flex flex-col items-center p-1 rounded cursor-pointer
-                  hover:bg-muthur-border/30 transition-colors text-center
-                  ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}
-                `}
+                className="flex items-center gap-[1vh] py-[0.25vh] px-[0.3vh] hover:bg-[rgba(0,255,65,0.05)] transition-colors group"
               >
-                <pre className="text-[8px] leading-tight opacity-70 mb-0.5">
-                  {getFileIcon(entry)}
-                </pre>
-                <span className="text-[9px] truncate w-full font-mono">
-                  {entry.name.length > 12 ? entry.name.slice(0, 10) + '..' : entry.name}
+                {/* Icon */}
+                <span className={`text-[1.2vh] w-[2vh] shrink-0 ${entry.is_dir ? 'text-muthur-primary' : 'text-muthur-secondary opacity-70'}`}>
+                  {entry.is_dir ? '/' : '.'}
+                </span>
+                {/* Name */}
+                <span className={`flex-1 text-[1.2vh] truncate ${entry.is_dir ? 'text-muthur-primary' : 'text-muthur-secondary'}`}>
+                  {entry.name}
+                </span>
+                {/* Size */}
+                <span className="text-[1vh] text-muthur-secondary opacity-40 w-[5vh] text-right tabular-nums shrink-0">
+                  {entry.is_dir ? '--' : formatSize(entry.size)}
+                </span>
+                {/* Modified */}
+                <span className="text-[1vh] text-muthur-secondary opacity-30 w-[8vh] text-right tabular-nums shrink-0">
+                  {formatDate(entry.modified)}
                 </span>
               </div>
             ))}

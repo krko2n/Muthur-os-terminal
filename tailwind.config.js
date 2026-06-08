@@ -7,34 +7,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        'muthur-bg': '#000000',
+        'muthur-bg': '#05080d',
         'muthur-primary': '#00ff41',
-        'muthur-secondary': '#00d4ff',
+        'muthur-secondary': '#aacfd1',
         'muthur-accent': '#ff006e',
-        'muthur-border': '#0a3622',
-        'muthur-panel': '#0a1612',
+        'muthur-border': 'rgba(0, 255, 65, 0.15)',
+        'muthur-panel': '#05080d',
+        'muthur-dim': 'rgba(0, 255, 65, 0.4)',
+        'muthur-faint': 'rgba(0, 255, 65, 0.08)',
       },
       fontFamily: {
         'mono': ['"Share Tech Mono"', '"Courier New"', 'monospace'],
-        'tech': ['"Share Tech Mono"', 'monospace'],
-      },
-      animation: {
-        'scanline': 'scanline 8s linear infinite',
-        'flicker': 'flicker 0.15s infinite',
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-      },
-      keyframes: {
-        scanline: {
-          '0%': { transform: 'translateY(-100vh)' },
-          '100%': { transform: 'translateY(100vh)' },
-        },
-        flicker: {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.97' },
-        },
-      },
-      boxShadow: {
-        'key-active': '0 0 8px #00ff41, 0 0 16px rgba(0, 255, 65, 0.3)',
       },
     },
   },

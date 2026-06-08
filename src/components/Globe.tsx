@@ -276,21 +276,21 @@ export default function Globe() {
             <RotatingGlobe mode={mode} worldLines={worldLines} conflicts={conflicts} />
           </Canvas>
         ) : (
-          <div className="flex items-center justify-center h-full text-muthur-border text-[10px]">
+          <div className="flex items-center justify-center h-full text-[1.1vh] opacity-30">
             {status}
           </div>
         )}
       </div>
 
-      <div className="flex gap-1 px-1 pb-1 justify-center shrink-0">
+      <div className="flex gap-[0.5vh] justify-center shrink-0 py-[0.3vh]">
         {(Object.keys(modeLabels) as GlobeMode[]).map((m) => (
           <button
             key={m}
             onClick={() => setMode(m)}
-            className={`px-2 py-0.5 text-[9px] font-mono border transition-colors ${
+            className={`px-[0.8vh] py-[0.2vh] text-[0.9vh] font-mono border transition-colors ${
               mode === m
-                ? 'text-red-500 border-red-500 bg-red-500/10'
-                : 'text-muthur-border border-muthur-border hover:text-muthur-secondary'
+                ? 'text-[#ff4444] border-[#ff4444] bg-[rgba(255,68,68,0.1)]'
+                : 'border-[rgba(0,255,65,0.2)] text-muthur-primary opacity-40 hover:opacity-70'
             }`}
           >
             {modeLabels[m]}

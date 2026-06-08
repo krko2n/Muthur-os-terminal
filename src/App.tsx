@@ -26,19 +26,19 @@ function App() {
   }, []);
 
   return (
-    <div className="w-screen h-screen bg-muthur-bg overflow-hidden relative crt-flicker">
+    <div className="w-screen h-screen overflow-hidden relative crt-flicker">
       <div className="scanline" />
       <CustomCursor />
 
-      <div className="flex flex-col h-full p-1 gap-1">
-        {/* Top section: left panel + center terminal + right panel */}
-        <div className="flex flex-1 gap-1 min-h-0">
+      <div className="flex flex-col h-full">
+        {/* Top: left stats + center terminal + right globe/ai */}
+        <div className="flex flex-1 min-h-0">
           <LeftPanel systemStats={systemStats} />
           <CenterPanel />
           <RightPanel />
         </div>
 
-        {/* Bottom section: filesystem + keyboard */}
+        {/* Bottom: filesystem + keyboard (fixed height) */}
         <BottomPanel />
       </div>
     </div>

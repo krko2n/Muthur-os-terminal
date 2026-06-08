@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-r: 0;
+  --color-g: 255;
+  --color-b: 65;
+  --color-accent: rgb(var(--color-r), var(--color-g), var(--color-b));
+  --color-accent-dim: rgba(var(--color-r), var(--color-g), var(--color-b), 0.3);
+  --color-accent-faint: rgba(var(--color-r), var(--color-g), var(--color-b), 0.08);
+  --color-bg: #05080d;
+  --color-grey: #1a1e22;
+  --color-text: #aacfd1;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -11,8 +23,12 @@
 
 body {
   font-family: 'Share Tech Mono', 'Courier New', monospace;
-  background: #000;
-  color: #00ff41;
+  background:
+    linear-gradient(90deg, var(--color-bg) 1.85vh, transparent 1%) center,
+    linear-gradient(var(--color-bg) 1.85vh, transparent 1%) center,
+    var(--color-grey);
+  background-size: 2.04vh 2.04vh;
+  color: var(--color-accent);
   overflow: hidden;
 }
 
@@ -22,17 +38,17 @@ body {
   overflow: hidden;
 }
 
-/* Custom cursor - circle with dot center */
+/* Custom cursor - circle with center dot */
 .custom-cursor {
   position: fixed;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #00ff41;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--color-accent);
   border-radius: 50%;
   pointer-events: none;
   z-index: 99999;
-  transition: transform 0.08s ease;
-  box-shadow: 0 0 6px #00ff41, inset 0 0 3px rgba(0, 255, 65, 0.3);
+  transition: transform 0.06s ease;
+  opacity: 0.9;
 }
 
 .custom-cursor::after {
@@ -43,49 +59,53 @@ body {
   transform: translate(-50%, -50%);
   width: 3px;
   height: 3px;
-  background: #00ff41;
+  background: var(--color-accent);
   border-radius: 50%;
-  box-shadow: 0 0 4px #00ff41;
 }
 
-/* Scanline effect */
+/* Scanline */
 .scanline {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 2px;
-  background: linear-gradient(transparent, rgba(0, 255, 65, 0.2), transparent);
-  animation: scanline 8s linear infinite;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0, 0, 0, 0.03) 1px,
+    rgba(0, 0, 0, 0.03) 2px
+  );
   pointer-events: none;
   z-index: 9998;
 }
 
-/* CRT flicker - subtle */
+/* CRT subtle */
 .crt-flicker {
-  animation: flicker 0.15s infinite;
+  animation: flicker 4s infinite;
 }
 
-/* Scrollbar styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a1612;
+  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.05);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0a3622;
+  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.4);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00ff41;
+  background: var(--color-accent);
 }
 
-/* Terminal styling */
+/* Terminal */
 .xterm {
   height: 100%;
   padding: 8px;
@@ -99,35 +119,25 @@ body {
   background-color: transparent !important;
 }
 
-/* Glow effects */
-.text-glow {
-  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
-}
-
-.border-glow {
-  box-shadow: 0 0 10px currentColor, inset 0 0 10px currentColor;
-}
-
-/* Panel styling */
+/* Panel styling - minimal, like eDEX */
 .panel {
-  background: rgba(10, 22, 18, 0.9);
-  border: 1px solid #0a3622;
+  background: rgba(5, 8, 13, 0.92);
+  border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.15);
 }
 
 .panel-header {
-  background: rgba(0, 255, 65, 0.05);
-  border-bottom: 1px solid #0a3622;
-  padding: 4px 8px;
-  font-size: 10px;
-  font-weight: bold;
+  border-bottom: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.15);
+  padding: 0.4vh 0.8vh;
+  font-size: 1.1vh;
+  font-weight: normal;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #00ff41;
+  letter-spacing: 0.2em;
+  color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.6);
 }
 
-/* Thin scrollbar variant */
+/* Thin scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -135,25 +145,29 @@ body {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #0a3622;
+  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.2);
   border-radius: 2px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #00ff41;
+/* Text glow for clock */
+.text-glow {
+  text-shadow: 0 0 8px rgba(var(--color-r), var(--color-g), var(--color-b), 0.5);
 }
 
-/* Keyboard key active glow */
-.shadow-key-active {
-  box-shadow: 0 0 8px #00ff41, 0 0 16px rgba(0, 255, 65, 0.3);
-}
-
-@keyframes scanline {
-  0% { transform: translateY(-100vh); }
-  100% { transform: translateY(100vh); }
+/* Keyboard key active */
+.key-active {
+  background: var(--color-accent) !important;
+  color: var(--color-bg) !important;
+  border-color: var(--color-accent) !important;
 }
 
 @keyframes flicker {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.97; }
+  50% { opacity: 0.985; }
+}
+
+@keyframes blink {
+  0% { background: rgba(var(--color-r), var(--color-g), var(--color-b), 0); }
+  50% { background: rgba(var(--color-r), var(--color-g), var(--color-b), 1); }
+  100% { background: rgba(var(--color-r), var(--color-g), var(--color-b), 0); }
 }
