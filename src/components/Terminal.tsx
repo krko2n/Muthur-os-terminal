@@ -9,6 +9,7 @@ interface TerminalSession {
   terminal: XTerm;
   fitAddon: FitAddon;
   name: string;
+  type: 'shell' | 'browser';
 }
 
 export default function Terminal() {
@@ -17,33 +18,53 @@ export default function Terminal() {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Create initial terminal session
-    createNewSession();
+    createNewSession('shell');
 
     return () => {
-      // Cleanup all sessions
       sessions.forEach(session => {
         session.terminal.dispose();
-        cleanupSession(session.id);
+        if (session.type === 'shell') cleanupSession(session.id);
       });
     };
   }, []);
 
-  const createNewSession = async () => {
+  // Listen for virtual keyboard input
+  useEffect(() => {
+    const handleVirtualKey = (e: Event) => {
+      const char = (e as CustomEvent).detail;
+      const active = sessions.find(s => s.id === activeSessionId);
+      if (active && active.type === 'shell' && char) {
+        writeToTerminal(active.id, char);
+      }
+    };
+    window.addEventListener('virtual-key', handleVirtualKey);
+    return () => window.removeEventListener('virtual-key', handleVirtualKey);
+  }, [sessions, activeSessionId]);
+
+  const writeToTerminal = async (sessionId: string, data: string) => {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('write_to_terminal', { sessionId, data });
+    } catch (e) {
+      console.error('Write failed:', e);
+    }
+  };
+
+  const createNewSession = async (type: 'shell' | 'browser') => {
     if (!containerRef.current) return;
 
     try {
       const { invoke } = await import('@tauri-apps/api/core');
       const { listen } = await import('@tauri-apps/api/event');
 
-      // Create terminal instance
       const terminal = new XTerm({
         cursorBlink: true,
-        fontSize: 14,
-        fontFamily: '"Share Tech Mono", "Courier New", monospace',
+        cursorStyle: 'block',
+        fontSize: 15,
+        fontFamily: '"Share Tech Mono", "Fira Mono", "Courier New", monospace',
         theme: {
           background: 'transparent',
-          foreground: '#00ff41',
+          foreground: '#aacfd1',
           cursor: '#00ff41',
           black: '#000000',
           red: '#ff006e',
@@ -72,28 +93,20 @@ export default function Terminal() {
       terminal.loadAddon(fitAddon);
       terminal.loadAddon(webLinksAddon);
 
-      // Create PTY session
       const sessionId = await invoke('create_terminal_session') as string;
 
-      // Listen for output
       await listen(`terminal-output-${sessionId}`, (e: any) => {
         terminal.write(e.payload);
       });
 
-      // Listen for session close
       await listen(`terminal-closed-${sessionId}`, () => {
-        terminal.write('\r\n\x1b[31mSession closed\x1b[0m\r\n');
+        terminal.write('\r\n\x1b[31m[Session ended]\x1b[0m\r\n');
       });
 
-      // Handle terminal input
       terminal.onData(async (data) => {
-        await invoke('write_to_terminal', {
-          sessionId,
-          data,
-        });
+        await invoke('write_to_terminal', { sessionId, data });
       });
 
-      // Create container for this terminal
       const terminalContainer = document.createElement('div');
       terminalContainer.className = 'terminal-container';
       terminalContainer.style.width = '100%';
@@ -102,10 +115,8 @@ export default function Terminal() {
 
       containerRef.current.appendChild(terminalContainer);
       terminal.open(terminalContainer);
-
       fitAddon.fit();
 
-      // Handle resize
       const resizeObserver = new ResizeObserver(() => {
         fitAddon.fit();
         const dims = fitAddon.proposeDimensions();
@@ -119,19 +130,30 @@ export default function Terminal() {
       });
       resizeObserver.observe(terminalContainer);
 
+      const sessionNum = sessions.length + 1;
       const newSession: TerminalSession = {
         id: sessionId,
         terminal,
         fitAddon,
-        name: `TERM-${sessions.length + 1}`,
+        name: type === 'browser' ? `WEB-${sessionNum}` : `TERM-${sessionNum}`,
+        type,
       };
 
       setSessions(prev => [...prev, newSession]);
       setActiveSessionId(sessionId);
 
-      // Show this terminal
       terminalContainer.style.display = 'block';
       terminal.focus();
+
+      // If browser type, launch a text browser command
+      if (type === 'browser') {
+        setTimeout(() => {
+          invoke('write_to_terminal', {
+            sessionId,
+            data: 'echo "MUTHUR BROWSER - Type a URL to fetch:"\n',
+          });
+        }, 500);
+      }
 
     } catch (error) {
       console.error('Failed to create terminal session:', error);
@@ -148,13 +170,11 @@ export default function Terminal() {
   };
 
   const switchSession = (sessionId: string) => {
-    // Hide all terminals
     const containers = containerRef.current?.querySelectorAll('.terminal-container');
     containers?.forEach(container => {
       (container as HTMLElement).style.display = 'none';
     });
 
-    // Show selected terminal
     const sessionIndex = sessions.findIndex(s => s.id === sessionId);
     if (sessionIndex >= 0 && containers) {
       (containers[sessionIndex] as HTMLElement).style.display = 'block';
@@ -177,42 +197,50 @@ export default function Terminal() {
     if (activeSessionId === sessionId && newSessions.length > 0) {
       switchSession(newSessions[0].id);
     } else if (newSessions.length === 0) {
-      createNewSession();
+      createNewSession('shell');
     }
   };
 
   return (
     <div className="h-full flex flex-col">
       {/* Tab bar */}
-      <div className="flex gap-1 bg-muthur-panel border-b border-muthur-border p-1">
+      <div className="flex items-center gap-[0.3vw] px-[0.5vh] py-[0.3vh] border-b border-[rgba(0,255,65,0.1)]">
         {sessions.map(session => (
           <div
             key={session.id}
-            className={`flex items-center gap-2 px-3 py-1 text-xs cursor-pointer ${
+            className={`flex items-center gap-[0.5vh] px-[0.8vh] py-[0.2vh] text-[1.2vh] transition-colors ${
               activeSessionId === session.id
-                ? 'bg-muthur-border text-muthur-primary'
-                : 'text-muthur-secondary hover:bg-muthur-border'
-            } transition-colors`}
+                ? 'text-muthur-primary border-b border-muthur-primary'
+                : 'text-muthur-secondary opacity-50 hover:opacity-80'
+            }`}
             onClick={() => switchSession(session.id)}
           >
             <span>{session.name}</span>
-            <button
+            <span
               onClick={(e) => {
                 e.stopPropagation();
                 closeSession(session.id);
               }}
-              className="text-muthur-accent hover:text-red-500"
+              className="opacity-40 hover:opacity-100 hover:text-[#ff006e]"
             >
-              ×
-            </button>
+              x
+            </span>
           </div>
         ))}
-        <button
-          onClick={createNewSession}
-          className="px-3 py-1 text-xs text-muthur-primary hover:bg-muthur-border transition-colors"
-        >
-          + NEW
-        </button>
+        <div className="flex gap-[0.3vw] ml-auto">
+          <button
+            onClick={() => createNewSession('shell')}
+            className="px-[0.6vh] py-[0.2vh] text-[1vh] border border-[rgba(0,255,65,0.2)] text-muthur-primary opacity-60 hover:opacity-100 transition-colors"
+          >
+            + shell
+          </button>
+          <button
+            onClick={() => createNewSession('browser')}
+            className="px-[0.6vh] py-[0.2vh] text-[1vh] border border-[rgba(0,255,65,0.2)] text-muthur-secondary opacity-60 hover:opacity-100 transition-colors"
+          >
+            + web
+          </button>
+        </div>
       </div>
 
       {/* Terminal container */}

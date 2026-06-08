@@ -8,6 +8,42 @@ interface FileEntry {
   modified: number;
 }
 
+const FILE_ICONS: Record<string, string> = {
+  // Directories
+  dir: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>`,
+  // Code files
+  ts: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="7" fill="currentColor" stroke="none">TS</text></svg>`,
+  js: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="7" fill="currentColor" stroke="none">JS</text></svg>`,
+  json: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">{}</text></svg>`,
+  rs: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><text x="12" y="15" text-anchor="middle" font-size="7" fill="currentColor" stroke="none">Rs</text></svg>`,
+  toml: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="14" y2="12"/><line x1="7" y1="16" x2="11" y2="16"/></svg>`,
+  // Config/data
+  yaml: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="14" y2="12"/></svg>`,
+  // Text/docs
+  md: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">MD</text></svg>`,
+  txt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>`,
+  // Shell
+  sh: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="7,8 10,12 7,16"/><line x1="12" y1="16" x2="17" y2="16"/></svg>`,
+  // HTML/CSS
+  html: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="7,7 3,12 7,17"/><polyline points="17,7 21,12 17,17"/><line x1="14" y1="4" x2="10" y2="20"/></svg>`,
+  css: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">CSS</text></svg>`,
+  // Images
+  png: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="2"/><path d="M21 15l-5-5L5 21"/></svg>`,
+  // Lock/config
+  lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`,
+  // Default
+  default: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>`,
+  // Go up
+  up: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/><text x="16" y="14" font-size="6" fill="currentColor" stroke="none">..</text></svg>`,
+};
+
+function getIcon(entry: FileEntry): string {
+  if (entry.is_dir) return FILE_ICONS.dir;
+  const ext = entry.name.split('.').pop()?.toLowerCase() || '';
+  if (entry.name.includes('lock')) return FILE_ICONS.lock;
+  return FILE_ICONS[ext] || FILE_ICONS.default;
+}
+
 export default function FileExplorer() {
   const [currentPath, setCurrentPath] = useState('');
   const [entries, setEntries] = useState<FileEntry[]>([]);
@@ -55,80 +91,60 @@ export default function FileExplorer() {
     const parts = normalized.split('/');
     if (parts.length > 1) {
       parts.pop();
-      const parent = parts.join('/') || '/';
-      loadDirectory(parent);
+      loadDirectory(parts.join('/') || '/');
     }
-  };
-
-  const formatSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes}B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}K`;
-    if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)}M`;
-    return `${(bytes / 1024 / 1024 / 1024).toFixed(1)}G`;
-  };
-
-  const formatDate = (ts: number): string => {
-    if (!ts) return '--';
-    const d = new Date(ts * 1000);
-    return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   };
 
   return (
     <div className="h-full flex flex-col">
-      {/* Title bar with path */}
-      <div className="flex items-center justify-between px-[0.8vh] py-[0.4vh] border-b border-[rgba(0,255,65,0.15)]">
-        <span className="text-[1.1vh] tracking-widest opacity-60">FILESYSTEM</span>
-        <span className="text-[1vh] text-muthur-secondary opacity-50 truncate ml-4">
+      {/* Header */}
+      <div className="flex items-center justify-between px-[1vh] py-[0.4vh] border-b border-[rgba(0,255,65,0.15)] shrink-0">
+        <span className="text-[1.3vh] tracking-widest opacity-60">FILESYSTEM</span>
+        <span className="text-[1.1vh] text-muthur-secondary opacity-40 truncate ml-4">
           {currentPath}
         </span>
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center gap-[0.5vh] px-[0.8vh] py-[0.3vh] border-b border-[rgba(0,255,65,0.1)]">
-        <button
-          onClick={goUp}
-          className="px-[1vh] py-[0.2vh] text-[1vh] border border-[rgba(0,255,65,0.3)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] transition-colors"
-        >
-          ^ UP
-        </button>
-        <input
-          type="text"
-          value={currentPath}
-          onChange={(e) => setCurrentPath(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && loadDirectory(currentPath)}
-          className="flex-1 bg-transparent border-b border-[rgba(0,255,65,0.2)] px-[0.5vh] py-[0.2vh] text-[1vh] text-muthur-primary focus:outline-none focus:border-muthur-primary"
-        />
-      </div>
-
-      {/* File list - vertical tree view */}
-      <div className="flex-1 overflow-auto scrollbar-thin px-[0.5vh] py-[0.3vh]">
+      {/* Grid */}
+      <div className="flex-1 overflow-auto scrollbar-thin p-[1vh]">
         {loading ? (
-          <div className="flex items-center justify-center h-full text-[1.2vh] opacity-30">
+          <div className="flex items-center justify-center h-full opacity-30 text-[1.4vh]">
             LOADING...
           </div>
         ) : (
-          <div className="space-y-0">
+          <div
+            className="grid gap-[1vh]"
+            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(8vh, 1fr))', gridAutoRows: '8vh' }}
+          >
+            {/* Go up button */}
+            <div
+              onClick={goUp}
+              className="flex flex-col items-center justify-center hover:bg-[rgba(0,255,65,0.05)] transition-colors rounded text-muthur-primary"
+            >
+              <div
+                className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]"
+                dangerouslySetInnerHTML={{ __html: FILE_ICONS.up }}
+              />
+              <span className="text-[1.1vh] opacity-70">Go up</span>
+            </div>
+
+            {/* Files */}
             {entries.map((entry, i) => (
               <div
                 key={i}
                 onClick={() => handleEntryClick(entry)}
-                className="flex items-center gap-[1vh] py-[0.25vh] px-[0.3vh] hover:bg-[rgba(0,255,65,0.05)] transition-colors group"
+                className={`
+                  flex flex-col items-center justify-center
+                  hover:bg-[rgba(0,255,65,0.05)] transition-colors rounded
+                  ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}
+                `}
               >
-                {/* Icon */}
-                <span className={`text-[1.2vh] w-[2vh] shrink-0 ${entry.is_dir ? 'text-muthur-primary' : 'text-muthur-secondary opacity-70'}`}>
-                  {entry.is_dir ? '/' : '.'}
-                </span>
-                {/* Name */}
-                <span className={`flex-1 text-[1.2vh] truncate ${entry.is_dir ? 'text-muthur-primary' : 'text-muthur-secondary'}`}>
-                  {entry.name}
-                </span>
-                {/* Size */}
-                <span className="text-[1vh] text-muthur-secondary opacity-40 w-[5vh] text-right tabular-nums shrink-0">
-                  {entry.is_dir ? '--' : formatSize(entry.size)}
-                </span>
-                {/* Modified */}
-                <span className="text-[1vh] text-muthur-secondary opacity-30 w-[8vh] text-right tabular-nums shrink-0">
-                  {formatDate(entry.modified)}
+                <div
+                  className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]"
+                  dangerouslySetInnerHTML={{ __html: getIcon(entry) }}
+                />
+                <span className="text-[1.1vh] max-w-full truncate px-[0.2vh] text-center opacity-80">
+                  {entry.name.length > 12 ? entry.name.slice(0, 10) + '..' : entry.name}
                 </span>
               </div>
             ))}
