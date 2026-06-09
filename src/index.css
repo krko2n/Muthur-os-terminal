@@ -186,6 +186,18 @@ button, [data-tauri-drag-region] {
   -webkit-user-select: none;
 }
 
+/* ASCII braille image rendering */
+.ascii-braille {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--color-accent);
+  text-shadow: 0 0 6px rgba(var(--color-r), var(--color-g), var(--color-b), 0.4);
+  white-space: pre;
+  letter-spacing: 0;
+  line-height: 1;
+  overflow-x: auto;
+}
+
 @keyframes flicker {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.985; }

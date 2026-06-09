@@ -5,6 +5,8 @@ mod pty;
 mod system;
 mod crash;
 mod ai;
+mod browser;
+mod ascii_image;
 
 use tauri::{Manager, State, Window};
 use std::sync::{Arc, Mutex};
@@ -175,6 +177,37 @@ async fn fetch_url(url: String) -> Result<String, String> {
     Ok(html_to_text(&body))
 }
 
+#[tauri::command]
+async fn fetch_url_structured(url: String) -> Result<serde_json::Value, String> {
+    let client = reqwest::Client::builder()
+        .user_agent("Mozilla/5.0 (X11; Linux x86_64) MUTHUR/0.1")
+        .timeout(std::time::Duration::from_secs(15))
+        .redirect(reqwest::redirect::Policy::limited(10))
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let response = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| format!("Request failed: {}", e))?;
+
+    let final_url = response.url().to_string();
+    let status = response.status();
+    if !status.is_success() {
+        return Err(format!("HTTP {}: {}", status.as_u16(), status.canonical_reason().unwrap_or("Unknown")));
+    }
+
+    let body = response.text().await.map_err(|e| e.to_string())?;
+    let doc = browser::parse_html(&body, &final_url);
+    serde_json::to_value(doc).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn render_image_ascii(url: String) -> Result<String, String> {
+    ascii_image::fetch_and_convert(&url).await
+}
+
 fn html_to_text(html: &str) -> String {
     let mut result = String::new();
     let mut in_tag = false;
@@ -287,6 +320,8 @@ fn main() {
             get_current_dir,
             fetch_json,
             fetch_url,
+            fetch_url_structured,
+            render_image_ascii,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -5,6 +5,7 @@ import { WebglAddon } from '@xterm/addon-webgl';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import '@xterm/xterm/css/xterm.css';
+import BrowserView from './BrowserView';
 
 interface TerminalSession {
   id: string;
@@ -19,9 +20,6 @@ export default function Terminal() {
   const [sessions, setSessions] = useState<TerminalSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [browserInput, setBrowserInput] = useState('');
-  const [browserLoading, setBrowserLoading] = useState(false);
-  const [browserContent, setBrowserContent] = useState<string | null>(null);
-  const browserContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     createNewSession('shell');
@@ -233,7 +231,7 @@ export default function Terminal() {
     }
   };
 
-  const navigateBrowser = async (url: string) => {
+  const navigateBrowser = (url: string) => {
     let normalized = url.trim();
     if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
       if (normalized.includes('.') && !normalized.includes(' ')) {
@@ -243,14 +241,6 @@ export default function Terminal() {
       }
     }
     setBrowserInput(normalized);
-    setBrowserLoading(true);
-    try {
-      const result = await invoke('fetch_url', { url: normalized }) as string;
-      setBrowserContent(result);
-    } catch (e) {
-      setBrowserContent(`ERROR: ${e}\n\nCould not fetch: ${normalized}`);
-    }
-    setBrowserLoading(false);
   };
 
   // Keyboard shortcuts for tab management
@@ -326,7 +316,7 @@ export default function Terminal() {
 
       {/* Content */}
       {isBrowser ? (
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           {/* URL bar */}
           <div className="flex gap-2 p-2 border-b border-[rgba(0,255,65,0.1)] shrink-0 relative z-10">
             <input
@@ -344,18 +334,8 @@ export default function Terminal() {
               GO
             </button>
           </div>
-          {/* Browser content */}
-          <div ref={browserContentRef} className="flex-1 overflow-auto p-3 text-sm font-mono scrollbar-thin">
-            {browserLoading ? (
-              <div className="text-muthur-secondary opacity-50 animate-pulse">Fetching...</div>
-            ) : browserContent ? (
-              <pre className="whitespace-pre-wrap break-words text-muthur-secondary leading-relaxed">{browserContent}</pre>
-            ) : (
-              <div className="text-muthur-secondary opacity-30 text-center mt-8">
-                Enter a URL or search term above
-              </div>
-            )}
-          </div>
+          {/* Structured browser content */}
+          <BrowserView url={browserInput} onNavigate={navigateBrowser} />
         </div>
       ) : (
         <div ref={containerRef} className="flex-1 overflow-hidden" />
