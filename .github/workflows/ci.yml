@@ -157,6 +157,9 @@ jobs:
           npm install --legacy-peer-deps
         fi
 
+    - name: Build frontend (required for Tauri context macro)
+      run: npm run build
+
     - name: Run Rust tests
       working-directory: src-tauri
       run: cargo test --no-fail-fast
