@@ -43,6 +43,115 @@ export default function Terminal() {
     return () => window.removeEventListener('virtual-key', handleVirtualKey);
   }, [sessions, activeSessionId]);
 
+  // Open file in editor: creates new terminal tab and runs editor
+  useEffect(() => {
+    const handleOpenFile = async (e: Event) => {
+      const filePath = (e as CustomEvent).detail;
+      if (!filePath) return;
+      try {
+        const editor = await invoke('detect_editor') as string;
+        const sessionId = await invoke('create_terminal_session') as string;
+        const terminal = new XTerm({
+          cursorBlink: true,
+          cursorStyle: 'block',
+          fontSize: 15,
+          fontFamily: '"Share Tech Mono", "Fira Mono", "Courier New", monospace',
+          theme: {
+            background: 'transparent',
+            foreground: '#aacfd1',
+            cursor: '#00ff41',
+            black: '#000000',
+            red: '#ff006e',
+            green: '#00ff41',
+            yellow: '#ffd700',
+            blue: '#00d4ff',
+            magenta: '#ff00ff',
+            cyan: '#00ffff',
+            white: '#ffffff',
+            brightBlack: '#555555',
+            brightRed: '#ff0088',
+            brightGreen: '#00ff88',
+            brightYellow: '#ffff00',
+            brightBlue: '#0088ff',
+            brightMagenta: '#ff88ff',
+            brightCyan: '#88ffff',
+            brightWhite: '#ffffff',
+          },
+          allowTransparency: true,
+          scrollback: 5000,
+        });
+
+        const fitAddon = new FitAddon();
+        terminal.loadAddon(fitAddon);
+
+        try {
+          const webglAddon = new WebglAddon();
+          webglAddon.onContextLoss(() => { webglAddon.dispose(); });
+          terminal.loadAddon(webglAddon);
+        } catch {}
+
+        await listen(`terminal-output-${sessionId}`, (ev: any) => {
+          terminal.write(ev.payload);
+        });
+
+        await listen(`terminal-closed-${sessionId}`, () => {
+          terminal.write('\r\n\x1b[31m[Session ended]\x1b[0m\r\n');
+        });
+
+        terminal.onData(async (data) => {
+          await invoke('write_to_terminal', { sessionId, data });
+        });
+
+        if (!containerRef.current) return;
+        const terminalContainer = document.createElement('div');
+        terminalContainer.className = 'terminal-container';
+        terminalContainer.style.width = '100%';
+        terminalContainer.style.height = '100%';
+        terminalContainer.style.display = 'none';
+        containerRef.current.appendChild(terminalContainer);
+        terminal.open(terminalContainer);
+        fitAddon.fit();
+
+        const resizeObserver = new ResizeObserver(() => {
+          fitAddon.fit();
+          const dims = fitAddon.proposeDimensions();
+          if (dims) {
+            invoke('resize_terminal', { sessionId, cols: dims.cols, rows: dims.rows }).catch(() => {});
+          }
+        });
+        resizeObserver.observe(terminalContainer);
+
+        const fileName = filePath.split('/').pop() || 'file';
+        const sessionNum = sessions.length + 1;
+        const newSession: TerminalSession = {
+          id: sessionId,
+          terminal,
+          fitAddon,
+          name: `EDIT-${sessionNum}`,
+          type: 'shell',
+        };
+
+        setSessions(prev => [...prev, newSession]);
+        setActiveSessionId(sessionId);
+
+        // Show the new container, hide others
+        const containers = containerRef.current.querySelectorAll('.terminal-container');
+        containers.forEach(c => (c as HTMLElement).style.display = 'none');
+        terminalContainer.style.display = 'block';
+        terminal.focus();
+
+        // Send the editor command after a brief delay for shell initialization
+        setTimeout(() => {
+          invoke('write_to_terminal', { sessionId, data: `${editor} "${filePath}"\n` });
+        }, 300);
+      } catch (err) {
+        console.error('Failed to open file in editor:', err);
+      }
+    };
+    window.addEventListener('open-file', handleOpenFile);
+    return () => window.removeEventListener('open-file', handleOpenFile);
+  }, [sessions]);
+
   // Focus retention: refocus terminal when clicking non-input areas
   useEffect(() => {
     const refocus = (e: MouseEvent) => {

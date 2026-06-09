@@ -189,20 +189,56 @@ export default function Globe() {
 
   useEffect(() => {
     loadGlobeData();
+    // Auto-refresh conflict data every 6 hours
+    const interval = setInterval(loadConflictData, 6 * 60 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchData = async (url: string, localPath?: string): Promise<any> => {
+    // Backend fetch first (bypasses CSP, more reliable in production)
+    try {
+      const text = await invoke('fetch_json', { url }) as string;
+      return JSON.parse(text);
+    } catch (e) {
+      console.warn(`Backend fetch failed for ${url}:`, e);
+    }
+    // Fallback to frontend fetch (works in dev mode via Vite)
     if (localPath) {
       try {
         const res = await fetch(localPath);
         if (res.ok) return await res.json();
-      } catch {}
+      } catch (e) {
+        console.warn(`Local fetch failed for ${localPath}:`, e);
+      }
     }
-    try {
-      const text = await invoke('fetch_json', { url }) as string;
-      return JSON.parse(text);
-    } catch {}
     return null;
+  };
+
+  const loadConflictData = async () => {
+    const data = await fetchData('https://ucdpapi.pcr.uu.se/api/gedevents/24.1?pagesize=500&page=0');
+
+    if (data?.Result && data.Result.length > 0) {
+      const grouped: Map<string, ConflictArea> = new Map();
+      for (const e of data.Result) {
+        const lat = parseFloat(e.latitude);
+        const lng = parseFloat(e.longitude);
+        if (isNaN(lat) || isNaN(lng)) continue;
+        const key = `${Math.round(lat)},${Math.round(lng)}`;
+        const existing = grouped.get(key);
+        if (existing) {
+          existing.count += parseInt(e.best) || 1;
+        } else {
+          grouped.set(key, { lat, lng, count: parseInt(e.best) || 1, country: e.country });
+        }
+      }
+      const areas = Array.from(grouped.values())
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 40);
+      setConflicts(areas);
+      setStatus(`${data.Result.length} EVENTS`);
+    } else {
+      setStatus(worldLines.length > 0 ? 'MAP ONLY' : 'NO DATA');
+    }
   };
 
   const loadGlobeData = async () => {
@@ -212,7 +248,7 @@ export default function Globe() {
       '/data/countries-110m.json'
     );
 
-    if (!topo) {
+    if (!topo || !topo.objects?.countries) {
       setStatus('MAP UNAVAILABLE');
       return;
     }
@@ -237,33 +273,8 @@ export default function Globe() {
       }
     }
     setWorldLines(lines);
-    setStatus('MAP LOADED');
-
-    // Load conflicts
     setStatus('LOADING EVENTS...');
-    const data = await fetchData('https://ucdpapi.pcr.uu.se/api/gedevents/24.1?pagesize=500&page=0');
-
-    if (data?.Result) {
-      const grouped: Map<string, ConflictArea> = new Map();
-      for (const e of data.Result) {
-        const lat = parseFloat(e.latitude);
-        const lng = parseFloat(e.longitude);
-        const key = `${Math.round(lat)},${Math.round(lng)}`;
-        const existing = grouped.get(key);
-        if (existing) {
-          existing.count += parseInt(e.best) || 1;
-        } else {
-          grouped.set(key, { lat, lng, count: parseInt(e.best) || 1, country: e.country });
-        }
-      }
-      const areas = Array.from(grouped.values())
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 40);
-      setConflicts(areas);
-      setStatus(`${data.Result.length} EVENTS`);
-    } else {
-      setStatus('MAP ONLY');
-    }
+    await loadConflictData();
   };
 
   const modeLabels: Record<GlobeMode, string> = {
@@ -292,7 +303,7 @@ export default function Globe() {
         )}
       </div>
 
-      <div className="flex gap-[0.5vh] justify-center shrink-0 py-[0.3vh]">
+      <div className="flex gap-[0.5vh] justify-center items-center shrink-0 py-[0.3vh]">
         {(Object.keys(modeLabels) as GlobeMode[]).map((m) => (
           <button
             key={m}
@@ -306,6 +317,12 @@ export default function Globe() {
             {modeLabels[m]}
           </button>
         ))}
+        <button
+          onClick={loadConflictData}
+          className="px-[0.8vh] py-[0.2vh] text-[0.9vh] font-mono border border-[rgba(0,255,65,0.2)] text-muthur-secondary opacity-30 hover:opacity-70 transition-colors ml-[0.5vh]"
+        >
+          REFRESH
+        </button>
       </div>
     </div>
   );

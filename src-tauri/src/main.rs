@@ -208,6 +208,27 @@ async fn render_image_ascii(url: String) -> Result<String, String> {
     ascii_image::fetch_and_convert(&url).await
 }
 
+#[tauri::command]
+async fn detect_editor() -> String {
+    if let Ok(editor) = std::env::var("EDITOR") {
+        if !editor.is_empty() {
+            return editor;
+        }
+    }
+    let candidates = ["micro", "nano", "vim", "vi"];
+    for cmd in candidates {
+        if std::process::Command::new("which")
+            .arg(cmd)
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false)
+        {
+            return cmd.to_string();
+        }
+    }
+    "nano".to_string()
+}
+
 fn html_to_text(html: &str) -> String {
     let mut result = String::new();
     let mut in_tag = false;
@@ -322,6 +343,7 @@ fn main() {
             fetch_url,
             fetch_url_structured,
             render_image_ascii,
+            detect_editor,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

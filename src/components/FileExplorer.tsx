@@ -104,6 +104,8 @@ export default function FileExplorer() {
   const handleEntryClick = (entry: FileEntry) => {
     if (entry.is_dir) {
       loadDirectory(entry.path);
+    } else {
+      window.dispatchEvent(new CustomEvent('open-file', { detail: entry.path }));
     }
   };
 

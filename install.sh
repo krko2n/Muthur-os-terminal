@@ -199,6 +199,13 @@ install_app() {
             ;;
     esac
 
+    # Install kys shutdown command
+    if [ -f "packaging/bin/kys" ]; then
+        sudo cp "packaging/bin/kys" /usr/local/bin/kys
+        sudo chmod +x /usr/local/bin/kys
+        echo -e "${GREEN}[OK]${NC} kys command installed to /usr/local/bin/kys"
+    fi
+
     # Create config directory
     mkdir -p ~/.config/xKOR_3RR0R/{crash_reports,logs}
     echo -e "${GREEN}[OK]${NC} Config directory created"
