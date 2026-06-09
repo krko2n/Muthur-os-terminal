@@ -3,6 +3,9 @@ name: Update Version History
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - '.github/**'
 
 permissions:
   contents: write
@@ -12,15 +15,18 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Generate version history
       run: |
-        chmod +x generate-changelog.sh
-        ./generate-changelog.sh
+        echo "# Version History" > VERSION_HISTORY.md
+        echo "" >> VERSION_HISTORY.md
+        echo "Auto-generated from git log." >> VERSION_HISTORY.md
+        echo "" >> VERSION_HISTORY.md
+        git log --oneline --no-merges -50 >> VERSION_HISTORY.md
 
     - name: Commit version history
       run: |
