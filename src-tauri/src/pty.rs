@@ -74,7 +74,8 @@ impl PtyManager {
             let mut buffer = vec![0u8; 65536];
             let mut batch = Vec::with_capacity(65536);
             let mut last_emit = Instant::now();
-            let frame_time = Duration::from_millis(8);
+            let frame_time = Duration::from_millis(16);
+            let low_water_mark = buffer.len() / 2;
 
             loop {
                 match reader.read(&mut buffer) {
@@ -82,7 +83,7 @@ impl PtyManager {
                         if !batch.is_empty() {
                             let data = String::from_utf8_lossy(&batch).to_string();
                             let _ = window_clone.emit(
-                                &format!("terminal-output-{}", sid_clone.to_string()),
+                                &format!("terminal-output-{}", sid_clone),
                                 data,
                             );
                         }
@@ -91,10 +92,15 @@ impl PtyManager {
                     Ok(n) => {
                         batch.extend_from_slice(&buffer[..n]);
                         let now = Instant::now();
-                        if now.duration_since(last_emit) >= frame_time || batch.len() > 32768 {
+                        let should_flush =
+                            now.duration_since(last_emit) >= frame_time ||
+                            batch.len() >= 32768 ||
+                            n < low_water_mark;
+
+                        if should_flush {
                             let data = String::from_utf8_lossy(&batch).to_string();
                             let _ = window_clone.emit(
-                                &format!("terminal-output-{}", sid_clone.to_string()),
+                                &format!("terminal-output-{}", sid_clone),
                                 data,
                             );
                             batch.clear();
@@ -104,7 +110,7 @@ impl PtyManager {
                     Err(_) => break,
                 }
             }
-            let _ = window_clone.emit(&format!("terminal-closed-{}", sid_clone.to_string()), ());
+            let _ = window_clone.emit(&format!("terminal-closed-{}", sid_clone), ());
         });
 
         self.writers.insert(session_id.clone(), writer);

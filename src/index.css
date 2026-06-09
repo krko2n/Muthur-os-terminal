@@ -85,8 +85,8 @@ body {
   );
   pointer-events: none;
   z-index: 9998;
-  will-change: transform;
-  contain: strict;
+  will-change: opacity;
+  transform: translate3d(0, 0, 0);
 }
 
 /* CRT flicker - isolated overlay, does not repaint children */

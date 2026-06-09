@@ -104,6 +104,7 @@ agent_orchestration.log
 # Internal development files (not for end users)
 CLAUDE.md
 TODO.md
+mother_internal_specification.md
 .gitmessage
 CICD_QUICK_START.md
 PROJECT_SUMMARY.md

@@ -328,7 +328,7 @@ export default function Terminal() {
       {isBrowser ? (
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* URL bar */}
-          <div className="flex gap-2 p-2 border-b border-[rgba(0,255,65,0.1)] shrink-0">
+          <div className="flex gap-2 p-2 border-b border-[rgba(0,255,65,0.1)] shrink-0 relative z-10">
             <input
               type="text"
               value={browserInput}

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { CpuIcon, MemoryIcon } from './SystemIcons';
-import MuthurLogo from './MuthurLogo';
 
 interface LeftPanelProps {
   systemStats: any;
@@ -22,10 +21,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
 
   return (
     <div className="h-full flex flex-col p-3 gap-3 overflow-hidden">
-      {/* Logo + Clock */}
-      <div className="shrink-0 flex items-center justify-center gap-2 mb-1">
-        <MuthurLogo size={28} color="#00ff41" shadowColor="rgba(0,255,65,0.08)" />
-      </div>
+      {/* Clock */}
       <div className="shrink-0">
         <div className="text-5xl font-mono tabular-nums text-muthur-primary text-glow leading-none text-center">
           {time.toLocaleTimeString('en-US', {

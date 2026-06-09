@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import Header from './components/Header';
 import LeftPanel from './components/LeftPanel';
 import CenterPanel from './components/CenterPanel';
 import RightPanel from './components/RightPanel';
@@ -94,8 +95,8 @@ function App() {
       <CustomCursor />
 
       <div className="flex flex-col h-full">
-        {/* Window drag region */}
-        <div data-tauri-drag-region className="h-[3px] w-full shrink-0" />
+        {/* Header with drag region */}
+        <Header systemStats={systemStats} />
         {/* Top section */}
         <div className="flex flex-1 min-h-0">
           <div style={{ width: `${leftWidth}%` }} className="shrink-0 overflow-hidden min-w-0">
