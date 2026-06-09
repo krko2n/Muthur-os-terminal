@@ -1,0 +1,270 @@
+#!/bin/bash
+#
+# mother-ui - MUTHUR OS Terminal Autostart Manager
+#
+# Usage:
+#   mother-ui enable   - Auto-launch MUTHUR fullscreen at login
+#   mother-ui disable  - Return to normal desktop, launch MUTHUR manually
+#
+# Handles three login environments:
+#   1. greetd     - Modifies initial_session in /etc/greetd/config.toml
+#   2. DM (GDM/SDDM/LightDM) - Uses XDG autostart + session entry
+#   3. Fallback   - XDG autostart only
+#
+
+set -euo pipefail
+
+# Paths
+AUTOSTART_DIR="$HOME/.config/autostart"
+AUTOSTART_FILE="$AUTOSTART_DIR/muthur-autostart.desktop"
+GREETD_CONFIG="/etc/greetd/config.toml"
+GREETD_BACKUP="/etc/greetd/config.toml.muthur-backup"
+SESSION_FILE="/usr/share/wayland-sessions/muthur.desktop"
+
+# Colors
+RED='\033[1;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+DIM='\033[2m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+usage() {
+    echo ""
+    echo -e "${BOLD}mother-ui${RESET} - MUTHUR OS Autostart Manager"
+    echo ""
+    echo "Usage:"
+    echo "  mother-ui enable    Enable MUTHUR fullscreen autostart"
+    echo "  mother-ui disable   Disable autostart, restore normal desktop"
+    echo "  mother-ui status    Show current configuration"
+    echo ""
+    exit 1
+}
+
+detect_login_system() {
+    if systemctl is-active --quiet greetd 2>/dev/null; then
+        echo "greetd"
+    elif systemctl is-active --quiet gdm 2>/dev/null; then
+        echo "gdm"
+    elif systemctl is-active --quiet sddm 2>/dev/null; then
+        echo "sddm"
+    elif systemctl is-active --quiet lightdm 2>/dev/null; then
+        echo "lightdm"
+    else
+        echo "xdg"
+    fi
+}
+
+check_prerequisites() {
+    local login_system="$1"
+
+    if [ "$login_system" = "greetd" ]; then
+        if ! command -v cage &>/dev/null; then
+            echo -e "${RED}ERROR:${RESET} cage compositor not found."
+            echo -e "  Install with: ${BOLD}pacman -S cage${RESET}"
+            echo -e "  Cage is required for greetd kiosk session."
+            exit 1
+        fi
+        if [ ! -f "$GREETD_CONFIG" ]; then
+            echo -e "${RED}ERROR:${RESET} greetd config not found at $GREETD_CONFIG"
+            exit 1
+        fi
+    fi
+
+    if ! command -v muthur-os-terminal &>/dev/null && [ ! -x "/usr/bin/muthur-os-terminal" ] && [ ! -x "/usr/local/bin/muthur" ]; then
+        echo -e "${YELLOW}WARNING:${RESET} MUTHUR binary not found in PATH."
+        echo -e "  Autostart will be configured but may fail at login."
+    fi
+}
+
+# --- ENABLE ---
+
+enable_greetd() {
+    echo -e "${DIM}Configuring greetd for MUTHUR kiosk session...${RESET}"
+
+    # Backup original config if not already backed up
+    if [ ! -f "$GREETD_BACKUP" ]; then
+        sudo cp "$GREETD_CONFIG" "$GREETD_BACKUP"
+        echo -e "  ${GREEN}Backup saved:${RESET} $GREETD_BACKUP"
+    fi
+
+    # Write new initial_session block
+    # Strategy: append initial_session section if missing, or replace if exists
+    if grep -q '^\[initial_session\]' "$GREETD_CONFIG"; then
+        # Replace existing initial_session
+        sudo sed -i '/^\[initial_session\]/,/^\[/{
+            /^\[initial_session\]/!{/^\[/!d}
+        }' "$GREETD_CONFIG"
+        sudo sed -i "/^\[initial_session\]/a\\
+command = \"/usr/bin/muthur-session\"\\
+user = \"$USER\"" "$GREETD_CONFIG"
+    else
+        # Append new section
+        printf '\n[initial_session]\ncommand = "/usr/bin/muthur-session"\nuser = "%s"\n' "$USER" | sudo tee -a "$GREETD_CONFIG" >/dev/null
+    fi
+
+    echo -e "  ${GREEN}greetd configured.${RESET} MUTHUR session will start on next login."
+}
+
+enable_xdg() {
+    echo -e "${DIM}Creating XDG autostart entry...${RESET}"
+
+    mkdir -p "$AUTOSTART_DIR"
+
+    cat > "$AUTOSTART_FILE" << 'DESKTOP'
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=MUTHUR OS Terminal
+GenericName=Immersive Terminal Interface
+Comment=Auto-launch MUTHUR fullscreen on login
+Icon=muthur
+Exec=muthur-os-terminal --fullscreen-force
+Terminal=false
+StartupNotify=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel
+X-MATE-Autostart-enabled=true
+Categories=System;TerminalEmulator;
+DESKTOP
+
+    echo -e "  ${GREEN}Autostart entry created:${RESET} $AUTOSTART_FILE"
+}
+
+do_enable() {
+    local login_system
+    login_system="$(detect_login_system)"
+
+    echo -e "${BOLD}Detected login system:${RESET} $login_system"
+    echo ""
+
+    check_prerequisites "$login_system"
+
+    case "$login_system" in
+        greetd)
+            enable_greetd
+            ;;
+        gdm|sddm|lightdm)
+            echo -e "${DIM}Display manager detected.${RESET}"
+            echo -e "  Session entry available at login screen: 'MUTHUR OS'"
+            enable_xdg
+            ;;
+        *)
+            enable_xdg
+            ;;
+    esac
+
+    echo ""
+    echo -e "${GREEN}MUTHUR autostart enabled.${RESET}"
+    echo -e "${DIM}Reboot or re-login to activate.${RESET}"
+}
+
+# --- DISABLE ---
+
+disable_greetd() {
+    echo -e "${DIM}Restoring greetd configuration...${RESET}"
+
+    if [ -f "$GREETD_BACKUP" ]; then
+        sudo cp "$GREETD_BACKUP" "$GREETD_CONFIG"
+        sudo rm "$GREETD_BACKUP"
+        echo -e "  ${GREEN}Original config restored${RESET} from backup."
+    else
+        # No backup -- remove initial_session section manually
+        if grep -q '^\[initial_session\]' "$GREETD_CONFIG"; then
+            sudo sed -i '/^\[initial_session\]/,/^\[/{/^\[initial_session\]/d;/^\[/!d}' "$GREETD_CONFIG"
+            echo -e "  ${GREEN}initial_session section removed.${RESET}"
+        else
+            echo -e "  ${DIM}No initial_session found (already disabled).${RESET}"
+        fi
+    fi
+}
+
+disable_xdg() {
+    echo -e "${DIM}Removing XDG autostart entry...${RESET}"
+
+    if [ -f "$AUTOSTART_FILE" ]; then
+        rm "$AUTOSTART_FILE"
+        echo -e "  ${GREEN}Autostart entry removed.${RESET}"
+    else
+        echo -e "  ${DIM}No autostart entry found (already disabled).${RESET}"
+    fi
+}
+
+do_disable() {
+    local login_system
+    login_system="$(detect_login_system)"
+
+    echo -e "${BOLD}Detected login system:${RESET} $login_system"
+    echo ""
+
+    case "$login_system" in
+        greetd)
+            disable_greetd
+            ;;
+        *)
+            disable_xdg
+            ;;
+    esac
+
+    # Always try to clean up XDG autostart regardless of login system
+    if [ -f "$AUTOSTART_FILE" ] && [ "$login_system" != "xdg" ]; then
+        disable_xdg
+    fi
+
+    echo ""
+    echo -e "${GREEN}MUTHUR autostart disabled.${RESET}"
+    echo -e "${DIM}System will boot into normal desktop on next login.${RESET}"
+}
+
+# --- STATUS ---
+
+do_status() {
+    local login_system
+    login_system="$(detect_login_system)"
+
+    echo -e "${BOLD}Login system:${RESET} $login_system"
+
+    if [ "$login_system" = "greetd" ] && grep -q '^\[initial_session\]' "$GREETD_CONFIG" 2>/dev/null; then
+        echo -e "${BOLD}greetd session:${RESET} ${GREEN}ENABLED${RESET} (MUTHUR kiosk)"
+    else
+        echo -e "${BOLD}greetd session:${RESET} ${DIM}not configured${RESET}"
+    fi
+
+    if [ -f "$AUTOSTART_FILE" ]; then
+        echo -e "${BOLD}XDG autostart:${RESET} ${GREEN}ENABLED${RESET}"
+    else
+        echo -e "${BOLD}XDG autostart:${RESET} ${DIM}disabled${RESET}"
+    fi
+
+    if [ -f "/etc/systemd/logind.conf.d/muthur-kiosk.conf" ]; then
+        echo -e "${BOLD}Kiosk hardening:${RESET} ${YELLOW}ACTIVE${RESET}"
+    else
+        echo -e "${BOLD}Kiosk hardening:${RESET} ${DIM}not applied${RESET}"
+    fi
+}
+
+# --- MAIN ---
+
+if [ $# -eq 0 ]; then
+    usage
+fi
+
+case "$1" in
+    enable)
+        do_enable
+        ;;
+    disable)
+        do_disable
+        ;;
+    status)
+        do_status
+        ;;
+    -h|--help|help)
+        usage
+        ;;
+    *)
+        echo -e "${RED}Unknown command:${RESET} $1"
+        usage
+        ;;
+esac

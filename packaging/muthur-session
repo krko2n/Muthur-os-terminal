@@ -24,14 +24,14 @@ export MUTHUR_SESSION_MODE=kiosk
 if ! command -v cage &> /dev/null; then
     echo "ERROR: cage compositor not found"
     echo "Install with: pacman -S cage"
-    notify-send -u critical "MUTHUR Session Error" "cage compositor not installed"
+    notify-send -u critical "MUTHUR Session Error" "cage compositor not installed" 2>/dev/null
     exit 1
 fi
 
 # Check if MUTHUR binary exists
 if [ ! -x "/usr/bin/muthur-os-terminal" ]; then
     echo "ERROR: muthur-os-terminal not found"
-    notify-send -u critical "MUTHUR Session Error" "MUTHUR binary not found"
+    notify-send -u critical "MUTHUR Session Error" "MUTHUR binary not found" 2>/dev/null
     exit 1
 fi
 
@@ -39,8 +39,7 @@ fi
 sleep 0.5
 
 # Launch MUTHUR in Cage compositor
-echo "[$(date)] Launching Cage with MUTHUR..."
-exec cage -- /usr/bin/muthur-os-terminal --fullscreen-force --session-mode
-
-# If cage exits, session ends
-echo "[$(date)] MUTHUR session ended"
+# -d : suppress client-side decorations
+# No -s flag: VT switching disabled for kiosk security
+echo "[$(date)] Launching Cage with MUTHUR (kiosk mode)..."
+exec cage -d -- /usr/bin/muthur-os-terminal --fullscreen-force --session-mode

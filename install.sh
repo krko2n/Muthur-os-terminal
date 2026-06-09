@@ -206,6 +206,25 @@ install_app() {
         echo -e "${GREEN}[OK]${NC} kys command installed to /usr/local/bin/kys"
     fi
 
+    # Install mother-ui autostart manager
+    if [ -f "packaging/bin/mother-ui" ]; then
+        sudo cp "packaging/bin/mother-ui" /usr/local/bin/mother-ui
+        sudo chmod +x /usr/local/bin/mother-ui
+        echo -e "${GREEN}[OK]${NC} mother-ui command installed to /usr/local/bin/mother-ui"
+    fi
+
+    # Install session entry for display managers
+    if [ -f "packaging/muthur-session.desktop" ]; then
+        sudo install -Dm644 "packaging/muthur-session.desktop" /usr/share/wayland-sessions/muthur.desktop
+        echo -e "${GREEN}[OK]${NC} Wayland session entry installed"
+    fi
+
+    # Install session wrapper script
+    if [ -f "packaging/muthur-session" ]; then
+        sudo install -Dm755 "packaging/muthur-session" /usr/bin/muthur-session
+        echo -e "${GREEN}[OK]${NC} Session wrapper installed to /usr/bin/muthur-session"
+    fi
+
     # Create config directory
     mkdir -p ~/.config/xKOR_3RR0R/{crash_reports,logs}
     echo -e "${GREEN}[OK]${NC} Config directory created"
