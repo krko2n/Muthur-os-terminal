@@ -1,10 +1,12 @@
 use serde::{Deserialize, Serialize};
 use sysinfo::{System, Networks, Disks};
+use std::sync::{Arc, RwLock};
+use std::time::Duration;
 
 #[cfg(target_os = "linux")]
 use std::fs;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BatteryInfo {
     pub present: bool,
     pub percent: u8,
@@ -12,7 +14,7 @@ pub struct BatteryInfo {
     pub time_remaining: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SystemStats {
     pub cpu_usage: f32,
     pub memory_used: u64,
@@ -25,7 +27,7 @@ pub struct SystemStats {
     pub battery: Option<BatteryInfo>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProcessInfo {
     pub pid: u32,
     pub name: String,
@@ -33,7 +35,7 @@ pub struct ProcessInfo {
     pub memory: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct NetworkStats {
     pub received: u64,
     pub transmitted: u64,
@@ -41,7 +43,7 @@ pub struct NetworkStats {
     pub tx_speed: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DiskInfo {
     pub name: String,
     pub mount_point: String,
@@ -51,97 +53,102 @@ pub struct DiskInfo {
 }
 
 pub struct SystemMonitor {
-    system: System,
-    networks: Networks,
-    total_received: u64,
-    total_transmitted: u64,
+    stats: Arc<RwLock<SystemStats>>,
 }
 
 impl SystemMonitor {
     pub fn new() -> Self {
-        let mut sys = System::new_all();
-        sys.refresh_all();
-        std::thread::sleep(std::time::Duration::from_millis(200));
-        sys.refresh_all();
-        let networks = Networks::new_with_refreshed_list();
-        SystemMonitor {
-            system: sys,
-            networks,
-            total_received: 0,
-            total_transmitted: 0,
-        }
+        let stats = Arc::new(RwLock::new(SystemStats::default()));
+        let stats_clone = stats.clone();
+
+        std::thread::spawn(move || {
+            let mut sys = System::new_all();
+            sys.refresh_all();
+            std::thread::sleep(Duration::from_millis(200));
+            sys.refresh_all();
+            let mut networks = Networks::new_with_refreshed_list();
+            let mut total_received: u64 = 0;
+            let mut total_transmitted: u64 = 0;
+
+            loop {
+                sys.refresh_all();
+                networks.refresh(false);
+
+                let cpu_usage = sys.global_cpu_usage();
+                let memory_used = sys.used_memory();
+                let memory_total = sys.total_memory();
+                let memory_percent = (memory_used as f32 / memory_total as f32) * 100.0;
+
+                let mut processes: Vec<ProcessInfo> = sys.processes()
+                    .iter()
+                    .map(|(pid, process)| ProcessInfo {
+                        pid: pid.as_u32(),
+                        name: process.name().to_string_lossy().to_string(),
+                        cpu_usage: process.cpu_usage(),
+                        memory: process.memory(),
+                    })
+                    .collect();
+
+                processes.sort_by(|a, b| b.cpu_usage.partial_cmp(&a.cpu_usage).unwrap());
+                processes.truncate(10);
+
+                let mut rx_delta = 0;
+                let mut tx_delta = 0;
+                for (_interface_name, data) in &networks {
+                    rx_delta += data.received();
+                    tx_delta += data.transmitted();
+                }
+                total_received += rx_delta;
+                total_transmitted += tx_delta;
+
+                let disks_list = Disks::new_with_refreshed_list();
+                let disk: Vec<DiskInfo> = disks_list
+                    .iter()
+                    .map(|d| {
+                        let total = d.total_space();
+                        let available = d.available_space();
+                        let used = total - available;
+                        let used_percent = (used as f32 / total as f32) * 100.0;
+                        DiskInfo {
+                            name: d.name().to_string_lossy().to_string(),
+                            mount_point: d.mount_point().to_string_lossy().to_string(),
+                            total,
+                            available,
+                            used_percent,
+                        }
+                    })
+                    .collect();
+
+                let new_stats = SystemStats {
+                    cpu_usage,
+                    memory_used,
+                    memory_total,
+                    memory_percent,
+                    processes,
+                    network: NetworkStats {
+                        received: total_received,
+                        transmitted: total_transmitted,
+                        rx_speed: rx_delta,
+                        tx_speed: tx_delta,
+                    },
+                    disk,
+                    uptime: System::uptime(),
+                    battery: Self::get_battery_info(),
+                };
+
+                if let Ok(mut stats) = stats_clone.write() {
+                    *stats = new_stats;
+                }
+
+                std::thread::sleep(Duration::from_secs(3));
+            }
+        });
+
+        SystemMonitor { stats }
     }
 
-    pub fn get_stats(&mut self) -> SystemStats {
-        self.system.refresh_all();
-        self.networks.refresh(false);
-
-        let cpu_usage = self.system.global_cpu_usage();
-
-        let memory_used = self.system.used_memory();
-        let memory_total = self.system.total_memory();
-        let memory_percent = (memory_used as f32 / memory_total as f32) * 100.0;
-
-        let mut processes: Vec<ProcessInfo> = self.system.processes()
-            .iter()
-            .map(|(pid, process)| ProcessInfo {
-                pid: pid.as_u32(),
-                name: process.name().to_string_lossy().to_string(),
-                cpu_usage: process.cpu_usage(),
-                memory: process.memory(),
-            })
-            .collect();
-
-        processes.sort_by(|a, b| b.cpu_usage.partial_cmp(&a.cpu_usage).unwrap());
-        processes.truncate(10);
-
-        let mut rx_delta = 0;
-        let mut tx_delta = 0;
-        for (_interface_name, data) in &self.networks {
-            rx_delta += data.received();
-            tx_delta += data.transmitted();
-        }
-        self.total_received += rx_delta;
-        self.total_transmitted += tx_delta;
-
-        let total_received = self.total_received;
-        let total_transmitted = self.total_transmitted;
-
-        let disks_list = Disks::new_with_refreshed_list();
-        let disks: Vec<DiskInfo> = disks_list
-            .iter()
-            .map(|disk| {
-                let total = disk.total_space();
-                let available = disk.available_space();
-                let used = total - available;
-                let used_percent = (used as f32 / total as f32) * 100.0;
-
-                DiskInfo {
-                    name: disk.name().to_string_lossy().to_string(),
-                    mount_point: disk.mount_point().to_string_lossy().to_string(),
-                    total,
-                    available,
-                    used_percent,
-                }
-            })
-            .collect();
-
-        SystemStats {
-            cpu_usage,
-            memory_used,
-            memory_total,
-            memory_percent,
-            processes,
-            network: NetworkStats {
-                received: total_received,
-                transmitted: total_transmitted,
-                rx_speed: rx_delta,
-                tx_speed: tx_delta,
-            },
-            disk: disks,
-            uptime: System::uptime(),
-            battery: Self::get_battery_info(),
-        }
+    pub fn get_stats(&self) -> SystemStats {
+        self.stats.read().map(|s| s.clone()).unwrap_or_default()
     }
 
     #[cfg(target_os = "linux")]

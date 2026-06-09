@@ -50,7 +50,7 @@
       }
     ],
     "security": {
-      "csp": null,
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: asset:; font-src 'self' data:; connect-src 'self' http://localhost:11434 https://cdn.jsdelivr.net https://ucdpapi.pcr.uu.se",
       "assetProtocol": {
         "enable": true,
         "scope": ["**"]

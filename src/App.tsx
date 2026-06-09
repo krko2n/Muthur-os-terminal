@@ -5,8 +5,10 @@ import CenterPanel from './components/CenterPanel';
 import RightPanel from './components/RightPanel';
 import BottomPanel from './components/BottomPanel';
 import CustomCursor from './components/CustomCursor';
+import LoadingScreen from './components/LoadingScreen';
 
 function App() {
+  const [booted, setBooted] = useState(false);
   const [systemStats, setSystemStats] = useState<any>(null);
   const [leftWidth, setLeftWidth] = useState(22);
   const [rightWidth, setRightWidth] = useState(22);
@@ -80,6 +82,10 @@ function App() {
     dragging.current = which;
     document.body.style.userSelect = 'none';
   };
+
+  if (!booted) {
+    return <LoadingScreen onComplete={() => setBooted(true)} />;
+  }
 
   return (
     <div className="w-screen h-screen overflow-hidden relative">

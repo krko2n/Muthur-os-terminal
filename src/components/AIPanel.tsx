@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { AIIcon } from './SystemIcons';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -90,7 +91,10 @@ export default function AIPanel() {
 
   return (
     <div className="flex flex-col min-h-0 flex-1">
-      <div className="text-[1.3vh] tracking-widest opacity-60 mb-[0.5vh]">MUTHUR AI</div>
+      <div className="text-[1.3vh] tracking-widest opacity-60 mb-[0.5vh] flex items-center gap-[0.5vh]">
+        <AIIcon size={14} color="rgba(0,255,65,0.6)" />
+        MUTHUR AI
+      </div>
 
       <div
         ref={containerRef}

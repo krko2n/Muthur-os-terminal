@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { CpuIcon, MemoryIcon } from './SystemIcons';
+import MuthurLogo from './MuthurLogo';
 
 interface LeftPanelProps {
   systemStats: any;
@@ -20,7 +22,10 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
 
   return (
     <div className="h-full flex flex-col p-3 gap-3 overflow-hidden">
-      {/* Clock */}
+      {/* Logo + Clock */}
+      <div className="shrink-0 flex items-center justify-center gap-2 mb-1">
+        <MuthurLogo size={28} color="#00ff41" shadowColor="rgba(0,255,65,0.08)" />
+      </div>
       <div className="shrink-0">
         <div className="text-5xl font-mono tabular-nums text-muthur-primary text-glow leading-none text-center">
           {time.toLocaleTimeString('en-US', {
@@ -50,7 +55,10 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
 
       {/* CPU */}
       <div className="shrink-0">
-        <div className="text-xs tracking-wider opacity-50 mb-1">CPU USAGE</div>
+        <div className="text-xs tracking-wider opacity-50 mb-1 flex items-center gap-1">
+          <CpuIcon size={12} color="rgba(0,255,65,0.5)" />
+          CPU USAGE
+        </div>
         {systemStats ? (
           <div className="flex items-center gap-2">
             <div className="flex-1 h-2 bg-[rgba(0,255,65,0.08)] overflow-hidden">
@@ -71,7 +79,10 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
       {/* Memory */}
       <div className="shrink-0">
         <div className="flex justify-between items-baseline mb-1">
-          <span className="text-xs tracking-wider opacity-50">MEMORY</span>
+          <span className="text-xs tracking-wider opacity-50 flex items-center gap-1">
+            <MemoryIcon size={12} color="rgba(0,255,65,0.5)" />
+            MEMORY
+          </span>
           {systemStats && (
             <span className="text-[11px] text-muthur-secondary">
               {(systemStats.memory_used / 1024 / 1024 / 1024).toFixed(1)} / {(systemStats.memory_total / 1024 / 1024 / 1024).toFixed(1)} GiB

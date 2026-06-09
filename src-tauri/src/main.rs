@@ -66,7 +66,7 @@ async fn close_terminal_session(
 
 #[tauri::command]
 async fn get_system_stats(state: State<'_, AppState>) -> Result<serde_json::Value, String> {
-    let mut monitor = state.system_monitor.lock().map_err(|e| e.to_string())?;
+    let monitor = state.system_monitor.lock().map_err(|e| e.to_string())?;
     let stats = monitor.get_stats();
     serde_json::to_value(stats).map_err(|e| e.to_string())
 }

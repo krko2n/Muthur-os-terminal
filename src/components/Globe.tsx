@@ -191,7 +191,13 @@ export default function Globe() {
     loadGlobeData();
   }, []);
 
-  const fetchData = async (url: string): Promise<any> => {
+  const fetchData = async (url: string, localPath?: string): Promise<any> => {
+    if (localPath) {
+      try {
+        const res = await fetch(localPath);
+        if (res.ok) return await res.json();
+      } catch {}
+    }
     try {
       const text = await invoke('fetch_json', { url }) as string;
       return JSON.parse(text);
@@ -201,7 +207,10 @@ export default function Globe() {
 
   const loadGlobeData = async () => {
     setStatus('FETCHING MAP...');
-    const topo = await fetchData('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    const topo = await fetchData(
+      'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
+      '/data/countries-110m.json'
+    );
 
     if (!topo) {
       setStatus('MAP UNAVAILABLE');

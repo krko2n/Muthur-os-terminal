@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { FileSystemIcon } from './SystemIcons';
 
 interface FileEntry {
   name: string;
@@ -9,40 +10,49 @@ interface FileEntry {
   modified: number;
 }
 
-const FILE_ICONS: Record<string, string> = {
-  // Directories
-  dir: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>`,
-  // Code files
-  ts: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="7" fill="currentColor" stroke="none">TS</text></svg>`,
-  js: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="7" fill="currentColor" stroke="none">JS</text></svg>`,
-  json: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">{}</text></svg>`,
-  rs: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><text x="12" y="15" text-anchor="middle" font-size="7" fill="currentColor" stroke="none">Rs</text></svg>`,
-  toml: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="14" y2="12"/><line x1="7" y1="16" x2="11" y2="16"/></svg>`,
-  // Config/data
-  yaml: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="14" y2="12"/></svg>`,
-  // Text/docs
-  md: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">MD</text></svg>`,
-  txt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>`,
-  // Shell
-  sh: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="7,8 10,12 7,16"/><line x1="12" y1="16" x2="17" y2="16"/></svg>`,
-  // HTML/CSS
-  html: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="7,7 3,12 7,17"/><polyline points="17,7 21,12 17,17"/><line x1="14" y1="4" x2="10" y2="20"/></svg>`,
-  css: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="6" fill="currentColor" stroke="none">CSS</text></svg>`,
-  // Images
-  png: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="2"/><path d="M21 15l-5-5L5 21"/></svg>`,
-  // Lock/config
-  lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`,
-  // Default
-  default: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>`,
-  // Go up
-  up: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/><text x="16" y="14" font-size="6" fill="currentColor" stroke="none">..</text></svg>`,
-};
+function FileIcon({ type }: { type: string }) {
+  const props = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.5, className: "w-full h-full" };
 
-function getIcon(entry: FileEntry): string {
-  if (entry.is_dir) return FILE_ICONS.dir;
+  switch (type) {
+    case 'dir':
+      return <svg {...props}><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>;
+    case 'ts':
+      return <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" textAnchor="middle" fontSize="7" fill="currentColor" stroke="none">TS</text></svg>;
+    case 'js':
+      return <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" textAnchor="middle" fontSize="7" fill="currentColor" stroke="none">JS</text></svg>;
+    case 'json':
+      return <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" textAnchor="middle" fontSize="6" fill="currentColor" stroke="none">{'{}'}</text></svg>;
+    case 'rs':
+      return <svg {...props}><circle cx="12" cy="12" r="9"/><text x="12" y="15" textAnchor="middle" fontSize="7" fill="currentColor" stroke="none">Rs</text></svg>;
+    case 'toml':
+    case 'yaml':
+      return <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="14" y2="12"/><line x1="7" y1="16" x2="11" y2="16"/></svg>;
+    case 'md':
+      return <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" textAnchor="middle" fontSize="6" fill="currentColor" stroke="none">MD</text></svg>;
+    case 'sh':
+      return <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="7,8 10,12 7,16"/><line x1="12" y1="16" x2="17" y2="16"/></svg>;
+    case 'html':
+      return <svg {...props}><polyline points="7,7 3,12 7,17"/><polyline points="17,7 21,12 17,17"/><line x1="14" y1="4" x2="10" y2="20"/></svg>;
+    case 'css':
+      return <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" textAnchor="middle" fontSize="6" fill="currentColor" stroke="none">CSS</text></svg>;
+    case 'png':
+    case 'jpg':
+    case 'svg':
+      return <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="2"/><path d="M21 15l-5-5L5 21"/></svg>;
+    case 'lock':
+      return <svg {...props}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>;
+    case 'up':
+      return <svg {...props}><path d="M15 18l-6-6 6-6"/><text x="16" y="14" fontSize="6" fill="currentColor" stroke="none">..</text></svg>;
+    default:
+      return <svg {...props}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>;
+  }
+}
+
+function getIconType(entry: FileEntry): string {
+  if (entry.is_dir) return 'dir';
   const ext = entry.name.split('.').pop()?.toLowerCase() || '';
-  if (entry.name.includes('lock')) return FILE_ICONS.lock;
-  return FILE_ICONS[ext] || FILE_ICONS.default;
+  if (entry.name.includes('lock')) return 'lock';
+  return ext;
 }
 
 export default function FileExplorer() {
@@ -98,7 +108,10 @@ export default function FileExplorer() {
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-[1vh] py-[0.4vh] border-b border-[rgba(0,255,65,0.15)] shrink-0">
-        <span className="text-[1.3vh] tracking-widest opacity-60">FILESYSTEM</span>
+        <span className="text-[1.3vh] tracking-widest opacity-60 flex items-center gap-[0.5vh]">
+          <FileSystemIcon size={14} color="rgba(0,255,65,0.5)" />
+          FILESYSTEM
+        </span>
         <span className="text-[1.1vh] text-muthur-secondary opacity-40 truncate ml-4">
           {currentPath}
         </span>
@@ -120,10 +133,9 @@ export default function FileExplorer() {
               onClick={goUp}
               className="flex flex-col items-center justify-center hover:bg-[rgba(0,255,65,0.05)] transition-colors rounded text-muthur-primary"
             >
-              <div
-                className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]"
-                dangerouslySetInnerHTML={{ __html: FILE_ICONS.up }}
-              />
+              <div className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]">
+                <FileIcon type="up" />
+              </div>
               <span className="text-[1.1vh] opacity-70">Go up</span>
             </div>
 
@@ -138,10 +150,9 @@ export default function FileExplorer() {
                   ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}
                 `}
               >
-                <div
-                  className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]"
-                  dangerouslySetInnerHTML={{ __html: getIcon(entry) }}
-                />
+                <div className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]">
+                  <FileIcon type={getIconType(entry)} />
+                </div>
                 <span className="text-[1.1vh] max-w-full truncate px-[0.2vh] text-center opacity-80">
                   {entry.name.length > 12 ? entry.name.slice(0, 10) + '..' : entry.name}
                 </span>
