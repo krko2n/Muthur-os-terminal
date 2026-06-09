@@ -8,6 +8,7 @@ mod ai;
 
 use tauri::{Manager, State, Window};
 use std::sync::{Arc, Mutex};
+use std::io::Write;
 use pty::{PtyManager, SessionId};
 use system::SystemMonitor;
 use ai::OllamaClient;
@@ -34,9 +35,14 @@ async fn write_to_terminal(
     session_id: String,
     data: String,
 ) -> Result<(), String> {
-    let mut pty = state.pty_manager.lock().map_err(|e| e.to_string())?;
     let sid = SessionId::from(session_id);
-    pty.write(sid, data.as_bytes()).map_err(|e| e.to_string())?;
+    // Get the per-session writer without holding the global lock during write
+    let writer = {
+        let pty = state.pty_manager.lock().map_err(|e| e.to_string())?;
+        pty.get_writer(&sid).ok_or_else(|| "Session not found".to_string())?
+    };
+    let mut w = writer.lock().map_err(|e| e.to_string())?;
+    w.write_all(data.as_bytes()).map_err(|e| e.to_string())?;
     Ok(())
 }
 

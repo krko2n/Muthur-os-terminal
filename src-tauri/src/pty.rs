@@ -1,6 +1,7 @@
 use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use std::collections::HashMap;
 use std::io::{Read, Write};
+use std::sync::{Arc, Mutex as StdMutex};
 use std::time::{Duration, Instant};
 use tauri::{Emitter, Window};
 use uuid::Uuid;
@@ -26,19 +27,21 @@ impl From<String> for SessionId {
 
 pub struct Session {
     master: Box<dyn portable_pty::MasterPty + Send>,
-    writer: Box<dyn Write + Send>,
+    writer: Arc<StdMutex<Box<dyn Write + Send>>>,
     #[allow(dead_code)]
     child: Box<dyn portable_pty::Child + Send>,
 }
 
 pub struct PtyManager {
     sessions: HashMap<SessionId, Session>,
+    writers: HashMap<SessionId, Arc<StdMutex<Box<dyn Write + Send>>>>,
 }
 
 impl PtyManager {
     pub fn new() -> Self {
         PtyManager {
             sessions: HashMap::new(),
+            writers: HashMap::new(),
         }
     }
 
@@ -52,11 +55,17 @@ impl PtyManager {
         })?;
         let mut cmd = CommandBuilder::new(get_shell());
         cmd.env("TERM", "xterm-256color");
+        if cfg!(not(target_os = "windows")) {
+            cmd.env(
+                "PROMPT_COMMAND",
+                r#"printf '\033]7;file://%s%s\033\\' "$HOSTNAME" "$PWD""#,
+            );
+        }
         let child = pty_pair.slave.spawn_command(cmd)?;
         drop(pty_pair.slave);
         let session_id = SessionId::new();
         let master = pty_pair.master;
-        let writer = master.take_writer()?;
+        let writer = Arc::new(StdMutex::new(master.take_writer()?));
         let mut reader = master.try_clone_reader()?;
         let sid_clone = session_id.clone();
         let window_clone = window.clone();
@@ -96,6 +105,8 @@ impl PtyManager {
             }
             let _ = window_clone.emit(&format!("terminal-closed-{}", sid_clone.to_string()), ());
         });
+
+        self.writers.insert(session_id.clone(), writer.clone());
         self.sessions.insert(
             session_id.clone(),
             Session { master, writer, child },
@@ -103,9 +114,14 @@ impl PtyManager {
         Ok(session_id)
     }
 
-    pub fn write(&mut self, session_id: SessionId, data: &[u8]) -> anyhow::Result<()> {
-        if let Some(session) = self.sessions.get_mut(&session_id) {
-            session.writer.write_all(data)?;
+    pub fn get_writer(&self, session_id: &SessionId) -> Option<Arc<StdMutex<Box<dyn Write + Send>>>> {
+        self.writers.get(session_id).cloned()
+    }
+
+    pub fn write(&self, session_id: &SessionId, data: &[u8]) -> anyhow::Result<()> {
+        if let Some(writer) = self.writers.get(session_id) {
+            let mut w = writer.lock().map_err(|e| anyhow::anyhow!("{}", e))?;
+            w.write_all(data)?;
             Ok(())
         } else {
             Err(anyhow::anyhow!("Session not found"))
@@ -127,6 +143,7 @@ impl PtyManager {
     }
 
     pub fn close_session(&mut self, session_id: SessionId) -> anyhow::Result<()> {
+        self.writers.remove(&session_id);
         if self.sessions.remove(&session_id).is_some() {
             Ok(())
         } else {

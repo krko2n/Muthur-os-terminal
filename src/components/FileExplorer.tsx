@@ -64,6 +64,18 @@ export default function FileExplorer() {
     initPath();
   }, []);
 
+  // Listen for CWD changes from shell (OSC 7)
+  useEffect(() => {
+    const handleCwdChange = (e: Event) => {
+      const path = (e as CustomEvent).detail;
+      if (path && path !== currentPath) {
+        loadDirectory(path);
+      }
+    };
+    window.addEventListener('cwd-change', handleCwdChange);
+    return () => window.removeEventListener('cwd-change', handleCwdChange);
+  }, [currentPath]);
+
   const initPath = async () => {
     try {
       const dir = await invoke('get_current_dir') as string;

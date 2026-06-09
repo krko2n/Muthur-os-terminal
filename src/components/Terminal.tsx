@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import { WebglAddon } from '@xterm/addon-webgl';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import '@xterm/xterm/css/xterm.css';
@@ -120,6 +121,25 @@ export default function Terminal() {
       terminal.loadAddon(fitAddon);
 
       const sessionId = await invoke('create_terminal_session') as string;
+
+      // GPU-accelerated rendering (falls back to canvas if WebGL unavailable)
+      try {
+        const webglAddon = new WebglAddon();
+        webglAddon.onContextLoss(() => { webglAddon.dispose(); });
+        terminal.loadAddon(webglAddon);
+      } catch {}
+
+      // OSC 7: CWD tracking from shell
+      terminal.parser.registerOscHandler(7, (data: string) => {
+        try {
+          const url = new URL(data);
+          const path = decodeURIComponent(url.pathname);
+          if (path) {
+            window.dispatchEvent(new CustomEvent('cwd-change', { detail: path }));
+          }
+        } catch {}
+        return true;
+      });
 
       await listen(`terminal-output-${sessionId}`, (e: any) => {
         terminal.write(e.payload);
