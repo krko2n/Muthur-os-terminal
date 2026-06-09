@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -28,8 +29,6 @@ export default function AIPanel() {
     setLoading(true);
 
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
-
       if (userMessage.startsWith('#')) {
         const context = userMessage.substring(1).trim();
         const response = await invoke('ai_suggest_command', { context }) as string;

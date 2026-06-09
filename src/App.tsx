@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import LeftPanel from './components/LeftPanel';
 import CenterPanel from './components/CenterPanel';
 import RightPanel from './components/RightPanel';
@@ -12,10 +13,29 @@ function App() {
   const [bottomHeight, setBottomHeight] = useState(35);
   const dragging = useRef<'left' | 'right' | 'bottom' | null>(null);
 
+  // Suppress browser-specific behaviors (context menu, shortcuts)
+  useEffect(() => {
+    const preventContext = (e: Event) => e.preventDefault();
+    const preventBrowserShortcuts = (e: KeyboardEvent) => {
+      if (
+        (e.ctrlKey && !e.shiftKey && ['r', 'l', 'p', 'u', 'g'].includes(e.key.toLowerCase())) ||
+        e.key === 'F5' ||
+        (e.ctrlKey && e.shiftKey && ['i', 'j'].includes(e.key.toLowerCase()))
+      ) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('contextmenu', preventContext);
+    document.addEventListener('keydown', preventBrowserShortcuts);
+    return () => {
+      document.removeEventListener('contextmenu', preventContext);
+      document.removeEventListener('keydown', preventBrowserShortcuts);
+    };
+  }, []);
+
   useEffect(() => {
     const updateStats = async () => {
       try {
-        const { invoke } = await import('@tauri-apps/api/core');
         const stats = await invoke('get_system_stats');
         setSystemStats(stats);
       } catch (error) {
@@ -24,7 +44,7 @@ function App() {
     };
 
     updateStats();
-    const interval = setInterval(updateStats, 2000);
+    const interval = setInterval(updateStats, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -62,11 +82,14 @@ function App() {
   };
 
   return (
-    <div className="w-screen h-screen overflow-hidden relative crt-flicker">
+    <div className="w-screen h-screen overflow-hidden relative">
       <div className="scanline" />
+      <div className="crt-overlay" />
       <CustomCursor />
 
       <div className="flex flex-col h-full">
+        {/* Window drag region */}
+        <div data-tauri-drag-region className="h-[3px] w-full shrink-0" />
         {/* Top section */}
         <div className="flex flex-1 min-h-0">
           <div style={{ width: `${leftWidth}%` }} className="shrink-0 overflow-hidden min-w-0">

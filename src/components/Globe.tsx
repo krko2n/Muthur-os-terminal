@@ -2,6 +2,7 @@ import { useRef, useState, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { feature } from 'topojson-client';
+import { invoke } from '@tauri-apps/api/core';
 
 type GlobeMode = 'conflicts' | 'cyber' | 'flights';
 
@@ -191,14 +192,7 @@ export default function Globe() {
   }, []);
 
   const fetchData = async (url: string): Promise<any> => {
-    // Try frontend fetch first (CSP disabled)
     try {
-      const res = await fetch(url);
-      if (res.ok) return await res.json();
-    } catch {}
-    // Fallback to backend proxy
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
       const text = await invoke('fetch_json', { url }) as string;
       return JSON.parse(text);
     } catch {}
@@ -275,8 +269,10 @@ export default function Globe() {
         {worldLines.length > 0 ? (
           <Canvas
             camera={{ position: [0, 0.5, 5.5], fov: 45 }}
-            gl={{ alpha: true, antialias: true }}
+            gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
             style={{ background: 'transparent' }}
+            frameloop="always"
+            dpr={1}
           >
             <RotatingGlobe mode={mode} worldLines={worldLines} conflicts={conflicts} />
           </Canvas>

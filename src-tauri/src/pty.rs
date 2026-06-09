@@ -1,6 +1,7 @@
 use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use std::collections::HashMap;
 use std::io::{Read, Write};
+use std::time::{Duration, Instant};
 use tauri::{Emitter, Window};
 use uuid::Uuid;
 
@@ -60,13 +61,35 @@ impl PtyManager {
         let sid_clone = session_id.clone();
         let window_clone = window.clone();
         std::thread::spawn(move || {
-            let mut buffer = vec![0u8; 8192];
+            let mut buffer = vec![0u8; 65536];
+            let mut batch = Vec::with_capacity(65536);
+            let mut last_emit = Instant::now();
+            let frame_time = Duration::from_millis(8);
+
             loop {
                 match reader.read(&mut buffer) {
-                    Ok(0) => break,
+                    Ok(0) => {
+                        if !batch.is_empty() {
+                            let data = String::from_utf8_lossy(&batch).to_string();
+                            let _ = window_clone.emit(
+                                &format!("terminal-output-{}", sid_clone.to_string()),
+                                data,
+                            );
+                        }
+                        break;
+                    }
                     Ok(n) => {
-                        let data = String::from_utf8_lossy(&buffer[..n]).to_string();
-                        let _ = window_clone.emit(&format!("terminal-output-{}", sid_clone.to_string()), data);
+                        batch.extend_from_slice(&buffer[..n]);
+                        let now = Instant::now();
+                        if now.duration_since(last_emit) >= frame_time || batch.len() > 32768 {
+                            let data = String::from_utf8_lossy(&batch).to_string();
+                            let _ = window_clone.emit(
+                                &format!("terminal-output-{}", sid_clone.to_string()),
+                                data,
+                            );
+                            batch.clear();
+                            last_emit = now;
+                        }
                     }
                     Err(_) => break,
                 }

@@ -1,35 +1,55 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function CustomCursor() {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isClicking, setIsClicking] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
+    let frame = 0;
+    let x = 0, y = 0;
+    let scale = 1;
+
+    const onMove = (e: MouseEvent) => {
+      x = e.clientX;
+      y = e.clientY;
+      if (!frame) {
+        frame = requestAnimationFrame(() => {
+          if (ref.current) {
+            ref.current.style.transform = `translate3d(${x - 9}px, ${y - 9}px, 0) scale(${scale})`;
+          }
+          frame = 0;
+        });
+      }
     };
 
-    const handleMouseDown = () => setIsClicking(true);
-    const handleMouseUp = () => setIsClicking(false);
+    const onDown = () => {
+      scale = 0.7;
+      if (ref.current) {
+        ref.current.style.transform = `translate3d(${x - 9}px, ${y - 9}px, 0) scale(${scale})`;
+      }
+    };
+    const onUp = () => {
+      scale = 1;
+      if (ref.current) {
+        ref.current.style.transform = `translate3d(${x - 9}px, ${y - 9}px, 0) scale(${scale})`;
+      }
+    };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', onMove, { passive: true });
+    window.addEventListener('mousedown', onDown);
+    window.addEventListener('mouseup', onUp);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('mouseup', onUp);
+      if (frame) cancelAnimationFrame(frame);
     };
   }, []);
 
   return (
     <div
+      ref={ref}
       className="custom-cursor"
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        transform: `translate(-50%, -50%) scale(${isClicking ? 0.7 : 1})`,
-      }}
+      style={{ willChange: 'transform', position: 'fixed', top: 0, left: 0 }}
     />
   );
 }

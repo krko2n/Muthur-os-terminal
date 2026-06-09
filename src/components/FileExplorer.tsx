@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 
 interface FileEntry {
   name: string;
@@ -55,7 +56,6 @@ export default function FileExplorer() {
 
   const initPath = async () => {
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
       const dir = await invoke('get_current_dir') as string;
       loadDirectory(dir);
     } catch {
@@ -66,7 +66,6 @@ export default function FileExplorer() {
   const loadDirectory = async (path: string) => {
     setLoading(true);
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
       const result = await invoke('list_directory', { path }) as FileEntry[];
       setEntries(result.sort((a, b) => {
         if (a.is_dir && !b.is_dir) return -1;

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
-import { WebLinksAddon } from '@xterm/addon-web-links';
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import '@xterm/xterm/css/xterm.css';
 
 interface TerminalSession {
@@ -43,9 +44,22 @@ export default function Terminal() {
     return () => window.removeEventListener('virtual-key', handleVirtualKey);
   }, [sessions, activeSessionId]);
 
+  // Focus retention: refocus terminal when clicking non-input areas
+  useEffect(() => {
+    const refocus = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      const active = sessions.find(s => s.id === activeSessionId);
+      if (active?.type === 'shell' && active.terminal) {
+        requestAnimationFrame(() => active.terminal.focus());
+      }
+    };
+    document.addEventListener('mouseup', refocus);
+    return () => document.removeEventListener('mouseup', refocus);
+  }, [sessions, activeSessionId]);
+
   const writeToTerminal = async (sessionId: string, data: string) => {
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
       await invoke('write_to_terminal', { sessionId, data });
     } catch (e) {
       console.error('Write failed:', e);
@@ -60,7 +74,7 @@ export default function Terminal() {
         id,
         terminal: null as any,
         fitAddon: null as any,
-        name: `WEB-${sessionNum}`,
+        name: `NET-${sessionNum}`,
         type: 'browser',
       };
       setSessions(prev => [...prev, fakeSession]);
@@ -72,9 +86,6 @@ export default function Terminal() {
     if (!containerRef.current) return;
 
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      const { listen } = await import('@tauri-apps/api/event');
-
       const terminal = new XTerm({
         cursorBlink: true,
         cursorStyle: 'block',
@@ -102,13 +113,11 @@ export default function Terminal() {
           brightWhite: '#ffffff',
         },
         allowTransparency: true,
-        scrollback: 10000,
+        scrollback: 5000,
       });
 
       const fitAddon = new FitAddon();
-      const webLinksAddon = new WebLinksAddon();
       terminal.loadAddon(fitAddon);
-      terminal.loadAddon(webLinksAddon);
 
       const sessionId = await invoke('create_terminal_session') as string;
 
@@ -138,7 +147,7 @@ export default function Terminal() {
         fitAddon.fit();
         const dims = fitAddon.proposeDimensions();
         if (dims) {
-          invoke('resize_terminal', { sessionId, cols: dims.cols, rows: dims.rows }).catch(console.error);
+          invoke('resize_terminal', { sessionId: sessionId as string, cols: dims.cols, rows: dims.rows }).catch(console.error);
         }
       });
       resizeObserver.observe(terminalContainer);
@@ -163,7 +172,6 @@ export default function Terminal() {
 
   const cleanupSession = async (sessionId: string) => {
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
       await invoke('close_terminal_session', { sessionId });
     } catch {}
   };
@@ -217,7 +225,6 @@ export default function Terminal() {
     setBrowserInput(normalized);
     setBrowserLoading(true);
     try {
-      const { invoke } = await import('@tauri-apps/api/core');
       const result = await invoke('fetch_url', { url: normalized }) as string;
       setBrowserContent(result);
     } catch (e) {
@@ -225,6 +232,35 @@ export default function Terminal() {
     }
     setBrowserLoading(false);
   };
+
+  // Keyboard shortcuts for tab management
+  useEffect(() => {
+    const handleShortcuts = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey) {
+        switch (e.key.toLowerCase()) {
+          case 't':
+            e.preventDefault();
+            createNewSession('shell');
+            break;
+          case 'w':
+            e.preventDefault();
+            if (activeSessionId) closeSession(activeSessionId);
+            break;
+        }
+      }
+      // Ctrl+Tab / Ctrl+Shift+Tab to cycle sessions
+      if (e.ctrlKey && e.key === 'Tab') {
+        e.preventDefault();
+        const idx = sessions.findIndex(s => s.id === activeSessionId);
+        const next = e.shiftKey
+          ? (idx - 1 + sessions.length) % sessions.length
+          : (idx + 1) % sessions.length;
+        if (sessions[next]) switchSession(sessions[next].id);
+      }
+    };
+    window.addEventListener('keydown', handleShortcuts);
+    return () => window.removeEventListener('keydown', handleShortcuts);
+  }, [sessions, activeSessionId]);
 
   const activeSession = sessions.find(s => s.id === activeSessionId);
   const isBrowser = activeSession?.type === 'browser';
@@ -263,7 +299,7 @@ export default function Terminal() {
             onClick={() => createNewSession('browser')}
             className="px-2 py-0.5 text-xs border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:bg-[rgba(0,255,65,0.1)] transition-colors"
           >
-            + web
+            + net
           </button>
         </div>
       </div>
