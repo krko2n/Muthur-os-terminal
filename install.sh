@@ -11,8 +11,15 @@
 #
 # Supports: Arch Linux, Ubuntu/Debian, Fedora
 #
+# Portability: All source paths are resolved relative to script location.
+# This script can be run from any directory on any target device.
+#
 
-set -e
+set -euo pipefail
+
+# ─── Script Location (portable, follows symlinks) ──────────────────────────
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")")" && pwd)"
 
 # ─── Configuration ──────────────────────────────────────────────────────────
 
@@ -80,6 +87,7 @@ preflight() {
 
     # Show preflight summary
     echo ""
+    echo -e " ${BOLD}Source:${NC}   $SCRIPT_DIR"
     echo -e " ${BOLD}Target:${NC}   $OS ($ARCH)"
     echo -e " ${BOLD}Version:${NC}  $VERSION"
     echo -e " ${BOLD}Binary:${NC}   $INSTALL_DIR/muthur"
@@ -208,6 +216,8 @@ build_app() {
     echo ""
     step "Building MUTHUR OS Terminal (5-10 minutes)..."
 
+    cd "$SCRIPT_DIR"
+
     step "[1/2] Installing frontend dependencies..."
     npm ci --legacy-peer-deps 2>/dev/null || npm install --legacy-peer-deps
     info "Dependencies installed"
@@ -227,8 +237,8 @@ install_assets() {
     # Find the built binary (try multiple known locations)
     local binary=""
     for candidate in \
-        "src-tauri/target/release/muthur-os-terminal" \
-        "src-tauri/target/release/bundle/appimage/"*".AppImage"; do
+        "$SCRIPT_DIR/src-tauri/target/release/muthur-os-terminal" \
+        "$SCRIPT_DIR/src-tauri/target/release/bundle/appimage/"*".AppImage"; do
         if [ -f "$candidate" ]; then
             binary="$candidate"
             break
@@ -246,31 +256,35 @@ install_assets() {
     info "Binary: $INSTALL_DIR/muthur"
 
     # ── CLI Utilities ──
-    if [ -f "packaging/bin/kys" ]; then
-        sudo install -Dm755 "packaging/bin/kys" "$INSTALL_DIR/kys"
+    if [ -f "$SCRIPT_DIR/packaging/bin/kys" ]; then
+        sudo install -Dm755 "$SCRIPT_DIR/packaging/bin/kys" "$INSTALL_DIR/kys"
+        sudo chmod 755 "$INSTALL_DIR/kys"
         info "Command: $INSTALL_DIR/kys"
     fi
 
-    if [ -f "packaging/bin/mother-ui" ]; then
-        sudo install -Dm755 "packaging/bin/mother-ui" "$INSTALL_DIR/mother-ui"
+    if [ -f "$SCRIPT_DIR/packaging/bin/mother-ui" ]; then
+        sudo install -Dm755 "$SCRIPT_DIR/packaging/bin/mother-ui" "$INSTALL_DIR/mother-ui"
+        sudo chmod 755 "$INSTALL_DIR/mother-ui"
         info "Command: $INSTALL_DIR/mother-ui"
     fi
 
     # ── Session Infrastructure ──
-    if [ -f "packaging/muthur-session" ]; then
-        sudo install -Dm755 "packaging/muthur-session" "$SYSTEM_BIN/muthur-session"
+    if [ -f "$SCRIPT_DIR/packaging/muthur-session" ]; then
+        sudo install -Dm755 "$SCRIPT_DIR/packaging/muthur-session" "$SYSTEM_BIN/muthur-session"
+        sudo chmod 755 "$SYSTEM_BIN/muthur-session"
         info "Session: $SYSTEM_BIN/muthur-session"
     fi
 
-    if [ -f "packaging/muthur-session.desktop" ]; then
-        sudo install -Dm644 "packaging/muthur-session.desktop" "$SESSION_DIR/muthur.desktop"
+    if [ -f "$SCRIPT_DIR/packaging/muthur-session.desktop" ]; then
+        sudo mkdir -p "$SESSION_DIR"
+        sudo install -Dm644 "$SCRIPT_DIR/packaging/muthur-session.desktop" "$SESSION_DIR/muthur.desktop"
         info "Session entry: $SESSION_DIR/muthur.desktop"
     fi
 
     # ── Desktop Entry ──
     mkdir -p "$DESKTOP_DIR"
-    if [ -f "packaging/muthur.desktop" ]; then
-        install -Dm644 "packaging/muthur.desktop" "$DESKTOP_DIR/muthur.desktop"
+    if [ -f "$SCRIPT_DIR/packaging/muthur.desktop" ]; then
+        install -Dm644 "$SCRIPT_DIR/packaging/muthur.desktop" "$DESKTOP_DIR/muthur.desktop"
     else
         cat > "$DESKTOP_DIR/muthur.desktop" << 'EOF'
 [Desktop Entry]
@@ -295,24 +309,24 @@ EOF
     mkdir -p "$DATA_DIR/crash_reports"
     mkdir -p "$DATA_DIR/logs"
 
-    if [ -f "examples/config.toml.example" ] && [ ! -f "$CONFIG_DIR/config.toml" ]; then
-        cp "examples/config.toml.example" "$CONFIG_DIR/config.toml"
+    if [ -f "$SCRIPT_DIR/examples/config.toml.example" ] && [ ! -f "$CONFIG_DIR/config.toml" ]; then
+        cp "$SCRIPT_DIR/examples/config.toml.example" "$CONFIG_DIR/config.toml"
         info "Config template: $CONFIG_DIR/config.toml"
     else
         dimtext "  Config preserved: $CONFIG_DIR/config.toml"
     fi
 
-    # ── Compositor Profiles (reference copies) ──
+    # ── Compositor Profiles (reference copies, always refreshed) ──
     mkdir -p "$CONFIG_DIR/compositors"
-    if [ -d "packaging/compositors" ]; then
-        cp -f packaging/compositors/* "$CONFIG_DIR/compositors/" 2>/dev/null || true
+    if [ -d "$SCRIPT_DIR/packaging/compositors" ]; then
+        cp -f "$SCRIPT_DIR/packaging/compositors/"* "$CONFIG_DIR/compositors/" 2>/dev/null || true
         dimtext "  Compositor profiles: $CONFIG_DIR/compositors/"
     fi
 
     # ── Kiosk Blueprints (reference copies, never auto-applied) ──
     mkdir -p "$CONFIG_DIR/kiosk"
-    if [ -d "packaging/kiosk" ]; then
-        cp -f packaging/kiosk/* "$CONFIG_DIR/kiosk/" 2>/dev/null || true
+    if [ -d "$SCRIPT_DIR/packaging/kiosk" ]; then
+        cp -f "$SCRIPT_DIR/packaging/kiosk/"* "$CONFIG_DIR/kiosk/" 2>/dev/null || true
         dimtext "  Kiosk blueprints: $CONFIG_DIR/kiosk/"
     fi
 }
