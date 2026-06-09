@@ -119,21 +119,27 @@ Think of it as a spiritual successor to [eDEX-UI](https://github.com/GitSquared/
 | Display | 1920x1080 (fullscreen) |
 | Optional | [Ollama](https://ollama.com/) installed for AI features |
 
-### One-Command Install
+### One-Command Install / Upgrade
 
 ```bash
 git clone https://github.com/krko2n/Muthur-os-terminal.git
-cd muthur-os-terminal
-make install
+cd Muthur-os-terminal
+./install.sh
 ```
 
-This handles everything automatically: system dependencies, Rust, Node.js, Ollama, building, and desktop entry creation. Takes 5-10 minutes on first run.
+This single command handles both **fresh installation** and **upgrades** through
+a unified, idempotent execution path. It automatically:
 
-For an interactive installer with prompts:
+- Detects your OS and installs system dependencies
+- Sets up Rust and Node.js toolchains (skips if present)
+- Installs Ollama and pulls the default AI model
+- Builds the application from source (5-10 minutes)
+- Deploys binaries, session infrastructure, and CLI utilities
+- Preserves existing user configuration across upgrades
+- Verifies the installation on completion
 
-```bash
-make install-interactive
-```
+To upgrade an existing installation, simply `git pull` and re-run `./install.sh`.
+Your config files, crash reports, and logs are never overwritten.
 
 ### Launch
 

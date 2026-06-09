@@ -1,44 +1,95 @@
 #!/bin/bash
+#
+# MUTHUR OS Terminal - Unified Installer & Upgrader
+#
+# This script handles BOTH fresh installation and upgrades through a single
+# idempotent execution path. Every operation is safe to re-run.
+#
+# Usage:
+#   ./install.sh          Full install/upgrade (interactive)
+#   ./install.sh --quiet  Suppress non-essential prompts
+#
+# Supports: Arch Linux, Ubuntu/Debian, Fedora
+#
 
 set -e
 
-# MUTHUR OS Terminal Installation Script
-# Supports: Arch Linux, Ubuntu/Debian, Fedora
+# ─── Configuration ──────────────────────────────────────────────────────────
 
-echo "================================"
-echo "MUTHUR OS TERMINAL INSTALLER"
-echo "================================"
-echo ""
+VERSION="0.1.1"
+INSTALL_DIR="/usr/local/bin"
+SYSTEM_BIN="/usr/bin"
+CONFIG_DIR="$HOME/.config/muthur"
+DATA_DIR="$HOME/.config/xKOR_3RR0R"
+SESSION_DIR="/usr/share/wayland-sessions"
+DESKTOP_DIR="$HOME/.local/share/applications"
 
-# Colors
+QUIET="${1:-}"
+
+# ─── Colors ─────────────────────────────────────────────────────────────────
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+DIM='\033[2m'
+BOLD='\033[1m'
+NC='\033[0m'
 
-# Check if running as root
-if [ "$EUID" -eq 0 ]; then
-    echo -e "${RED}Error: Do not run this script as root/sudo${NC}"
-    echo "The script will ask for sudo password when needed"
-    exit 1
-fi
+# ─── Helpers ────────────────────────────────────────────────────────────────
 
-# Check if already installed
-if [ -f "/usr/local/bin/muthur" ]; then
-    echo -e "${YELLOW}MUTHUR is already installed${NC}"
+info()    { echo -e "${GREEN}[OK]${NC} $*"; }
+warn()    { echo -e "${YELLOW}[!!]${NC} $*"; }
+err()     { echo -e "${RED}[ERR]${NC} $*"; }
+step()    { echo -e "${BLUE}[>>]${NC} $*"; }
+dimtext() { echo -e "${DIM}$*${NC}"; }
+
+# ─── Pre-flight Checks ─────────────────────────────────────────────────────
+
+preflight() {
     echo ""
-    read -p "Reinstall? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Installation cancelled"
-        echo "To upgrade, run: ./upgrade.sh"
-        exit 0
+    echo "================================================================"
+    echo -e "${BOLD} MUTHUR OS TERMINAL - INSTALLER${NC}"
+    echo "================================================================"
+    echo ""
+
+    # Architecture check
+    ARCH=$(uname -m)
+    if [ "$ARCH" != "x86_64" ]; then
+        err "Unsupported architecture: $ARCH (requires x86_64)"
+        exit 1
     fi
-    echo ""
-fi
 
-# Detect OS
+    # Root check
+    if [ "$EUID" -eq 0 ]; then
+        err "Do not run as root/sudo. The script elevates when needed."
+        exit 1
+    fi
+
+    # Detect existing installation
+    EXISTING=""
+    if [ -x "$INSTALL_DIR/muthur" ] || [ -x "$SYSTEM_BIN/muthur-os-terminal" ]; then
+        EXISTING="true"
+        echo -e " ${BOLD}Mode:${NC} UPGRADE (existing installation detected)"
+    else
+        echo -e " ${BOLD}Mode:${NC} FRESH INSTALL"
+    fi
+
+    # Detect OS
+    detect_os
+
+    # Show preflight summary
+    echo ""
+    echo -e " ${BOLD}Target:${NC}   $OS ($ARCH)"
+    echo -e " ${BOLD}Version:${NC}  $VERSION"
+    echo -e " ${BOLD}Binary:${NC}   $INSTALL_DIR/muthur"
+    echo -e " ${BOLD}Config:${NC}   $CONFIG_DIR"
+    echo ""
+
+    # Advisory checks (non-fatal)
+    check_optional_deps
+}
+
 detect_os() {
     if [ -f /etc/arch-release ]; then
         OS="arch"
@@ -47,291 +98,331 @@ detect_os() {
     elif [ -f /etc/fedora-release ]; then
         OS="fedora"
     else
-        echo -e "${RED}Unsupported OS. This installer supports Arch, Debian/Ubuntu, and Fedora.${NC}"
+        err "Unsupported OS. Supports: Arch, Debian/Ubuntu, Fedora."
         exit 1
     fi
-    echo -e "${GREEN}[OK]${NC} Detected OS: $OS"
 }
 
-# Install system dependencies
-install_deps() {
+check_optional_deps() {
+    dimtext "  Optional dependencies:"
+    if command -v cage &>/dev/null; then
+        dimtext "    cage:    installed (kiosk mode available)"
+    else
+        dimtext "    cage:    not found (install for kiosk mode: pacman -S cage)"
+    fi
+    if command -v greetd &>/dev/null || systemctl is-active --quiet greetd 2>/dev/null; then
+        dimtext "    greetd:  installed (session login available)"
+    else
+        dimtext "    greetd:  not found (install for auto-login: pacman -S greetd)"
+    fi
+    if command -v ollama &>/dev/null; then
+        dimtext "    ollama:  installed (AI features available)"
+    else
+        dimtext "    ollama:  not found (install for AI: curl -fsSL https://ollama.com/install.sh | sh)"
+    fi
     echo ""
-    echo "Installing system dependencies..."
+}
+
+# ─── System Dependencies ───────────────────────────────────────────────────
+
+install_deps() {
+    step "Installing system dependencies..."
 
     case $OS in
         arch)
-            sudo pacman -Sy --noconfirm \
-                base-devel \
-                curl \
-                wget \
-                file \
-                openssl \
-                gtk3 \
-                libappindicator-gtk3 \
-                librsvg \
-                webkit2gtk-4.1
+            sudo pacman -Sy --noconfirm --needed \
+                base-devel curl wget file openssl \
+                gtk3 libappindicator-gtk3 librsvg webkit2gtk-4.1
             ;;
         debian)
-            sudo apt update
-            sudo apt install -y \
-                build-essential \
-                curl \
-                wget \
-                file \
-                libssl-dev \
-                libgtk-3-dev \
-                libayatana-appindicator3-dev \
-                librsvg2-dev \
-                libwebkit2gtk-4.1-dev
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq \
+                build-essential curl wget file \
+                libssl-dev libgtk-3-dev libayatana-appindicator3-dev \
+                librsvg2-dev libwebkit2gtk-4.1-dev
             ;;
         fedora)
-            sudo dnf install -y \
-                gcc \
-                gcc-c++ \
-                make \
-                curl \
-                wget \
-                file \
-                openssl-devel \
-                gtk3-devel \
-                libappindicator-gtk3-devel \
-                librsvg2-devel \
-                webkit2gtk4.1-devel
+            sudo dnf install -y -q \
+                gcc gcc-c++ make curl wget file \
+                openssl-devel gtk3-devel libappindicator-gtk3-devel \
+                librsvg2-devel webkit2gtk4.1-devel
             ;;
     esac
 
-    echo -e "${GREEN}[OK]${NC} System dependencies installed"
+    info "System dependencies satisfied"
 }
 
-# Install Rust
+# ─── Toolchain ─────────────────────────────────────────────────────────────
+
 install_rust() {
-    if command -v rustc &> /dev/null; then
-        RUST_VERSION=$(rustc --version | cut -d' ' -f2)
-        echo -e "${GREEN}[OK]${NC} Rust already installed: $RUST_VERSION"
+    if command -v rustc &>/dev/null; then
+        info "Rust $(rustc --version | cut -d' ' -f2)"
     else
-        echo ""
-        echo -e "${YELLOW}Installing Rust...${NC}"
+        step "Installing Rust toolchain..."
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         source "$HOME/.cargo/env"
-        echo -e "${GREEN}[OK]${NC} Rust installed"
+        info "Rust installed"
     fi
 }
 
-# Install Node.js
 install_node() {
-    if command -v node &> /dev/null; then
-        NODE_VERSION=$(node --version)
-        echo -e "${GREEN}[OK]${NC} Node.js already installed: $NODE_VERSION"
+    if command -v node &>/dev/null; then
+        info "Node.js $(node --version)"
     else
-        echo ""
-        echo -e "${YELLOW}Installing Node.js via nvm...${NC}"
+        step "Installing Node.js via nvm..."
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         nvm install 24
         nvm use 24
-        echo -e "${GREEN}[OK]${NC} Node.js installed"
+        info "Node.js installed"
     fi
 }
 
-# Install Ollama and pull model
 install_ollama() {
-    if command -v ollama &> /dev/null; then
-        echo -e "${GREEN}[OK]${NC} Ollama already installed"
+    if command -v ollama &>/dev/null; then
+        info "Ollama available"
     else
-        echo ""
-        echo -e "${YELLOW}Installing Ollama for AI features...${NC}"
-        curl -fsSL https://ollama.com/install.sh | sh
-        echo -e "${GREEN}[OK]${NC} Ollama installed"
+        step "Installing Ollama for AI features..."
+        curl -fsSL https://ollama.com/install.sh | sh 2>/dev/null || {
+            warn "Ollama install failed (non-fatal). Install manually: https://ollama.com"
+            return 0
+        }
+        info "Ollama installed"
     fi
 
-    # Ensure ollama service is running
-    if ! pgrep -x "ollama" > /dev/null 2>&1; then
-        echo -e "${YELLOW}Starting Ollama service...${NC}"
-        ollama serve > /dev/null 2>&1 &
-        sleep 2
+    # Pull model if ollama is available and running
+    if command -v ollama &>/dev/null; then
+        if ! pgrep -x "ollama" >/dev/null 2>&1; then
+            ollama serve >/dev/null 2>&1 &
+            sleep 2
+        fi
+        step "Pulling AI model (llama3.2)..."
+        ollama pull llama3.2 2>/dev/null || warn "Model pull failed - retry with: ollama pull llama3.2"
     fi
-
-    # Pull the default model
-    echo -e "${YELLOW}Pulling AI model (llama3.2)...${NC}"
-    ollama pull llama3.2 2>/dev/null || echo -e "${YELLOW}Model pull failed - you can retry with: ollama pull llama3.2${NC}"
-    echo -e "${GREEN}[OK]${NC} AI setup complete"
 }
 
-# Build the application
+# ─── Build ─────────────────────────────────────────────────────────────────
+
 build_app() {
     echo ""
-    echo -e "${YELLOW}Building MUTHUR OS Terminal...${NC}"
-    echo "This will take 5-10 minutes..."
-    echo ""
+    step "Building MUTHUR OS Terminal (5-10 minutes)..."
 
-    # Install npm dependencies
-    echo -e "${YELLOW}[1/2]${NC} Installing dependencies..."
-    npm ci --legacy-peer-deps
-    echo -e "${GREEN}[OK]${NC} Dependencies installed"
+    step "[1/2] Installing frontend dependencies..."
+    npm ci --legacy-peer-deps 2>/dev/null || npm install --legacy-peer-deps
+    info "Dependencies installed"
 
-    # Build with Tauri (handles frontend + backend + bundling)
-    echo -e "${YELLOW}[2/2]${NC} Building application (frontend + backend + bundles)..."
+    step "[2/2] Compiling application (frontend + backend)..."
     npm run tauri build
-    echo -e "${GREEN}[OK]${NC} Build complete"
+    info "Build complete"
 }
 
-# Install the application
-install_app() {
+# ─── Install / Upgrade Assets ──────────────────────────────────────────────
+
+install_assets() {
     echo ""
-    echo "Installing MUTHUR OS Terminal..."
+    step "Deploying MUTHUR assets..."
 
-    case $OS in
-        arch|debian|fedora)
-            if [ -f "src-tauri/target/release/bundle/appimage/muthur-os-terminal_0.1.0_amd64.AppImage" ]; then
-                sudo cp "src-tauri/target/release/bundle/appimage/muthur-os-terminal_0.1.0_amd64.AppImage" /usr/local/bin/muthur
-                sudo chmod +x /usr/local/bin/muthur
-                echo -e "${GREEN}[OK]${NC} AppImage installed to /usr/local/bin/muthur"
-            elif [ -f "src-tauri/target/release/bundle/deb/muthur-os-terminal_0.1.0_amd64.deb" ]; then
-                sudo dpkg -i "src-tauri/target/release/bundle/deb/muthur-os-terminal_0.1.0_amd64.deb" 2>/dev/null
-                echo -e "${GREEN}[OK]${NC} Deb package installed"
-            else
-                # Fallback: copy binary directly
-                sudo cp "src-tauri/target/release/muthur-os-terminal" /usr/local/bin/muthur
-                sudo chmod +x /usr/local/bin/muthur
-                echo -e "${GREEN}[OK]${NC} Binary installed to /usr/local/bin/muthur"
-            fi
-            ;;
-    esac
+    # ── Core Binary ──
+    # Find the built binary (try multiple known locations)
+    local binary=""
+    for candidate in \
+        "src-tauri/target/release/muthur-os-terminal" \
+        "src-tauri/target/release/bundle/appimage/"*".AppImage"; do
+        if [ -f "$candidate" ]; then
+            binary="$candidate"
+            break
+        fi
+    done
 
-    # Install kys shutdown command
+    if [ -z "$binary" ]; then
+        err "Build artifact not found. Build may have failed."
+        exit 1
+    fi
+
+    sudo install -Dm755 "$binary" "$INSTALL_DIR/muthur"
+    # Symlink to standard system path
+    sudo ln -sf "$INSTALL_DIR/muthur" "$SYSTEM_BIN/muthur-os-terminal"
+    info "Binary: $INSTALL_DIR/muthur"
+
+    # ── CLI Utilities ──
     if [ -f "packaging/bin/kys" ]; then
-        sudo cp "packaging/bin/kys" /usr/local/bin/kys
-        sudo chmod +x /usr/local/bin/kys
-        echo -e "${GREEN}[OK]${NC} kys command installed to /usr/local/bin/kys"
+        sudo install -Dm755 "packaging/bin/kys" "$INSTALL_DIR/kys"
+        info "Command: $INSTALL_DIR/kys"
     fi
 
-    # Install mother-ui autostart manager
     if [ -f "packaging/bin/mother-ui" ]; then
-        sudo cp "packaging/bin/mother-ui" /usr/local/bin/mother-ui
-        sudo chmod +x /usr/local/bin/mother-ui
-        echo -e "${GREEN}[OK]${NC} mother-ui command installed to /usr/local/bin/mother-ui"
+        sudo install -Dm755 "packaging/bin/mother-ui" "$INSTALL_DIR/mother-ui"
+        info "Command: $INSTALL_DIR/mother-ui"
     fi
 
-    # Install session entry for display managers
-    if [ -f "packaging/muthur-session.desktop" ]; then
-        sudo install -Dm644 "packaging/muthur-session.desktop" /usr/share/wayland-sessions/muthur.desktop
-        echo -e "${GREEN}[OK]${NC} Wayland session entry installed"
-    fi
-
-    # Install session wrapper script
+    # ── Session Infrastructure ──
     if [ -f "packaging/muthur-session" ]; then
-        sudo install -Dm755 "packaging/muthur-session" /usr/bin/muthur-session
-        echo -e "${GREEN}[OK]${NC} Session wrapper installed to /usr/bin/muthur-session"
+        sudo install -Dm755 "packaging/muthur-session" "$SYSTEM_BIN/muthur-session"
+        info "Session: $SYSTEM_BIN/muthur-session"
     fi
 
-    # Create config directory
-    mkdir -p ~/.config/xKOR_3RR0R/{crash_reports,logs}
-    echo -e "${GREEN}[OK]${NC} Config directory created"
-}
+    if [ -f "packaging/muthur-session.desktop" ]; then
+        sudo install -Dm644 "packaging/muthur-session.desktop" "$SESSION_DIR/muthur.desktop"
+        info "Session entry: $SESSION_DIR/muthur.desktop"
+    fi
 
-# Create desktop entry
-create_desktop_entry() {
-    echo ""
-    echo "Creating desktop entry..."
-
-    cat > ~/.local/share/applications/muthur.desktop << EOF
+    # ── Desktop Entry ──
+    mkdir -p "$DESKTOP_DIR"
+    if [ -f "packaging/muthur.desktop" ]; then
+        install -Dm644 "packaging/muthur.desktop" "$DESKTOP_DIR/muthur.desktop"
+    else
+        cat > "$DESKTOP_DIR/muthur.desktop" << 'EOF'
 [Desktop Entry]
 Version=1.0
 Type=Application
 Name=MUTHUR OS Terminal
-Comment=Advanced terminal interface with AI integration
-Exec=/usr/local/bin/muthur
+Comment=Cinematic terminal interface with AI integration
+Exec=muthur-os-terminal
 Icon=utilities-terminal
 Terminal=false
 Categories=System;TerminalEmulator;
-Keywords=terminal;shell;prompt;command;
+Keywords=terminal;shell;muthur;ai;
 EOF
+    fi
+    if command -v update-desktop-database &>/dev/null; then
+        update-desktop-database "$DESKTOP_DIR" 2>/dev/null || true
+    fi
+    info "Desktop entry: $DESKTOP_DIR/muthur.desktop"
 
-    # Update desktop database
-    if command -v update-desktop-database &> /dev/null; then
-        update-desktop-database ~/.local/share/applications 2>/dev/null || true
+    # ── User Configuration (preserve existing) ──
+    mkdir -p "$CONFIG_DIR"
+    mkdir -p "$DATA_DIR/crash_reports"
+    mkdir -p "$DATA_DIR/logs"
+
+    if [ -f "examples/config.toml.example" ] && [ ! -f "$CONFIG_DIR/config.toml" ]; then
+        cp "examples/config.toml.example" "$CONFIG_DIR/config.toml"
+        info "Config template: $CONFIG_DIR/config.toml"
+    else
+        dimtext "  Config preserved: $CONFIG_DIR/config.toml"
     fi
 
-    echo -e "${GREEN}[OK]${NC} Desktop entry created"
+    # ── Compositor Profiles (reference copies) ──
+    mkdir -p "$CONFIG_DIR/compositors"
+    if [ -d "packaging/compositors" ]; then
+        cp -f packaging/compositors/* "$CONFIG_DIR/compositors/" 2>/dev/null || true
+        dimtext "  Compositor profiles: $CONFIG_DIR/compositors/"
+    fi
+
+    # ── Kiosk Blueprints (reference copies, never auto-applied) ──
+    mkdir -p "$CONFIG_DIR/kiosk"
+    if [ -d "packaging/kiosk" ]; then
+        cp -f packaging/kiosk/* "$CONFIG_DIR/kiosk/" 2>/dev/null || true
+        dimtext "  Kiosk blueprints: $CONFIG_DIR/kiosk/"
+    fi
 }
 
-# Error handler
+# ─── Verification ──────────────────────────────────────────────────────────
+
+verify_installation() {
+    echo ""
+    step "Verifying installation..."
+
+    local errors=0
+
+    # Binary check
+    if [ -x "$INSTALL_DIR/muthur" ]; then
+        local size
+        size=$(du -h "$INSTALL_DIR/muthur" | cut -f1)
+        info "Binary OK ($size)"
+    else
+        err "Binary missing: $INSTALL_DIR/muthur"
+        errors=$((errors + 1))
+    fi
+
+    # Symlink check
+    if [ -L "$SYSTEM_BIN/muthur-os-terminal" ]; then
+        info "Symlink OK: $SYSTEM_BIN/muthur-os-terminal"
+    else
+        warn "Symlink missing (non-fatal)"
+    fi
+
+    # CLI utilities
+    [ -x "$INSTALL_DIR/mother-ui" ] && info "mother-ui OK" || warn "mother-ui missing"
+    [ -x "$INSTALL_DIR/kys" ] && info "kys OK" || warn "kys missing"
+
+    # Config directories
+    [ -d "$CONFIG_DIR" ] && info "Config dir OK" || warn "Config dir missing"
+    [ -d "$DATA_DIR" ] && info "Data dir OK" || warn "Data dir missing"
+
+    if [ $errors -gt 0 ]; then
+        err "Installation verification failed ($errors errors)"
+        exit 1
+    fi
+}
+
+# ─── Summary ───────────────────────────────────────────────────────────────
+
+print_summary() {
+    echo ""
+    echo "================================================================"
+    if [ -n "$EXISTING" ]; then
+        echo -e "${GREEN} UPGRADE COMPLETE${NC} - MUTHUR OS Terminal v$VERSION"
+    else
+        echo -e "${GREEN} INSTALLATION COMPLETE${NC} - MUTHUR OS Terminal v$VERSION"
+    fi
+    echo "================================================================"
+    echo ""
+    echo "  Commands:"
+    echo "    muthur               Launch MUTHUR OS Terminal"
+    echo "    mother-ui enable     Enable fullscreen autostart"
+    echo "    mother-ui disable    Disable autostart"
+    echo "    mother-ui status     Show current configuration"
+    echo "    kys                  System shutdown (10s countdown)"
+    echo ""
+    echo "  Configuration:"
+    echo "    $CONFIG_DIR/config.toml"
+    echo ""
+    echo "  Kiosk Mode (advanced):"
+    echo "    See: $CONFIG_DIR/kiosk/README-KIOSK.md"
+    echo ""
+    if command -v ollama &>/dev/null; then
+        echo "  AI Features:"
+        echo "    Ensure 'ollama serve' is running"
+        echo "    Model: ollama pull llama3.2"
+        echo ""
+    fi
+    echo "  Documentation:"
+    echo "    https://github.com/krko2n/Muthur-os-terminal"
+    echo ""
+}
+
+# ─── Error Handler ─────────────────────────────────────────────────────────
+
 handle_error() {
     echo ""
-    echo -e "${RED}================================${NC}"
-    echo -e "${RED}INSTALLATION FAILED${NC}"
-    echo -e "${RED}================================${NC}"
+    err "================================================================"
+    err " INSTALLATION FAILED"
+    err "================================================================"
     echo ""
-    echo "An error occurred during installation."
+    echo "  Log: /tmp/muthur-install.log"
+    echo "  Report: https://github.com/krko2n/Muthur-os-terminal/issues/new"
     echo ""
-    echo "Error log saved to: /tmp/muthur-install-error.log"
-    echo ""
-    read -p "Report this error to GitHub? (y/N) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        if [ -x "./report-error.sh" ]; then
-            ./report-error.sh install /tmp/muthur-install-error.log
-        else
-            echo "Please report manually: https://github.com/krko2n/Muthur-os-terminal/issues/new"
-        fi
-    else
-        echo ""
-        echo "To report manually: https://github.com/krko2n/Muthur-os-terminal/issues/new"
-    fi
     exit 1
 }
 
-# Set error trap
 trap 'handle_error' ERR
 
-# Main installation flow
+# ─── Main ──────────────────────────────────────────────────────────────────
+
 main() {
-    # Redirect all output to log file
-    exec > >(tee /tmp/muthur-install-error.log)
+    exec > >(tee /tmp/muthur-install.log)
     exec 2>&1
 
-    detect_os
+    preflight
     install_deps
     install_rust
     install_node
     install_ollama
     build_app
-    install_app
-    create_desktop_entry
-
-    echo ""
-    echo "================================"
-    echo -e "${GREEN}INSTALLATION COMPLETE${NC}"
-    echo "================================"
-    echo ""
-
-    # Verify installation
-    if [ -f "/usr/local/bin/muthur" ]; then
-        SIZE=$(du -h /usr/local/bin/muthur | cut -f1)
-        echo -e "${GREEN}[OK]${NC} Binary size: $SIZE"
-        echo ""
-    fi
-
-    echo "Launch: muthur"
-    echo "Or find 'MUTHUR OS Terminal' in your application menu"
-    echo ""
-
-    if command -v ollama &> /dev/null; then
-        echo -e "${BLUE}AI Features Setup:${NC}"
-        echo "  1. Start Ollama: ollama serve"
-        echo "  2. Download model: ollama pull llama3.2"
-        echo "  3. Restart MUTHUR"
-        echo ""
-    fi
-
-    echo "Useful commands:"
-    echo "  muthur         - Launch application"
-    echo "  ./upgrade.sh   - Upgrade to latest version"
-    echo "  ./uninstall.sh - Remove from system"
-    echo ""
-    echo "Documentation: https://github.com/krko2n/Muthur-os-terminal"
-    echo ""
+    install_assets
+    verify_installation
+    print_summary
 }
 
 main
