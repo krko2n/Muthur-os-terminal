@@ -13,9 +13,11 @@ impl SessionId {
     pub fn new() -> Self {
         SessionId(Uuid::new_v4().to_string())
     }
+}
 
-    pub fn to_string(&self) -> String {
-        self.0.clone()
+impl std::fmt::Display for SessionId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -27,7 +29,6 @@ impl From<String> for SessionId {
 
 pub struct Session {
     master: Box<dyn portable_pty::MasterPty + Send>,
-    writer: Arc<StdMutex<Box<dyn Write + Send>>>,
     #[allow(dead_code)]
     child: Box<dyn portable_pty::Child + Send>,
 }
@@ -106,26 +107,16 @@ impl PtyManager {
             let _ = window_clone.emit(&format!("terminal-closed-{}", sid_clone.to_string()), ());
         });
 
-        self.writers.insert(session_id.clone(), writer.clone());
+        self.writers.insert(session_id.clone(), writer);
         self.sessions.insert(
             session_id.clone(),
-            Session { master, writer, child },
+            Session { master, child },
         );
         Ok(session_id)
     }
 
     pub fn get_writer(&self, session_id: &SessionId) -> Option<Arc<StdMutex<Box<dyn Write + Send>>>> {
         self.writers.get(session_id).cloned()
-    }
-
-    pub fn write(&self, session_id: &SessionId, data: &[u8]) -> anyhow::Result<()> {
-        if let Some(writer) = self.writers.get(session_id) {
-            let mut w = writer.lock().map_err(|e| anyhow::anyhow!("{}", e))?;
-            w.write_all(data)?;
-            Ok(())
-        } else {
-            Err(anyhow::anyhow!("Session not found"))
-        }
     }
 
     pub fn resize(&mut self, session_id: SessionId, cols: u16, rows: u16) -> anyhow::Result<()> {

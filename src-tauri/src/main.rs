@@ -83,17 +83,15 @@ async fn list_directory(path: String) -> Result<Vec<serde_json::Value>, String> 
     let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
 
     let mut results = Vec::new();
-    for entry in entries {
-        if let Ok(entry) = entry {
-            let metadata = entry.metadata().map_err(|e| e.to_string())?;
-            results.push(serde_json::json!({
-                "name": entry.file_name().to_string_lossy(),
-                "path": entry.path().to_string_lossy(),
-                "is_dir": metadata.is_dir(),
-                "size": metadata.len(),
-                "modified": metadata.modified().ok().and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok().map(|d| d.as_secs()))
-            }));
-        }
+    for entry in entries.flatten() {
+        let metadata = entry.metadata().map_err(|e| e.to_string())?;
+        results.push(serde_json::json!({
+            "name": entry.file_name().to_string_lossy(),
+            "path": entry.path().to_string_lossy(),
+            "is_dir": metadata.is_dir(),
+            "size": metadata.len(),
+            "modified": metadata.modified().ok().and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok().map(|d| d.as_secs()))
+        }));
     }
     Ok(results)
 }
