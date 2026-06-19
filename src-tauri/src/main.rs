@@ -229,6 +229,49 @@ async fn detect_editor() -> String {
     "nano".to_string()
 }
 
+#[tauri::command]
+async fn open_file_external(path: String) -> Result<(), String> {
+    let editor = detect_editor().await;
+    let terminals = ["konsole", "gnome-terminal", "xfce4-terminal", "alacritty", "xterm"];
+    let mut terminal_cmd = "xterm";
+
+    for t in terminals {
+        if std::process::Command::new("which")
+            .arg(t)
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false)
+        {
+            terminal_cmd = t;
+            break;
+        }
+    }
+
+    let result = match terminal_cmd {
+        "konsole" => std::process::Command::new("konsole")
+            .arg("-e")
+            .arg(&editor)
+            .arg(&path)
+            .spawn(),
+        "gnome-terminal" => std::process::Command::new("gnome-terminal")
+            .arg("--")
+            .arg(&editor)
+            .arg(&path)
+            .spawn(),
+        "alacritty" => std::process::Command::new("alacritty")
+            .arg("-e")
+            .arg(&editor)
+            .arg(&path)
+            .spawn(),
+        _ => std::process::Command::new(terminal_cmd)
+            .arg("-e")
+            .arg(format!("{} \"{}\"", editor, path))
+            .spawn(),
+    };
+
+    result.map(|_| ()).map_err(|e| e.to_string())
+}
+
 fn html_to_text(html: &str) -> String {
     let mut result = String::new();
     let mut in_tag = false;
@@ -344,6 +387,7 @@ fn main() {
             fetch_url_structured,
             render_image_ascii,
             detect_editor,
+            open_file_external,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

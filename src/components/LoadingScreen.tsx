@@ -1,41 +1,49 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import MuthurLogo from './MuthurLogo';
 
-const ASCII_LOGO = `
- ███╗   ███╗██╗   ██╗████████╗██╗  ██╗██╗   ██╗██████╗
- ████╗ ████║██║   ██║╚══██╔══╝██║  ██║██║   ██║██╔══██╗
- ██╔████╔██║██║   ██║   ██║   ███████║██║   ██║██████╔╝
- ██║╚██╔╝██║██║   ██║   ██║   ██╔══██║██║   ██║██╔══██╗
- ██║ ╚═╝ ██║╚██████╔╝   ██║   ██║  ██║╚██████╔╝██║  ██║
- ╚═╝     ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝`;
-
-const BOOT_MESSAGES = [
-  'BIOS POST CHECK..................OK',
-  'MEMORY TEST......................64GB OK',
-  'CPU IDENTIFICATION...............VERIFIED',
-  'SECURE BOOT.....................ENABLED',
+const BOOT_LOG = [
+  'Welcome to MUTHUR-OS!',
+  'vm_page_bootstrap: 987323 free pages and 53061 wired pages',
+  'kext submap [0xffffff7f8072e000 - 0xffffff8000000000]',
+  'zone leak detection enabled',
+  'standard timeslicing quantum is 10000 us',
+  'TSC Deadline Timer supported and enabled',
+  'MUTHURACPICPU: ProcessorId=1 LocalApicId=0 Enabled',
+  'MUTHURACPICPU: ProcessorId=2 LocalApicId=2 Enabled',
+  'MUTHURACPICPU: ProcessorId=3 LocalApicId=1 Enabled',
+  'MUTHURACPICPU: ProcessorId=4 LocalApicId=3 Enabled',
+  'calling mpo_policy_init for SecurityNet',
+  'Security policy loaded: Seatbelt sandbox policy (Sandbox)',
+  'Security policy loaded: Quarantine policy (Quarantine)',
   '',
-  'MUTHUR CORE v0.1.0',
-  'BUILD: 2026.06.09-STABLE',
+  'HN_ Framework successfully initialized',
+  'using 16384 buffer headers and 10240 cluster IO buffer headers',
+  'IOAPIC: Version 0x20 Vectors 64:87',
+  'ACPI: System State [S0 S3 S4 S5] (S3)',
+  '[ PCI configuration begin ]',
+  'MUTHURIntelCPUPowerManagement: Turbo Ratios 0046',
+  'MUTHURIntelCPUPowerManagement: initialization complete',
+  '[ PCI configuration end, bridges 12 devices 16 ]',
+  'mbinit: done [64 MB total pool size, (42/21) split]',
+  'com.MUTHUR.FSCompressionTypeZlib kmod start',
+  'com.MUTHUR.FSCompressionTypeZlib load succeeded',
   '',
-  'LOADING KERNEL MODULES...........',
-  '  [pty]     pseudoterminal.......OK',
-  '  [sysmon]  system monitor.......OK',
-  '  [ai]      neural interface.....OK',
-  '  [net]     network stack........OK',
-  '  [fs]      filesystem driver....OK',
-  '  [gpu]     render pipeline......OK',
+  'MUTHURIntelCPUPowerManagementClient: ready',
+  'wl0: Broadcom BCM4331 802.11 Wireless Controller',
+  'FireWire (OHCI) built-in now active; max speed s800.',
+  'BSD root: disk0s2, major 14, minor 2',
+  'Kernel is LP64',
   '',
-  'INITIALIZING SUBSYSTEMS..........',
-  '  TERMINAL EMULATOR.............READY',
-  '  AI CORE.......................STANDBY',
-  '  GLOBAL NETWORK MAP............SYNCING',
+  'IOThunderboltSwitch: status = 0x00000000',
+  'AirPort: Link Up on en1',
   '',
-  'AUTHENTICATION REQUIRED',
+  '===================================================',
+  '  MUTHUR-OS KERNEL v0.1.0 - BUILD 2026.06.19',
+  '  Neural Interface Active',
+  '  All Systems Nominal',
+  '===================================================',
   '',
-  '> MUTHUR AI TERMINAL',
-  '> CORE SYSTEM INITIALIZED',
-  '> AWAITING USER AUTHENTICATION...',
+  'Boot Complete',
 ];
 
 interface LoadingScreenProps {
@@ -43,75 +51,90 @@ interface LoadingScreenProps {
 }
 
 export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
+  const [phase, setPhase] = useState<'logo' | 'boot'>('logo');
   const [visibleLines, setVisibleLines] = useState(0);
-  const [showLogo, setShowLogo] = useState(true);
   const [logoOpacity, setLogoOpacity] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Fade in logo
-    const fadeIn = setTimeout(() => setLogoOpacity(1), 100);
-
-    // Start boot text after logo display
-    const startBoot = setTimeout(() => {
-      setShowLogo(false);
-    }, 2000);
-
-    return () => {
-      clearTimeout(fadeIn);
-      clearTimeout(startBoot);
-    };
+    try {
+      const audio = new Audio('/audio/theme.wav');
+      audio.volume = 0.3;
+      audio.play().catch(() => {});
+    } catch {}
   }, []);
 
   useEffect(() => {
-    if (showLogo) return;
+    const fadeIn = setTimeout(() => setLogoOpacity(1), 100);
+    const startBoot = setTimeout(() => setPhase('boot'), 2500);
+    return () => { clearTimeout(fadeIn); clearTimeout(startBoot); };
+  }, []);
 
-    if (visibleLines >= BOOT_MESSAGES.length) {
-      const done = setTimeout(onComplete, 800);
+  useEffect(() => {
+    if (phase !== 'boot') return;
+
+    if (visibleLines >= BOOT_LOG.length) {
+      try {
+        const granted = new Audio('/audio/granted.wav');
+        granted.volume = 0.4;
+        granted.play().catch(() => {});
+      } catch {}
+      const done = setTimeout(onComplete, 1000);
       return () => clearTimeout(done);
     }
 
-    const delay = BOOT_MESSAGES[visibleLines] === '' ? 100 :
-                  BOOT_MESSAGES[visibleLines].startsWith('>') ? 300 : 50;
+    const line = BOOT_LOG[visibleLines];
+    const delay = line === '' ? 80 :
+                  line.startsWith('===') ? 150 :
+                  line === 'Boot Complete' ? 400 : 22;
 
     const timer = setTimeout(() => {
       setVisibleLines(prev => prev + 1);
+      if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      }
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [visibleLines, showLogo, onComplete]);
+  }, [visibleLines, phase, onComplete]);
 
   return (
     <div className="w-screen h-screen bg-[#05080d] flex items-center justify-center overflow-hidden">
-      {showLogo ? (
+      {phase === 'logo' ? (
         <div
           className="flex flex-col items-center gap-6"
-          style={{ opacity: logoOpacity, transition: 'opacity 0.8s ease-in' }}
+          style={{ opacity: logoOpacity, transition: 'opacity 1s ease-in' }}
         >
           <MuthurLogo size="12vh" color="#00ff41" shadowColor="rgba(0,255,65,0.08)" />
-          <pre className="text-muthur-primary font-mono text-[1.4vh] leading-tight text-center">
-            {ASCII_LOGO}
-          </pre>
+          <div className="text-muthur-primary font-mono text-[1.2vh] tracking-[0.5em] uppercase opacity-60 animate-pulse">
+            INITIALIZING SYSTEM
+          </div>
         </div>
       ) : (
-        <div className="w-full max-w-[80ch] px-8 font-mono text-[1.3vh] leading-relaxed">
-          {BOOT_MESSAGES.slice(0, visibleLines).map((line, i) => (
+        <div
+          ref={containerRef}
+          className="w-full h-full p-6 font-mono text-[11px] leading-[1.6] overflow-hidden"
+        >
+          {BOOT_LOG.slice(0, visibleLines).map((line, i) => (
             <div
               key={i}
               className={`${
-                line.startsWith('>')
+                line.startsWith('===')
+                  ? 'text-muthur-primary font-bold'
+                  : line === 'Boot Complete'
+                  ? 'text-muthur-primary text-glow'
+                  : line.includes('Enabled') || line.includes('succeeded') || line.includes('ready') || line.includes('complete')
+                  ? 'text-[#00ff41] opacity-70'
+                  : line.includes('MUTHUR-OS KERNEL')
                   ? 'text-muthur-primary'
-                  : line.startsWith('  [')
-                  ? 'text-muthur-secondary'
-                  : line.includes('OK') || line.includes('READY') || line.includes('ENABLED')
-                  ? 'text-muthur-primary opacity-80'
-                  : 'text-muthur-secondary opacity-60'
+                  : 'text-[#aacfd1] opacity-50'
               }`}
             >
               {line || ' '}
             </div>
           ))}
-          {visibleLines < BOOT_MESSAGES.length && (
-            <span className="inline-block w-[1ch] h-[1.5vh] bg-muthur-primary animate-pulse" />
+          {visibleLines < BOOT_LOG.length && (
+            <span className="inline-block w-[8px] h-[13px] bg-muthur-primary animate-pulse" />
           )}
         </div>
       )}

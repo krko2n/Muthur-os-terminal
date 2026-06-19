@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { playSound } from '../sounds';
 
 interface KeyDef {
   code: string;
@@ -25,7 +26,7 @@ const ROWS: KeyDef[][] = [
     { code: 'Digit0', lower: '0', shift: ')', w: 1 },
     { code: 'Minus', lower: '-', shift: '_', w: 1 },
     { code: 'Equal', lower: '=', shift: '+', w: 1 },
-    { code: 'Backspace', lower: 'back', shift: 'back', w: 2, isModifier: true },
+    { code: 'Backspace', lower: 'bksp', shift: 'bksp', w: 2, isModifier: true },
   ],
   [
     { code: 'Tab', lower: 'tab', shift: 'tab', w: 1.5, isModifier: true },
@@ -41,7 +42,7 @@ const ROWS: KeyDef[][] = [
     { code: 'KeyP', lower: 'p', shift: 'P', w: 1, isLetter: true },
     { code: 'BracketLeft', lower: '[', shift: '{', w: 1 },
     { code: 'BracketRight', lower: ']', shift: '}', w: 1 },
-    { code: 'Enter', lower: 'enter', shift: 'enter', w: 2.5, isModifier: true },
+    { code: 'Enter', lower: 'ret', shift: 'ret', w: 2.5, isModifier: true },
   ],
   [
     { code: 'CapsLock', lower: 'caps', shift: 'caps', w: 1.8, isModifier: true },
@@ -59,7 +60,7 @@ const ROWS: KeyDef[][] = [
     { code: 'Backslash', lower: '\\', shift: '|', w: 1 },
   ],
   [
-    { code: 'ShiftLeft', lower: 'shift', shift: 'shift', w: 2.2, isModifier: true },
+    { code: 'ShiftLeft', lower: 'shift', shift: 'shift', w: 2.4, isModifier: true },
     { code: 'KeyZ', lower: 'z', shift: 'Z', w: 1, isLetter: true },
     { code: 'KeyX', lower: 'x', shift: 'X', w: 1, isLetter: true },
     { code: 'KeyC', lower: 'c', shift: 'C', w: 1, isLetter: true },
@@ -70,13 +71,15 @@ const ROWS: KeyDef[][] = [
     { code: 'Comma', lower: ',', shift: '<', w: 1 },
     { code: 'Period', lower: '.', shift: '>', w: 1 },
     { code: 'Slash', lower: '/', shift: '?', w: 1 },
-    { code: 'ShiftRight', lower: 'shift', shift: 'shift', w: 2.8, isModifier: true },
+    { code: 'ShiftRight', lower: 'shift', shift: 'shift', w: 2.6, isModifier: true },
   ],
   [
     { code: 'ControlLeft', lower: 'ctrl', shift: 'ctrl', w: 1.5, isModifier: true },
-    { code: 'Fn', lower: 'fn', shift: 'fn', w: 1, isModifier: true },
-    { code: 'Space', lower: '', shift: '', w: 9, isModifier: true },
-    { code: 'AltRight', lower: 'alt gr', shift: 'alt gr', w: 1.5, isModifier: true },
+    { code: 'MetaLeft', lower: 'super', shift: 'super', w: 1.2, isModifier: true },
+    { code: 'AltLeft', lower: 'alt', shift: 'alt', w: 1.2, isModifier: true },
+    { code: 'Space', lower: '', shift: '', w: 7 },
+    { code: 'AltRight', lower: 'alt', shift: 'alt', w: 1.2, isModifier: true },
+    { code: 'MetaRight', lower: 'fn', shift: 'fn', w: 1.2, isModifier: true },
     { code: 'ControlRight', lower: 'ctrl', shift: 'ctrl', w: 1.5, isModifier: true },
   ],
 ];
@@ -85,13 +88,13 @@ export default function Keyboard() {
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
   const [capsLock, setCapsLock] = useState(false);
   const [shiftHeld, setShiftHeld] = useState(false);
-  // Sticky shift: when shift is clicked on virtual keyboard, it stays until next key
   const [stickyShift, setStickyShift] = useState(false);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     setActiveKeys(prev => new Set(prev).add(e.code));
     if (e.code === 'CapsLock') setCapsLock(prev => !prev);
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') setShiftHeld(true);
+    playSound('keyboard', 0.08);
   }, []);
 
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
@@ -116,16 +119,12 @@ export default function Keyboard() {
 
   const getLabel = (keyDef: KeyDef): string => {
     if (keyDef.isModifier) return keyDef.lower;
-    if (keyDef.isLetter) {
-      return (capsLock || isShifted) ? keyDef.shift : keyDef.lower;
-    }
+    if (keyDef.isLetter) return (capsLock || isShifted) ? keyDef.shift : keyDef.lower;
     return isShifted ? keyDef.shift : keyDef.lower;
   };
 
   const getChar = (keyDef: KeyDef): string => {
-    if (keyDef.isLetter) {
-      return (capsLock || isShifted) ? keyDef.shift : keyDef.lower;
-    }
+    if (keyDef.isLetter) return (capsLock || isShifted) ? keyDef.shift : keyDef.lower;
     return isShifted ? keyDef.shift : keyDef.lower;
   };
 
@@ -136,7 +135,6 @@ export default function Keyboard() {
   };
 
   const handleClick = (keyDef: KeyDef) => {
-    // Toggle sticky shift
     if (keyDef.code === 'ShiftLeft' || keyDef.code === 'ShiftRight') {
       setStickyShift(prev => !prev);
       return;
@@ -145,8 +143,7 @@ export default function Keyboard() {
       setCapsLock(prev => !prev);
       return;
     }
-    // Skip other modifiers that don't produce characters
-    if (keyDef.code.startsWith('Control') || keyDef.code === 'Fn' || keyDef.code.startsWith('Alt')) {
+    if (keyDef.code.startsWith('Control') || keyDef.code.startsWith('Meta') || keyDef.code.startsWith('Alt')) {
       return;
     }
 
@@ -158,32 +155,23 @@ export default function Keyboard() {
     else if (keyDef.code === 'Escape') char = '\x1b';
     else char = getChar(keyDef);
 
-    if (char) {
-      window.dispatchEvent(new CustomEvent('virtual-key', { detail: char }));
-    }
+    if (char) window.dispatchEvent(new CustomEvent('virtual-key', { detail: char }));
 
-    // Release sticky shift after typing one character
-    if (stickyShift) {
-      setStickyShift(false);
-    }
+    playSound('keyboard', 0.08);
+    if (stickyShift) setStickyShift(false);
 
-    // Visual feedback
     setActiveKeys(prev => new Set(prev).add(keyDef.code));
     setTimeout(() => {
-      setActiveKeys(prev => {
-        const next = new Set(prev);
-        next.delete(keyDef.code);
-        return next;
-      });
+      setActiveKeys(prev => { const n = new Set(prev); n.delete(keyDef.code); return n; });
     }, 100);
   };
 
   return (
-    <div className="h-full w-full flex flex-col justify-between p-[0.5vw]">
+    <div className="h-full w-full flex flex-col justify-center gap-[0.15vw] p-[0.3vw]">
       {ROWS.map((row, ri) => {
         const totalW = row.reduce((sum, k) => sum + k.w, 0);
         return (
-          <div key={ri} className="flex flex-1 gap-[0.2vw] items-stretch">
+          <div key={ri} className="flex gap-[0.15vw] items-stretch" style={{ height: '18%' }}>
             {row.map((keyDef, ki) => {
               const active = isActive(keyDef.code);
               const label = getLabel(keyDef);
@@ -196,16 +184,17 @@ export default function Keyboard() {
                   onClick={() => handleClick(keyDef)}
                   className={`
                     flex items-center justify-center
-                    rounded-sm transition-all duration-75
-                    font-mono select-none my-[0.15vw]
+                    rounded-[3px] transition-all duration-75
+                    font-mono select-none uppercase
                     ${highlighted
-                      ? 'key-active'
-                      : 'border border-[rgba(0,255,65,0.25)] text-muthur-primary opacity-80 hover:opacity-100 hover:border-[rgba(0,255,65,0.5)]'
+                      ? 'key-active shadow-[0_0_8px_rgba(0,255,65,0.4)]'
+                      : 'border border-[rgba(0,255,65,0.2)] text-muthur-primary opacity-70 hover:opacity-100 hover:border-[rgba(0,255,65,0.5)] hover:shadow-[0_0_4px_rgba(0,255,65,0.15)]'
                     }
                   `}
                   style={{
                     flex: `${keyDef.w / totalW}`,
-                    fontSize: keyDef.w > 1.5 ? '0.7vw' : '0.9vw',
+                    fontSize: keyDef.w > 1.5 ? '0.55vw' : '0.7vw',
+                    background: highlighted ? undefined : 'rgba(0,255,65,0.02)',
                   }}
                 >
                   {label}

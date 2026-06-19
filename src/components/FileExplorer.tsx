@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { FileSystemIcon } from './SystemIcons';
+import { playSound } from '../sounds';
 
 interface FileEntry {
   name: string;
@@ -101,11 +102,17 @@ export default function FileExplorer() {
     setLoading(false);
   };
 
-  const handleEntryClick = (entry: FileEntry) => {
+  const handleEntryClick = async (entry: FileEntry) => {
     if (entry.is_dir) {
       loadDirectory(entry.path);
+      playSound('folder', 0.12);
     } else {
-      window.dispatchEvent(new CustomEvent('open-file', { detail: entry.path }));
+      try {
+        await invoke('open_file_external', { path: entry.path });
+        playSound('expand', 0.12);
+      } catch (e) {
+        console.error('Failed to open file externally:', e);
+      }
     }
   };
 

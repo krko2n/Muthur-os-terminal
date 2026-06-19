@@ -425,19 +425,19 @@ export default function Terminal() {
       {/* Content */}
       {isBrowser ? (
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-          {/* URL bar */}
-          <div className="flex gap-2 p-2 border-b border-[rgba(0,255,65,0.1)] shrink-0 relative z-10">
+          {/* URL bar - fixed height, always visible */}
+          <div className="flex gap-2 px-3 py-2 border-b border-[rgba(0,255,65,0.15)] shrink-0 relative z-10 bg-[rgba(5,8,13,0.95)]">
             <input
               type="text"
               value={browserInput}
               onChange={(e) => setBrowserInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && navigateBrowser(browserInput)}
-              placeholder="Enter URL or search..."
-              className="flex-1 bg-transparent border border-[rgba(0,255,65,0.2)] px-2 py-1 text-sm text-muthur-primary font-mono focus:outline-none focus:border-[rgba(0,255,65,0.5)]"
+              placeholder="URL or search..."
+              className="flex-1 bg-[rgba(0,255,65,0.03)] border border-[rgba(0,255,65,0.25)] rounded-sm px-3 py-1.5 text-sm text-muthur-primary font-mono focus:outline-none focus:border-[rgba(0,255,65,0.6)] focus:shadow-[0_0_6px_rgba(0,255,65,0.15)] placeholder:text-[rgba(0,255,65,0.3)]"
             />
             <button
               onClick={() => navigateBrowser(browserInput)}
-              className="px-3 py-1 text-sm border border-[rgba(0,255,65,0.3)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)]"
+              className="px-4 py-1.5 text-sm border border-[rgba(0,255,65,0.3)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] rounded-sm font-mono tracking-wider"
             >
               GO
             </button>

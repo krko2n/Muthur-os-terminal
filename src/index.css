@@ -26,7 +26,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='%2300ff41' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%2300ff41'/%3E%3C/svg%3E") 10 10, crosshair !important;
+  cursor: none !important;
 }
 
 body {
@@ -48,13 +48,14 @@ body {
 
 /* Custom cursor - circle with center dot (GPU-composited) */
 .custom-cursor {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: 1.5px solid var(--color-accent);
   border-radius: 50%;
   pointer-events: none;
   z-index: 99999;
   opacity: 0.9;
+  box-shadow: 0 0 6px rgba(var(--color-r), var(--color-g), var(--color-b), 0.3);
 }
 
 .custom-cursor::after {
@@ -67,6 +68,17 @@ body {
   height: 3px;
   background: var(--color-accent);
   border-radius: 50%;
+  box-shadow: 0 0 4px var(--color-accent);
+}
+
+.cursor-trail {
+  width: 4px;
+  height: 4px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  opacity: 0;
 }
 
 /* Scanline - GPU-composited layer */

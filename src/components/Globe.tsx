@@ -195,14 +195,7 @@ export default function Globe() {
   }, []);
 
   const fetchData = async (url: string, localPath?: string): Promise<any> => {
-    // Backend fetch first (bypasses CSP, more reliable in production)
-    try {
-      const text = await invoke('fetch_json', { url }) as string;
-      return JSON.parse(text);
-    } catch (e) {
-      console.warn(`Backend fetch failed for ${url}:`, e);
-    }
-    // Fallback to frontend fetch (works in dev mode via Vite)
+    // Local file first (always bundled, no network needed)
     if (localPath) {
       try {
         const res = await fetch(localPath);
@@ -210,6 +203,13 @@ export default function Globe() {
       } catch (e) {
         console.warn(`Local fetch failed for ${localPath}:`, e);
       }
+    }
+    // Backend fetch (bypasses CSP for remote URLs)
+    try {
+      const text = await invoke('fetch_json', { url }) as string;
+      return JSON.parse(text);
+    } catch (e) {
+      console.warn(`Backend fetch failed for ${url}:`, e);
     }
     return null;
   };
