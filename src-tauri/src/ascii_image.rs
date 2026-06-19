@@ -5,10 +5,10 @@ const MAX_HEIGHT: u32 = 200;
 const MAX_IMAGE_BYTES: usize = 5 * 1024 * 1024;
 
 const BAYER_MATRIX: [[u8; 4]; 4] = [
-    [  0, 136,  34, 170],
-    [204,  68, 238, 102],
-    [ 51, 187,  17, 153],
-    [255, 119, 221,  85],
+    [0, 136, 34, 170],
+    [204, 68, 238, 102],
+    [51, 187, 17, 153],
+    [255, 119, 221, 85],
 ];
 
 fn bayer_threshold(pixel: u8, x: u32, y: u32) -> bool {
@@ -43,13 +43,16 @@ fn pixels_to_braille(gray: &GrayImage, width: u32, height: u32) -> String {
                 if y < height && bayer_threshold(gray.get_pixel(x + 1, y)[0], x + 1, y) {
                     byte |= 0x08;
                 }
-                if y + 1 < height && bayer_threshold(gray.get_pixel(x + 1, y + 1)[0], x + 1, y + 1) {
+                if y + 1 < height && bayer_threshold(gray.get_pixel(x + 1, y + 1)[0], x + 1, y + 1)
+                {
                     byte |= 0x10;
                 }
-                if y + 2 < height && bayer_threshold(gray.get_pixel(x + 1, y + 2)[0], x + 1, y + 2) {
+                if y + 2 < height && bayer_threshold(gray.get_pixel(x + 1, y + 2)[0], x + 1, y + 2)
+                {
                     byte |= 0x20;
                 }
-                if y + 3 < height && bayer_threshold(gray.get_pixel(x + 1, y + 3)[0], x + 1, y + 3) {
+                if y + 3 < height && bayer_threshold(gray.get_pixel(x + 1, y + 3)[0], x + 1, y + 3)
+                {
                     byte |= 0x80;
                 }
             }
@@ -70,8 +73,7 @@ pub fn convert_to_braille(image_bytes: &[u8]) -> Result<String, String> {
         return Err("Image too large (>5MB)".to_string());
     }
 
-    let img = image::load_from_memory(image_bytes)
-        .map_err(|e| format!("Decode failed: {}", e))?;
+    let img = image::load_from_memory(image_bytes).map_err(|e| format!("Decode failed: {}", e))?;
 
     let (src_w, src_h) = (img.width(), img.height());
     if src_w == 0 || src_h == 0 {

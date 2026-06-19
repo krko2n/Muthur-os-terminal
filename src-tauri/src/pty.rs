@@ -82,27 +82,22 @@ impl PtyManager {
                     Ok(0) => {
                         if !batch.is_empty() {
                             let data = String::from_utf8_lossy(&batch).to_string();
-                            let _ = window_clone.emit(
-                                &format!("terminal-output-{}", sid_clone),
-                                data,
-                            );
+                            let _ =
+                                window_clone.emit(&format!("terminal-output-{}", sid_clone), data);
                         }
                         break;
                     }
                     Ok(n) => {
                         batch.extend_from_slice(&buffer[..n]);
                         let now = Instant::now();
-                        let should_flush =
-                            now.duration_since(last_emit) >= frame_time ||
-                            batch.len() >= 32768 ||
-                            n < low_water_mark;
+                        let should_flush = now.duration_since(last_emit) >= frame_time
+                            || batch.len() >= 32768
+                            || n < low_water_mark;
 
                         if should_flush {
                             let data = String::from_utf8_lossy(&batch).to_string();
-                            let _ = window_clone.emit(
-                                &format!("terminal-output-{}", sid_clone),
-                                data,
-                            );
+                            let _ =
+                                window_clone.emit(&format!("terminal-output-{}", sid_clone), data);
                             batch.clear();
                             last_emit = now;
                         }
@@ -114,14 +109,15 @@ impl PtyManager {
         });
 
         self.writers.insert(session_id.clone(), writer);
-        self.sessions.insert(
-            session_id.clone(),
-            Session { master, child },
-        );
+        self.sessions
+            .insert(session_id.clone(), Session { master, child });
         Ok(session_id)
     }
 
-    pub fn get_writer(&self, session_id: &SessionId) -> Option<Arc<StdMutex<Box<dyn Write + Send>>>> {
+    pub fn get_writer(
+        &self,
+        session_id: &SessionId,
+    ) -> Option<Arc<StdMutex<Box<dyn Write + Send>>>> {
         self.writers.get(session_id).cloned()
     }
 

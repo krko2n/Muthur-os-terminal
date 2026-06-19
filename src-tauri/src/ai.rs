@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 
@@ -99,9 +99,7 @@ impl OllamaClient {
 
         // Windows fallback: %APPDATA%\muthur\config.toml
         if let Ok(appdata) = std::env::var("APPDATA") {
-            let win_path = PathBuf::from(appdata)
-                .join("muthur")
-                .join("config.toml");
+            let win_path = PathBuf::from(appdata).join("muthur").join("config.toml");
             if win_path.exists() {
                 return Some(win_path);
             }
@@ -110,7 +108,11 @@ impl OllamaClient {
         None
     }
 
-    pub async fn suggest_command(&self, context: &str, error: Option<&str>) -> anyhow::Result<String> {
+    pub async fn suggest_command(
+        &self,
+        context: &str,
+        error: Option<&str>,
+    ) -> anyhow::Result<String> {
         let prompt = if let Some(err) = error {
             format!(
                 "You are a Linux command-line assistant. The user encountered this error:\n\
@@ -154,7 +156,8 @@ impl OllamaClient {
             stream: false,
         };
 
-        let response = self.client
+        let response = self
+            .client
             .post(format!("{}/api/generate", self.base_url))
             .json(&request)
             .send()

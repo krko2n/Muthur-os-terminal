@@ -35,6 +35,8 @@ jobs:
 
         if [ -f VERSION_HISTORY.md ]; then
           git add VERSION_HISTORY.md
-          git diff --staged --quiet || git commit -m "docs: auto-update version history [skip ci]"
-          git push
+          if ! git diff --staged --quiet; then
+            git commit -m "docs: auto-update version history [skip ci]"
+            git push || echo "Push failed (likely branch protection) - skipping"
+          fi
         fi

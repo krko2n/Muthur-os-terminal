@@ -1,4 +1,4 @@
-use scraper::{Html, Selector, ElementRef};
+use scraper::{ElementRef, Html, Selector};
 use serde::Serialize;
 
 const MAX_BLOCKS: usize = 500;
@@ -8,15 +8,38 @@ const MAX_HTML_BYTES: usize = 5 * 1024 * 1024;
 #[derive(Serialize, Clone, Debug)]
 #[serde(tag = "type")]
 pub enum TextBlock {
-    Heading { level: u8, text: String },
-    Paragraph { text: String },
-    Link { id: usize, text: String, url: String },
-    BulletList { items: Vec<String> },
-    OrderedList { items: Vec<String> },
-    CodeBlock { code: String },
-    Table { headers: Vec<String>, rows: Vec<Vec<String>> },
-    Image { alt: String, url: String },
-    BlockQuote { text: String },
+    Heading {
+        level: u8,
+        text: String,
+    },
+    Paragraph {
+        text: String,
+    },
+    Link {
+        id: usize,
+        text: String,
+        url: String,
+    },
+    BulletList {
+        items: Vec<String>,
+    },
+    OrderedList {
+        items: Vec<String>,
+    },
+    CodeBlock {
+        code: String,
+    },
+    Table {
+        headers: Vec<String>,
+        rows: Vec<Vec<String>>,
+    },
+    Image {
+        alt: String,
+        url: String,
+    },
+    BlockQuote {
+        text: String,
+    },
     Separator,
 }
 
@@ -64,7 +87,9 @@ pub fn parse_html(html: &str, base_url: &str) -> BrowserDocument {
         process_children(&body, &mut blocks, &mut links, &mut link_id, base_url, 0);
     } else {
         // Fallback: walk entire document
-        if let Some(root_el) = document.root_element().children()
+        if let Some(root_el) = document
+            .root_element()
+            .children()
             .filter_map(ElementRef::wrap)
             .next()
         {
@@ -72,7 +97,12 @@ pub fn parse_html(html: &str, base_url: &str) -> BrowserDocument {
         }
     }
 
-    BrowserDocument { title, url: base_url.to_string(), blocks, links }
+    BrowserDocument {
+        title,
+        url: base_url.to_string(),
+        blocks,
+        links,
+    }
 }
 
 fn process_children(
@@ -119,7 +149,9 @@ fn process_element(
 
     // Skip invisible elements
     match tag {
-        "script" | "style" | "noscript" | "template" | "svg" | "nav" | "footer" | "header" => return,
+        "script" | "style" | "noscript" | "template" | "svg" | "nav" | "footer" | "header" => {
+            return
+        }
         _ => {}
     }
 
@@ -197,9 +229,8 @@ fn process_element(
             blocks.push(TextBlock::Separator);
         }
         // Container elements: recurse into children
-        "div" | "section" | "article" | "main" | "span" | "aside" | "figure"
-        | "figcaption" | "details" | "summary" | "dl" | "dd" | "dt" | "form"
-        | "fieldset" | "label" => {
+        "div" | "section" | "article" | "main" | "span" | "aside" | "figure" | "figcaption"
+        | "details" | "summary" | "dl" | "dd" | "dt" | "form" | "fieldset" | "label" => {
             process_children(elem, blocks, links, link_id, base_url, depth);
         }
         "li" => {
@@ -320,7 +351,11 @@ fn collect_table(elem: &ElementRef) -> (Vec<String>, Vec<Vec<String>>) {
                                 .collect()
                         })
                         .unwrap_or_default();
-                    if cells.is_empty() { None } else { Some(cells) }
+                    if cells.is_empty() {
+                        None
+                    } else {
+                        Some(cells)
+                    }
                 })
                 .collect()
         })
@@ -349,7 +384,10 @@ fn resolve_url(href: &str, base_url: &str) -> String {
         if href.starts_with('/') {
             // Absolute path relative to origin
             if let Some(origin_end) = base_url.find("://").map(|i| {
-                base_url[i + 3..].find('/').map(|j| i + 3 + j).unwrap_or(base_url.len())
+                base_url[i + 3..]
+                    .find('/')
+                    .map(|j| i + 3 + j)
+                    .unwrap_or(base_url.len())
             }) {
                 return format!("{}{}", &base_url[..origin_end], href);
             }

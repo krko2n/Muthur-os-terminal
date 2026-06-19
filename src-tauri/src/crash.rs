@@ -1,6 +1,6 @@
+use chrono::Local;
 use std::fs;
 use std::path::PathBuf;
-use chrono::Local;
 
 pub fn init_crash_handler() {
     std::panic::set_hook(Box::new(|panic_info| {

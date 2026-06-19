@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
-use sysinfo::{System, Networks, Disks};
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
+use sysinfo::{Disks, Networks, System};
 
 #[cfg(target_os = "linux")]
 use std::fs;
@@ -79,7 +79,8 @@ impl SystemMonitor {
                 let memory_total = sys.total_memory();
                 let memory_percent = (memory_used as f32 / memory_total as f32) * 100.0;
 
-                let mut processes: Vec<ProcessInfo> = sys.processes()
+                let mut processes: Vec<ProcessInfo> = sys
+                    .processes()
                     .iter()
                     .map(|(pid, process)| ProcessInfo {
                         pid: pid.as_u32(),

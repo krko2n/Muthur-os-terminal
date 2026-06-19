@@ -1,19 +1,19 @@
 // Prevents additional console window on Windows in release
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod ai;
+mod ascii_image;
+mod browser;
+mod crash;
 mod pty;
 mod system;
-mod crash;
-mod ai;
-mod browser;
-mod ascii_image;
 
-use tauri::{Manager, State, Window};
-use std::sync::{Arc, Mutex};
-use std::io::Write;
-use pty::{PtyManager, SessionId};
-use system::SystemMonitor;
 use ai::OllamaClient;
+use pty::{PtyManager, SessionId};
+use std::io::Write;
+use std::sync::{Arc, Mutex};
+use system::SystemMonitor;
+use tauri::{Manager, State, Window};
 
 pub struct AppState {
     pty_manager: Arc<Mutex<PtyManager>>,
@@ -41,7 +41,8 @@ async fn write_to_terminal(
     // Get the per-session writer without holding the global lock during write
     let writer = {
         let pty = state.pty_manager.lock().map_err(|e| e.to_string())?;
-        pty.get_writer(&sid).ok_or_else(|| "Session not found".to_string())?
+        pty.get_writer(&sid)
+            .ok_or_else(|| "Session not found".to_string())?
     };
     let mut w = writer.lock().map_err(|e| e.to_string())?;
     w.write_all(data.as_bytes()).map_err(|e| e.to_string())?;
@@ -104,7 +105,8 @@ async fn ai_suggest_command(
     context: String,
     error: Option<String>,
 ) -> Result<String, String> {
-    let response = state.ollama_client
+    let response = state
+        .ollama_client
         .suggest_command(&context, error.as_deref())
         .await
         .map_err(|e| e.to_string())?;
@@ -112,11 +114,9 @@ async fn ai_suggest_command(
 }
 
 #[tauri::command]
-async fn ai_chat(
-    state: State<'_, AppState>,
-    message: String,
-) -> Result<String, String> {
-    let response = state.ollama_client
+async fn ai_chat(state: State<'_, AppState>, message: String) -> Result<String, String> {
+    let response = state
+        .ollama_client
         .chat(&message)
         .await
         .map_err(|e| e.to_string())?;
@@ -169,7 +169,11 @@ async fn fetch_url(url: String) -> Result<String, String> {
 
     let status = response.status();
     if !status.is_success() {
-        return Err(format!("HTTP {}: {}", status.as_u16(), status.canonical_reason().unwrap_or("Unknown")));
+        return Err(format!(
+            "HTTP {}: {}",
+            status.as_u16(),
+            status.canonical_reason().unwrap_or("Unknown")
+        ));
     }
 
     let body = response.text().await.map_err(|e| e.to_string())?;
@@ -195,7 +199,11 @@ async fn fetch_url_structured(url: String) -> Result<serde_json::Value, String> 
     let final_url = response.url().to_string();
     let status = response.status();
     if !status.is_success() {
-        return Err(format!("HTTP {}: {}", status.as_u16(), status.canonical_reason().unwrap_or("Unknown")));
+        return Err(format!(
+            "HTTP {}: {}",
+            status.as_u16(),
+            status.canonical_reason().unwrap_or("Unknown")
+        ));
     }
 
     let body = response.text().await.map_err(|e| e.to_string())?;
@@ -232,7 +240,13 @@ async fn detect_editor() -> String {
 #[tauri::command]
 async fn open_file_external(path: String) -> Result<(), String> {
     let editor = detect_editor().await;
-    let terminals = ["konsole", "gnome-terminal", "xfce4-terminal", "alacritty", "xterm"];
+    let terminals = [
+        "konsole",
+        "gnome-terminal",
+        "xfce4-terminal",
+        "alacritty",
+        "xterm",
+    ];
     let mut terminal_cmd = "xterm";
 
     for t in terminals {
@@ -291,15 +305,30 @@ fn html_to_text(html: &str) -> String {
                 in_tag = false;
                 collecting_tag = false;
                 let lower = tag_name.to_lowercase();
-                if lower == "script" { in_script = true; }
-                else if lower == "/script" { in_script = false; }
-                else if lower == "style" { in_style = true; }
-                else if lower == "/style" { in_style = false; }
-                else if lower == "br" || lower == "br/" || lower == "p" || lower == "/p"
-                    || lower == "div" || lower == "/div" || lower == "li"
-                    || lower == "h1" || lower == "h2" || lower == "h3"
-                    || lower == "h4" || lower == "h5" || lower == "h6"
-                    || lower == "tr" || lower == "/tr" {
+                if lower == "script" {
+                    in_script = true;
+                } else if lower == "/script" {
+                    in_script = false;
+                } else if lower == "style" {
+                    in_style = true;
+                } else if lower == "/style" {
+                    in_style = false;
+                } else if lower == "br"
+                    || lower == "br/"
+                    || lower == "p"
+                    || lower == "/p"
+                    || lower == "div"
+                    || lower == "/div"
+                    || lower == "li"
+                    || lower == "h1"
+                    || lower == "h2"
+                    || lower == "h3"
+                    || lower == "h4"
+                    || lower == "h5"
+                    || lower == "h6"
+                    || lower == "tr"
+                    || lower == "/tr"
+                {
                     result.push('\n');
                 } else if lower == "td" || lower == "th" {
                     result.push_str("  ");
