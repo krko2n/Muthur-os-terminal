@@ -108,7 +108,6 @@ mother_internal_specification.md
 .gitmessage
 CICD_QUICK_START.md
 PROJECT_SUMMARY.md
-VERSION_HISTORY.md
 PRODUCTION_ROADMAP.md
 create-lockfile.sh
 fix-build.sh

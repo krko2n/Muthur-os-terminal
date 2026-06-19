@@ -34,7 +34,7 @@ jobs:
         git config --local user.name "github-actions[bot]"
 
         if [ -f VERSION_HISTORY.md ]; then
-          git add VERSION_HISTORY.md
+          git add -f VERSION_HISTORY.md
           if ! git diff --staged --quiet; then
             git commit -m "docs: auto-update version history [skip ci]"
             git push || echo "Push failed (likely branch protection) - skipping"
