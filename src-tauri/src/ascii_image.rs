@@ -85,7 +85,7 @@ pub fn convert_to_braille(image_bytes: &[u8]) -> Result<String, String> {
     // Compensate for character cell aspect ratio (chars are ~2x taller than wide)
     // Braille uses 2x4 grid, so effective pixel aspect is already partially handled
     // Apply 0.5 vertical scale to prevent tall/stretched output
-    target_h = target_h / 2;
+    target_h /= 2;
 
     if target_h > MAX_HEIGHT {
         target_h = MAX_HEIGHT;

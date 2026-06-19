@@ -1,12 +1,12 @@
 # MUTHUR OS Terminal - Makefile
 
-.PHONY: help install upgrade uninstall build dev clean test verify version
+.PHONY: help install update uninstall build dev clean test verify version
 
 help:
 	@echo "MUTHUR OS Terminal - Available Commands"
 	@echo ""
 	@echo "  make install    - Install MUTHUR"
-	@echo "  make upgrade    - Upgrade to latest version"
+	@echo "  make update     - Update to latest version"
 	@echo "  make uninstall  - Remove MUTHUR"
 	@echo "  make build      - Build production binary"
 	@echo "  make dev        - Run in development mode"
@@ -24,7 +24,7 @@ install-interactive:
 	@chmod +x install.sh
 	@./install.sh
 
-upgrade:
+update:
 	@chmod +x upgrade.sh
 	@./upgrade.sh
 

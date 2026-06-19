@@ -187,7 +187,6 @@ export default function Terminal() {
       };
       setSessions(prev => [...prev, fakeSession]);
       setActiveSessionId(id);
-      setBrowserContent(null);
       return;
     }
 
