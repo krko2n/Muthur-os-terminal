@@ -170,13 +170,22 @@ export default function Keyboard() {
     <div className="h-full w-full flex flex-col justify-center gap-[0.15vw] p-[0.3vw]">
       {ROWS.map((row, ri) => {
         const totalW = row.reduce((sum, k) => sum + k.w, 0);
+        const delay = Math.abs(ri - 2) * 0.1;
         return (
-          <div key={ri} className="flex gap-[0.15vw] items-stretch" style={{ height: '18%' }}>
+          <div
+            key={ri}
+            className="flex gap-[0.15vw] items-stretch keyboard-row-intro"
+            style={{
+              height: '18%',
+              animationDelay: `${delay}s`,
+            }}
+          >
             {row.map((keyDef, ki) => {
               const active = isActive(keyDef.code);
               const label = getLabel(keyDef);
               const isShiftKey = keyDef.code === 'ShiftLeft' || keyDef.code === 'ShiftRight';
               const isCapsKey = keyDef.code === 'CapsLock';
+              const isSpace = keyDef.code === 'Space';
               const highlighted = active || (isShiftKey && stickyShift) || (isCapsKey && capsLock);
               return (
                 <div
@@ -187,14 +196,15 @@ export default function Keyboard() {
                     rounded-[3px] transition-all duration-75
                     font-mono select-none uppercase
                     ${highlighted
-                      ? 'key-active shadow-[0_0_8px_rgba(0,255,65,0.4)]'
-                      : 'border border-[rgba(0,255,65,0.2)] text-muthur-primary opacity-70 hover:opacity-100 hover:border-[rgba(0,255,65,0.5)] hover:shadow-[0_0_4px_rgba(0,255,65,0.15)]'
+                      ? 'key-active'
+                      : isSpace
+                      ? 'border border-[rgba(0,255,65,0.4)] text-muthur-primary opacity-0 hover:opacity-100'
+                      : 'border border-transparent text-muthur-primary opacity-0 hover:opacity-100 hover:border-[rgba(0,255,65,0.4)]'
                     }
                   `}
                   style={{
                     flex: `${keyDef.w / totalW}`,
                     fontSize: keyDef.w > 1.5 ? '0.55vw' : '0.7vw',
-                    background: highlighted ? undefined : 'rgba(0,255,65,0.02)',
                   }}
                 >
                   {label}

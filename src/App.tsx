@@ -7,9 +7,11 @@ import RightPanel from './components/RightPanel';
 import BottomPanel from './components/BottomPanel';
 import CustomCursor from './components/CustomCursor';
 import LoadingScreen from './components/LoadingScreen';
+import { playSound } from './sounds';
 
 function App() {
   const [booted, setBooted] = useState(false);
+  const [assembled, setAssembled] = useState(false);
   const [systemStats, setSystemStats] = useState<any>(null);
   const [leftWidth, setLeftWidth] = useState(22);
   const [rightWidth, setRightWidth] = useState(22);
@@ -84,6 +86,17 @@ function App() {
     document.body.style.userSelect = 'none';
   };
 
+  useEffect(() => {
+    if (booted && !assembled) {
+      playSound('expand', 0.2);
+      const timer = setTimeout(() => {
+        setAssembled(true);
+        playSound('panels', 0.15);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [booted, assembled]);
+
   if (!booted) {
     return <LoadingScreen onComplete={() => setBooted(true)} />;
   }
@@ -99,7 +112,7 @@ function App() {
         <Header systemStats={systemStats} />
         {/* Top section */}
         <div className="flex flex-1 min-h-0">
-          <div style={{ width: `${leftWidth}%` }} className="shrink-0 overflow-hidden min-w-0">
+          <div style={{ width: `${leftWidth}%`, transitionDelay: '0.2s' }} className={`shrink-0 overflow-hidden min-w-0 panel-reveal ${assembled ? 'visible' : ''}`}>
             <LeftPanel systemStats={systemStats} />
           </div>
 
@@ -108,7 +121,7 @@ function App() {
             onMouseDown={() => startDrag('left')}
           />
 
-          <div className="flex-1 min-w-0 min-h-0">
+          <div className={`flex-1 min-w-0 min-h-0 panel-reveal ${assembled ? 'visible' : ''}`} style={{ transitionDelay: '0s' }}>
             <CenterPanel />
           </div>
 
@@ -117,7 +130,7 @@ function App() {
             onMouseDown={() => startDrag('right')}
           />
 
-          <div style={{ width: `${rightWidth}%` }} className="shrink-0 overflow-hidden min-w-0">
+          <div style={{ width: `${rightWidth}%`, transitionDelay: '0.4s' }} className={`shrink-0 overflow-hidden min-w-0 panel-reveal ${assembled ? 'visible' : ''}`}>
             <RightPanel />
           </div>
         </div>
@@ -129,7 +142,7 @@ function App() {
         />
 
         {/* Bottom */}
-        <div style={{ height: `${bottomHeight}vh` }} className="shrink-0 overflow-hidden">
+        <div style={{ height: `${bottomHeight}vh`, transitionDelay: '0.6s' }} className={`shrink-0 overflow-hidden panel-reveal ${assembled ? 'visible' : ''}`}>
           <BottomPanel />
         </div>
       </div>

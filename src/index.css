@@ -186,6 +186,86 @@ body {
   border-color: var(--color-accent) !important;
 }
 
+/* Key blink on release (eDEX-UI style) */
+.key-blink {
+  animation: blink 0.5s linear 1;
+}
+
+/* Skewed parallelogram tabs (eDEX-UI signature) */
+.tab-skew {
+  transform: skewX(-25deg);
+}
+.tab-skew-content {
+  display: inline-block;
+  transform: skewX(25deg);
+}
+.tab-active {
+  background: rgb(var(--color-r), var(--color-g), var(--color-b));
+  color: var(--color-bg);
+  border: 1px solid rgb(var(--color-r), var(--color-g), var(--color-b));
+  transform: skewX(-25deg) scale(1.1);
+  font-weight: bold;
+  z-index: 1;
+}
+
+/* Sci-fi panel corners (clip-path) */
+.panel-scifi {
+  clip-path: polygon(
+    0% 2vh, 1vh 0%, calc(100% - 1vh) 0%, 100% 2vh,
+    100% calc(100% - 2vh), calc(100% - 1vh) 100%, 1vh 100%, 0% calc(100% - 2vh)
+  );
+  border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.3);
+}
+
+/* Corner bracket decorations on panel headers */
+.panel-header-bracket {
+  position: relative;
+}
+.panel-header-bracket::before,
+.panel-header-bracket::after {
+  content: '';
+  position: absolute;
+  top: -0.5vh;
+  height: 0.8vh;
+  border-color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.3);
+}
+.panel-header-bracket::before {
+  left: 0;
+  border-left: 1px solid;
+}
+.panel-header-bracket::after {
+  right: 0;
+  border-right: 1px solid;
+}
+
+/* Keyboard intro animation */
+.keyboard-row-intro {
+  overflow: hidden;
+  animation: keyboardExpand 0.6s cubic-bezier(0.4, 0, 1, 1) forwards;
+  filter: brightness(170%);
+}
+.keyboard-row-intro.expanded {
+  filter: brightness(100%);
+  animation: none;
+  width: 100%;
+}
+
+@keyframes keyboardExpand {
+  from { width: 0; filter: brightness(170%); }
+  to { width: 100%; filter: brightness(100%); }
+}
+
+/* UI assembly animation */
+.panel-reveal {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 1, 1), transform 0.5s cubic-bezier(0.4, 0, 1, 1);
+}
+.panel-reveal.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Selection color to match theme */
 ::selection {
   background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.25);

@@ -385,22 +385,22 @@ export default function Terminal() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Tab bar - large, same level */}
-      <div className="flex items-center px-2 py-1 border-b border-[rgba(0,255,65,0.15)] shrink-0">
+      {/* Tab bar - skewed parallelogram style (eDEX-UI signature) */}
+      <div className="flex items-center justify-evenly px-2 py-1 border-b border-[rgba(0,255,65,0.15)] shrink-0 gap-1">
         {sessions.map(session => (
           <div
             key={session.id}
-            className={`flex items-center gap-2 px-3 py-1 text-sm transition-colors mr-1 ${
+            className={`tab-skew flex items-center gap-2 px-4 py-1.5 text-xs font-mono tracking-wider transition-all duration-200 ${
               activeSessionId === session.id
-                ? 'text-muthur-primary border-b-2 border-muthur-primary'
-                : 'text-muthur-secondary opacity-50 hover:opacity-80'
+                ? 'tab-active'
+                : 'text-muthur-secondary opacity-50 hover:opacity-80 border border-[rgba(0,255,65,0.15)]'
             }`}
             onClick={() => switchSession(session.id)}
           >
-            <span className="font-mono">{session.name}</span>
+            <span className="tab-skew-content">{session.name}</span>
             <span
               onClick={(e) => { e.stopPropagation(); closeSession(session.id); }}
-              className="text-xs opacity-40 hover:opacity-100 hover:text-[#ff006e] ml-1"
+              className="tab-skew-content text-[10px] opacity-40 hover:opacity-100 hover:text-[#ff006e] ml-1"
             >
               x
             </span>
@@ -409,15 +409,15 @@ export default function Terminal() {
         <div className="flex gap-1 ml-auto">
           <button
             onClick={() => createNewSession('shell')}
-            className="px-2 py-0.5 text-xs border border-[rgba(0,255,65,0.25)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] transition-colors"
+            className="tab-skew px-3 py-1 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
           >
-            + shell
+            <span className="tab-skew-content">+ SHELL</span>
           </button>
           <button
             onClick={() => createNewSession('browser')}
-            className="px-2 py-0.5 text-xs border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:bg-[rgba(0,255,65,0.1)] transition-colors"
+            className="tab-skew px-3 py-1 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
           >
-            + net
+            <span className="tab-skew-content">+ NET</span>
           </button>
         </div>
       </div>
