@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+55f6619 Refactor MUTHUR session and control deck wording
+014125d docs: auto-update version history [skip ci]
 54b10a2 feat(keyboard): 13 international keyboard layouts with live switching
 bcdb7a7 docs: auto-update version history [skip ci]
 0abf92f feat(globe): network connections mode with live TCP geolocation
@@ -50,5 +52,3 @@ f4a807f fix(core): fix system stats, terminal, file explorer, globe data
 6ed601c fix(globe): restore Line import, fix TS2304 error feat(upgrade): GIF-style progress bar with timer and live status
 e9e02a1 feat(globe): hide back-face lines, slower rotation, more detail
 5474530 fix(build): skip bundling in upgrade, handle missing linuxdeploy
-a1b1978 fix(system): remove duplicate derive macro on BatteryInfo
-f5f148b docs(readme): add min/recommended requirements, nav link
