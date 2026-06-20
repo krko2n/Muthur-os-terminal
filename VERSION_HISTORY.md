@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+0abf92f feat(globe): network connections mode with live TCP geolocation
+ad078a2 docs: auto-update version history [skip ci]
 3668eff feat(ui): hardware inspector, disk bar, globe intro, final polish
 90a4a79 docs: auto-update version history [skip ci]
 8f5c07e feat(keyboard): ISO L-shaped Enter key spanning two rows
@@ -50,5 +52,3 @@ a1b1978 fix(system): remove duplicate derive macro on BatteryInfo
 f5f148b docs(readme): add min/recommended requirements, nav link
 815fe06 chore: remove internal files from repo, add to gitignore
 494bc05 docs: auto-update version history [skip ci]
-e8f48b6 feat(readme): add banner.png, whitelist in gitignore
-61b89e8 docs: auto-update version history [skip ci]
