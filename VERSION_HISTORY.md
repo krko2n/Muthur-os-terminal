@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+4102fd1 feat(ui): network status module, terminal sounds, panel decorations
+d16de42 docs: auto-update version history [skip ci]
 100001c feat(ui): eDEX-UI high-priority visual signatures
 6ef0371 docs: add detailed eDEX-UI comparison report with improvement roadmap
 e498331 docs: auto-update version history [skip ci]
@@ -50,5 +52,3 @@ d5655cf feat(readme): finalize banner and header layout
 eb9fceb docs: auto-update version history [skip ci]
 d48240f docs(readme): show all 100 banner variants for selection
 3a1afa9 docs: auto-update version history [skip ci]
-188ebe0 docs(readme): 100 banner color variants, show top 12 picks
-ea80b3d docs: auto-update version history [skip ci]
