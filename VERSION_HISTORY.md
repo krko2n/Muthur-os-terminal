@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+8f5c07e feat(keyboard): ISO L-shaped Enter key spanning two rows
+26340d6 docs: auto-update version history [skip ci]
 9844663 feat(ui): system monitors, list view, password mode, second font
 0379dc3 docs: auto-update version history [skip ci]
 b69b99b feat(ui): complete eDEX-UI feature parity batch
@@ -50,5 +52,3 @@ e8f48b6 feat(readme): add banner.png, whitelist in gitignore
 61b89e8 docs: auto-update version history [skip ci]
 8b22ae3 chore: use PNG banner, remove unused docs and files
 907efb7 docs: auto-update version history [skip ci]
-d5655cf feat(readme): finalize banner and header layout
-836c51d docs: auto-update version history [skip ci]
