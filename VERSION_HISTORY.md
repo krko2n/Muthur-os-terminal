@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+b69b99b feat(ui): complete eDEX-UI feature parity batch
+1226c57 docs: auto-update version history [skip ci]
 4102fd1 feat(ui): network status module, terminal sounds, panel decorations
 d16de42 docs: auto-update version history [skip ci]
 100001c feat(ui): eDEX-UI high-priority visual signatures
@@ -50,5 +52,3 @@ d5655cf feat(readme): finalize banner and header layout
 836c51d docs: auto-update version history [skip ci]
 9c99d0d fix(readme): correct banner SVG file paths
 eb9fceb docs: auto-update version history [skip ci]
-d48240f docs(readme): show all 100 banner variants for selection
-3a1afa9 docs: auto-update version history [skip ci]
