@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+9844663 feat(ui): system monitors, list view, password mode, second font
+0379dc3 docs: auto-update version history [skip ci]
 b69b99b feat(ui): complete eDEX-UI feature parity batch
 1226c57 docs: auto-update version history [skip ci]
 4102fd1 feat(ui): network status module, terminal sounds, panel decorations
@@ -50,5 +52,3 @@ e8f48b6 feat(readme): add banner.png, whitelist in gitignore
 907efb7 docs: auto-update version history [skip ci]
 d5655cf feat(readme): finalize banner and header layout
 836c51d docs: auto-update version history [skip ci]
-9c99d0d fix(readme): correct banner SVG file paths
-eb9fceb docs: auto-update version history [skip ci]
