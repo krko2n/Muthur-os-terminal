@@ -8,6 +8,8 @@ interface KeyDef {
   w: number;
   isLetter?: boolean;
   isModifier?: boolean;
+  isEnter?: boolean;
+  isEnterBottom?: boolean;
 }
 
 const ROWS: KeyDef[][] = [
@@ -42,7 +44,7 @@ const ROWS: KeyDef[][] = [
     { code: 'KeyP', lower: 'p', shift: 'P', w: 1, isLetter: true },
     { code: 'BracketLeft', lower: '[', shift: '{', w: 1 },
     { code: 'BracketRight', lower: ']', shift: '}', w: 1 },
-    { code: 'Enter', lower: 'ret', shift: 'ret', w: 2.5, isModifier: true },
+    { code: 'Enter', lower: 'ret', shift: 'ret', w: 1.5, isModifier: true, isEnter: true },
   ],
   [
     { code: 'CapsLock', lower: 'caps', shift: 'caps', w: 1.8, isModifier: true },
@@ -58,6 +60,7 @@ const ROWS: KeyDef[][] = [
     { code: 'Semicolon', lower: ';', shift: ':', w: 1 },
     { code: 'Quote', lower: "'", shift: '"', w: 1 },
     { code: 'Backslash', lower: '\\', shift: '|', w: 1 },
+    { code: 'Enter2', lower: '', shift: '', w: 1.5, isModifier: true, isEnterBottom: true },
   ],
   [
     { code: 'ShiftLeft', lower: 'shift', shift: 'shift', w: 2.4, isModifier: true },
@@ -190,12 +193,33 @@ export default function Keyboard() {
             }}
           >
             {row.map((keyDef, ki) => {
-              const active = isActive(keyDef.code);
+              const active = isActive(keyDef.code) || (keyDef.isEnterBottom && isActive('Enter'));
               const label = getLabel(keyDef);
               const isShiftKey = keyDef.code === 'ShiftLeft' || keyDef.code === 'ShiftRight';
               const isCapsKey = keyDef.code === 'CapsLock';
               const isSpace = keyDef.code === 'Space';
               const highlighted = active || (isShiftKey && stickyShift) || (isCapsKey && capsLock);
+
+              if (keyDef.isEnterBottom) {
+                return (
+                  <div
+                    key={`${ri}-${ki}`}
+                    onClick={() => handleClick({ ...keyDef, code: 'Enter' })}
+                    className={`
+                      relative flex items-center justify-center
+                      rounded-[3px] rounded-tl-none transition-all duration-75
+                      font-mono select-none uppercase
+                      border-t-0
+                      ${highlighted
+                        ? 'key-active'
+                        : 'border border-[rgba(0,255,65,0.4)] border-t-0 text-muthur-primary opacity-0 hover:opacity-100'
+                      }
+                    `}
+                    style={{ flex: `${keyDef.w / totalW}`, fontSize: '0.55vw' }}
+                  />
+                );
+              }
+
               return (
                 <div
                   key={`${ri}-${ki}`}
@@ -204,9 +228,12 @@ export default function Keyboard() {
                     relative flex items-center justify-center
                     rounded-[3px] transition-all duration-75
                     font-mono select-none uppercase
+                    ${keyDef.isEnter ? 'rounded-br-none enter-key-top' : ''}
                     ${highlighted
                       ? 'key-active'
                       : isSpace
+                      ? 'border border-[rgba(0,255,65,0.4)] text-muthur-primary opacity-0 hover:opacity-100'
+                      : keyDef.isEnter
                       ? 'border border-[rgba(0,255,65,0.4)] text-muthur-primary opacity-0 hover:opacity-100'
                       : 'border border-transparent text-muthur-primary opacity-0 hover:opacity-100 hover:border-[rgba(0,255,65,0.4)]'
                     }
@@ -214,6 +241,7 @@ export default function Keyboard() {
                   style={{
                     flex: `${keyDef.w / totalW}`,
                     fontSize: keyDef.w > 1.5 ? '0.55vw' : '0.7vw',
+                    ...(keyDef.isEnter ? { marginBottom: '-0.15vw', paddingBottom: '0.15vw', borderBottomRightRadius: 0 } : {}),
                   }}
                 >
                   {label}

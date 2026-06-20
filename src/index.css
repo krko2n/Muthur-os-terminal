@@ -205,6 +205,14 @@ body {
   animation: blink 0.5s linear 1;
 }
 
+/* L-shaped Enter key - top part extends down */
+.enter-key-top {
+  position: relative;
+  z-index: 2;
+  border-bottom-right-radius: 0 !important;
+  margin-bottom: -0.15vw;
+}
+
 /* Skewed parallelogram tabs (eDEX-UI signature) */
 .tab-skew {
   transform: skewX(-25deg);
