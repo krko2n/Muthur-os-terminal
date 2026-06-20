@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { CpuIcon, MemoryIcon } from './SystemIcons';
+import HardwareInspector from './HardwareInspector';
 
 interface LeftPanelProps {
   systemStats: any;
@@ -109,6 +110,9 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
           <span className="text-muthur-primary">ONLINE</span>
         </div>
       </div>
+
+      {/* Hardware Inspector */}
+      <HardwareInspector />
 
       {/* CPU Chart */}
       <div className="shrink-0">

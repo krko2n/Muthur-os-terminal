@@ -56,11 +56,19 @@ function getIconType(entry: FileEntry): string {
   return ext;
 }
 
+interface DiskUsage {
+  mount_point: string;
+  total: number;
+  available: number;
+  used_percent: number;
+}
+
 export default function FileExplorer() {
   const [currentPath, setCurrentPath] = useState('');
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [listView, setListView] = useState(false);
+  const [diskUsage, setDiskUsage] = useState<DiskUsage | null>(null);
 
   useEffect(() => {
     initPath();
@@ -109,6 +117,15 @@ export default function FileExplorer() {
         return a.name.localeCompare(b.name);
       }));
       setCurrentPath(path);
+      try {
+        const stats = await invoke('get_system_stats') as any;
+        if (stats?.disk?.length > 0) {
+          const match = stats.disk
+            .filter((d: any) => path.startsWith(d.mount_point))
+            .sort((a: any, b: any) => b.mount_point.length - a.mount_point.length)[0];
+          if (match) setDiskUsage(match);
+        }
+      } catch {}
     } catch (error) {
       console.error('Failed to load directory:', error);
     }
@@ -218,6 +235,22 @@ export default function FileExplorer() {
           </div>
         )}
       </div>
+
+      {/* Disk usage bar */}
+      {diskUsage && (
+        <div className="shrink-0 px-[1vh] py-[0.4vh] border-t border-[rgba(0,255,65,0.15)]">
+          <div className="flex items-center gap-[1vh] text-[1.0vh]">
+            <span className="text-muthur-secondary opacity-50 shrink-0">{diskUsage.mount_point}</span>
+            <div className="flex-1 h-[0.6vh] bg-[rgba(0,255,65,0.08)] rounded-sm overflow-hidden">
+              <div
+                className="h-full bg-muthur-primary transition-all duration-500"
+                style={{ width: `${diskUsage.used_percent}%` }}
+              />
+            </div>
+            <span className="text-muthur-primary tabular-nums shrink-0">{diskUsage.used_percent.toFixed(0)}%</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

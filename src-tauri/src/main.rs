@@ -238,6 +238,51 @@ async fn detect_editor() -> String {
 }
 
 #[tauri::command]
+async fn get_hardware_info() -> Result<serde_json::Value, String> {
+    let read_dmi = |field: &str| -> String {
+        std::fs::read_to_string(format!("/sys/devices/virtual/dmi/id/{}", field))
+            .unwrap_or_default()
+            .trim()
+            .to_string()
+    };
+
+    let manufacturer = read_dmi("sys_vendor");
+    let model = read_dmi("product_name");
+    let chassis = read_dmi("chassis_type");
+
+    let chassis_name = match chassis.as_str() {
+        "1" => "Other",
+        "2" => "Unknown",
+        "3" => "Desktop",
+        "4" => "Low Profile Desktop",
+        "5" => "Pizza Box",
+        "6" => "Mini Tower",
+        "7" => "Tower",
+        "8" => "Portable",
+        "9" => "Laptop",
+        "10" => "Notebook",
+        "11" => "Hand Held",
+        "12" => "Docking Station",
+        "13" => "All in One",
+        "14" => "Sub Notebook",
+        "15" => "Space-saving",
+        "16" => "Lunch Box",
+        "17" => "Main Server Chassis",
+        "24" => "Sealed-case PC",
+        "30" => "Tablet",
+        "31" => "Convertible",
+        "32" => "Detachable",
+        _ => &chassis,
+    };
+
+    Ok(serde_json::json!({
+        "manufacturer": if manufacturer.is_empty() { "Unknown".to_string() } else { manufacturer },
+        "model": if model.is_empty() { "Unknown".to_string() } else { model },
+        "chassis": chassis_name,
+    }))
+}
+
+#[tauri::command]
 async fn open_file_external(path: String) -> Result<(), String> {
     let editor = detect_editor().await;
     let terminals = [
@@ -417,6 +462,7 @@ fn main() {
             render_image_ascii,
             detect_editor,
             open_file_external,
+            get_hardware_info,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

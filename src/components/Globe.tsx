@@ -225,12 +225,22 @@ function Satellites({ radius }: { radius: number }) {
 export default function Globe() {
   const [mode, setMode] = useState<GlobeMode>('conflicts');
   const [worldLines, setWorldLines] = useState<THREE.Vector3[][]>([]);
+  const [visibleLines, setVisibleLines] = useState(0);
   const [conflicts, setConflicts] = useState<ConflictArea[]>([]);
   const [status, setStatus] = useState('LOADING...');
 
   useEffect(() => {
+    if (worldLines.length > 0 && visibleLines < worldLines.length) {
+      const batch = Math.max(5, Math.floor(worldLines.length / 40));
+      const timer = setTimeout(() => {
+        setVisibleLines(prev => Math.min(prev + batch, worldLines.length));
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [worldLines, visibleLines]);
+
+  useEffect(() => {
     loadGlobeData();
-    // Auto-refresh conflict data every 6 hours
     const interval = setInterval(loadConflictData, 6 * 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -336,7 +346,7 @@ export default function Globe() {
             frameloop="always"
             dpr={1}
           >
-            <RotatingGlobe mode={mode} worldLines={worldLines} conflicts={conflicts} />
+            <RotatingGlobe mode={mode} worldLines={worldLines.slice(0, visibleLines)} conflicts={conflicts} />
           </Canvas>
         ) : (
           <div className="flex items-center justify-center h-full text-[1.1vh] opacity-30">
