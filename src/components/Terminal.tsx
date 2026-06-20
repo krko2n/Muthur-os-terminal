@@ -6,6 +6,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import '@xterm/xterm/css/xterm.css';
 import BrowserView from './BrowserView';
+import { playSound } from '../sounds';
 
 interface TerminalSession {
   id: string;
@@ -247,8 +248,14 @@ export default function Terminal() {
         return true;
       });
 
+      let lastStdout = 0;
       await listen(`terminal-output-${sessionId}`, (e: any) => {
         terminal.write(e.payload);
+        const now = Date.now();
+        if (now - lastStdout > 50) {
+          playSound('keyboard', 0.03);
+          lastStdout = now;
+        }
       });
 
       await listen(`terminal-closed-${sessionId}`, () => {
@@ -303,6 +310,7 @@ export default function Terminal() {
   };
 
   const switchSession = (sessionId: string) => {
+    playSound('folder', 0.1);
     const containers = containerRef.current?.querySelectorAll('.terminal-container');
     containers?.forEach(container => {
       (container as HTMLElement).style.display = 'none';

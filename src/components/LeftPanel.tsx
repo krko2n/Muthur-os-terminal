@@ -51,7 +51,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
 
       {/* CPU */}
       <div className="shrink-0">
-        <div className="text-xs tracking-wider opacity-50 mb-1 flex items-center gap-1">
+        <div className="text-xs tracking-wider opacity-50 mb-1 flex items-center gap-1 panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-1">
           <CpuIcon size={12} color="rgba(0,255,65,0.5)" />
           CPU USAGE
         </div>
@@ -74,7 +74,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
 
       {/* Memory */}
       <div className="shrink-0">
-        <div className="flex justify-between items-baseline mb-1">
+        <div className="flex justify-between items-baseline mb-1 panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-1">
           <span className="text-xs tracking-wider opacity-50 flex items-center gap-1">
             <MemoryIcon size={12} color="rgba(0,255,65,0.5)" />
             MEMORY
@@ -102,7 +102,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
 
       {/* Top Processes */}
       <div className="flex-1 min-h-0 flex flex-col">
-        <div className="text-xs tracking-wider opacity-50 mb-1 shrink-0">TOP PROCESSES</div>
+        <div className="text-xs tracking-wider opacity-50 mb-1 shrink-0 panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-1">TOP PROCESSES</div>
         <div className="flex text-[10px] opacity-40 mb-0.5 shrink-0">
           <span className="w-10">PID</span>
           <span className="flex-1">NAME</span>

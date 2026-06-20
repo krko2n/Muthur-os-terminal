@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { feature } from 'topojson-client';
 import { invoke } from '@tauri-apps/api/core';
+import { playSound } from '../sounds';
 
 type GlobeMode = 'conflicts' | 'cyber' | 'flights';
 
@@ -252,6 +253,7 @@ export default function Globe() {
       setStatus('MAP UNAVAILABLE');
       return;
     }
+    playSound('scan', 0.15);
 
     const geo = feature(topo, topo.objects.countries) as any;
     const lines: THREE.Vector3[][] = [];
