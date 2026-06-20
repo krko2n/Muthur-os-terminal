@@ -2,6 +2,9 @@
 
 Auto-generated from git log.
 
+100001c feat(ui): eDEX-UI high-priority visual signatures
+6ef0371 docs: add detailed eDEX-UI comparison report with improvement roadmap
+e498331 docs: auto-update version history [skip ci]
 10dd078 fix(ci): remove VERSION_HISTORY.md from .gitignore
 45ddf2e fix(ci): cargo fmt + version-update workflow resilience
 0abaafa feat(ui): eDEX-style boot, cursor trail, sound effects, keyboard + browser fixes
@@ -49,6 +52,3 @@ d48240f docs(readme): show all 100 banner variants for selection
 3a1afa9 docs: auto-update version history [skip ci]
 188ebe0 docs(readme): 100 banner color variants, show top 12 picks
 ea80b3d docs: auto-update version history [skip ci]
-8f89dc7 docs(readme): add 10 color variants of Banner E for final selection
-8b1e2c2 docs: auto-update version history [skip ci]
-fcb21b6 docs(readme): add 10 banner designs + 10 header layouts for selection
