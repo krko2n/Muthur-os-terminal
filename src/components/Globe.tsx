@@ -176,8 +176,48 @@ function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; world
         />
       ))}
 
+      {/* Orbiting satellites */}
+      <Satellites radius={radius} />
+
       <ambientLight intensity={0.3} />
       <pointLight position={[10, 10, 10]} intensity={0.5} color="#00ff41" />
+    </group>
+  );
+}
+
+function Satellites({ radius }: { radius: number }) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame((_state, delta) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y += delta * 0.4;
+      groupRef.current.rotation.x += delta * 0.1;
+    }
+  });
+
+  const positions = useMemo(() => {
+    const pts: THREE.Vector3[] = [];
+    for (let i = 0; i < 5; i++) {
+      const alt = radius * (1.3 + i * 0.08);
+      const angle = (i / 5) * Math.PI * 2;
+      const tilt = (i % 2 === 0 ? 0.3 : -0.2);
+      pts.push(new THREE.Vector3(
+        Math.cos(angle) * alt,
+        Math.sin(tilt) * alt * 0.4,
+        Math.sin(angle) * alt
+      ));
+    }
+    return pts;
+  }, [radius]);
+
+  return (
+    <group ref={groupRef}>
+      {positions.map((pos, i) => (
+        <mesh key={`sat-${i}`} position={pos}>
+          <sphereGeometry args={[0.025, 6, 6]} />
+          <meshBasicMaterial color="#00ff41" transparent opacity={0.8} />
+        </mesh>
+      ))}
     </group>
   );
 }

@@ -12,6 +12,7 @@ import { playSound } from './sounds';
 function App() {
   const [booted, setBooted] = useState(false);
   const [assembled, setAssembled] = useState(false);
+  const [greeting, setGreeting] = useState('');
   const [systemStats, setSystemStats] = useState<any>(null);
   const [leftWidth, setLeftWidth] = useState(22);
   const [rightWidth, setRightWidth] = useState(22);
@@ -92,6 +93,9 @@ function App() {
       const timer = setTimeout(() => {
         setAssembled(true);
         playSound('panels', 0.15);
+        const user = (typeof window !== 'undefined' && (window as any).__TAURI_INTERNALS__) ? 'operator' : 'user';
+        setGreeting(`Welcome back, ${user}`);
+        setTimeout(() => setGreeting(''), 2500);
       }, 600);
       return () => clearTimeout(timer);
     }
@@ -105,6 +109,13 @@ function App() {
     <div className="w-screen h-screen overflow-hidden relative">
       <div className="scanline" />
       <div className="crt-overlay" />
+      {greeting && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9000] pointer-events-none">
+          <div className="text-muthur-primary font-mono text-[2vh] tracking-[0.3em] opacity-80 animate-pulse">
+            {greeting}
+          </div>
+        </div>
+      )}
       <CustomCursor />
 
       <div className="flex flex-col h-full">

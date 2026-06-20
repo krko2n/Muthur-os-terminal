@@ -157,13 +157,17 @@ export default function Keyboard() {
 
     if (char) window.dispatchEvent(new CustomEvent('virtual-key', { detail: char }));
 
-    playSound('keyboard', 0.08);
+    if (keyDef.code === 'Enter') {
+      playSound('granted', 0.12);
+    } else {
+      playSound('keyboard', 0.08);
+    }
     if (stickyShift) setStickyShift(false);
 
     setActiveKeys(prev => new Set(prev).add(keyDef.code));
     setTimeout(() => {
       setActiveKeys(prev => { const n = new Set(prev); n.delete(keyDef.code); return n; });
-    }, 100);
+    }, 150);
   };
 
   return (

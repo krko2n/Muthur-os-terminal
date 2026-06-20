@@ -106,6 +106,7 @@ export default function FileExplorer() {
     if (entry.is_dir) {
       loadDirectory(entry.path);
       playSound('folder', 0.12);
+      window.dispatchEvent(new CustomEvent('fs-cd', { detail: entry.path }));
     } else {
       try {
         await invoke('open_file_external', { path: entry.path });
@@ -167,9 +168,14 @@ export default function FileExplorer() {
                 onClick={() => handleEntryClick(entry)}
                 className={`
                   flex flex-col items-center justify-center
-                  hover:bg-[rgba(0,255,65,0.05)] transition-colors rounded
+                  hover:bg-[rgba(0,255,65,0.05)] transition-all rounded
                   ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}
                 `}
+                style={{
+                  opacity: 0,
+                  animation: `fadeIn 0.3s ease forwards`,
+                  animationDelay: `${i * 30}ms`,
+                }}
               >
                 <div className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]">
                   <FileIcon type={getIconType(entry)} />

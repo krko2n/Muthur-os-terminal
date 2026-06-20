@@ -153,6 +153,20 @@ export default function Terminal() {
     return () => window.removeEventListener('open-file', handleOpenFile);
   }, [sessions]);
 
+  // Sync filesystem cd with active terminal
+  useEffect(() => {
+    const handleFsCd = async (e: Event) => {
+      const path = (e as CustomEvent).detail;
+      if (!path) return;
+      const active = sessions.find(s => s.id === activeSessionId && s.type === 'shell');
+      if (active) {
+        await invoke('write_to_terminal', { sessionId: active.id, data: `cd "${path}"\n` });
+      }
+    };
+    window.addEventListener('fs-cd', handleFsCd);
+    return () => window.removeEventListener('fs-cd', handleFsCd);
+  }, [sessions, activeSessionId]);
+
   // Focus retention: refocus terminal when clicking non-input areas
   useEffect(() => {
     const refocus = (e: MouseEvent) => {
