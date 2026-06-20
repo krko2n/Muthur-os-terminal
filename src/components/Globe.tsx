@@ -5,7 +5,13 @@ import { feature } from 'topojson-client';
 import { invoke } from '@tauri-apps/api/core';
 import { playSound } from '../sounds';
 
-type GlobeMode = 'conflicts' | 'cyber' | 'flights';
+type GlobeMode = 'conflicts' | 'network' | 'cyber';
+
+interface NetworkPeer {
+  lat: number;
+  lng: number;
+  ip: string;
+}
 
 interface ConflictArea {
   lat: number;
@@ -105,7 +111,7 @@ function ConflictCircle({ center, radius: areaRadius, color, globeRadius }: { ce
   return <OccludedLine points={points} color={color} opacity={0.6} />;
 }
 
-function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; worldLines: THREE.Vector3[][]; conflicts: ConflictArea[] }) {
+function RotatingGlobe({ mode, worldLines, conflicts, networkPeers }: { mode: GlobeMode; worldLines: THREE.Vector3[][]; conflicts: ConflictArea[]; networkPeers: NetworkPeer[] }) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((_state, delta) => {
@@ -176,6 +182,16 @@ function RotatingGlobe({ mode, worldLines, conflicts }: { mode: GlobeMode; world
         />
       ))}
 
+      {/* Network peers */}
+      {mode === 'network' && networkPeers.map((peer, i) => (
+        <OccludedDot
+          key={`net-${i}`}
+          position={latLngToVector3(peer.lat, peer.lng, radius * 1.02)}
+          color="#00d4ff"
+          size={0.04}
+        />
+      ))}
+
       {/* Orbiting satellites */}
       <Satellites radius={radius} />
 
@@ -227,6 +243,7 @@ export default function Globe() {
   const [worldLines, setWorldLines] = useState<THREE.Vector3[][]>([]);
   const [visibleLines, setVisibleLines] = useState(0);
   const [conflicts, setConflicts] = useState<ConflictArea[]>([]);
+  const [networkPeers, setNetworkPeers] = useState<NetworkPeer[]>([]);
   const [status, setStatus] = useState('LOADING...');
 
   useEffect(() => {
@@ -238,6 +255,29 @@ export default function Globe() {
       return () => clearTimeout(timer);
     }
   }, [worldLines, visibleLines]);
+
+  useEffect(() => {
+    if (mode !== 'network') return;
+    const loadConnections = async () => {
+      try {
+        const conns = await invoke('get_network_connections') as any[];
+        const peers: NetworkPeer[] = [];
+        for (const conn of conns.slice(0, 10)) {
+          try {
+            const geo = await invoke('fetch_json', { url: `http://ip-api.com/json/${conn.ip}?fields=lat,lon,status` }) as string;
+            const data = JSON.parse(geo);
+            if (data.status === 'success') {
+              peers.push({ lat: data.lat, lng: data.lon, ip: conn.ip });
+            }
+          } catch {}
+        }
+        setNetworkPeers(peers);
+      } catch {}
+    };
+    loadConnections();
+    const interval = setInterval(loadConnections, 10000);
+    return () => clearInterval(interval);
+  }, [mode]);
 
   useEffect(() => {
     loadGlobeData();
@@ -331,8 +371,8 @@ export default function Globe() {
 
   const modeLabels: Record<GlobeMode, string> = {
     conflicts: 'CONFLICTS',
+    network: 'NETWORK',
     cyber: 'CYBER',
-    flights: 'FLIGHTS',
   };
 
   return (
@@ -346,7 +386,7 @@ export default function Globe() {
             frameloop="always"
             dpr={1}
           >
-            <RotatingGlobe mode={mode} worldLines={worldLines.slice(0, visibleLines)} conflicts={conflicts} />
+            <RotatingGlobe mode={mode} worldLines={worldLines.slice(0, visibleLines)} conflicts={conflicts} networkPeers={networkPeers} />
           </Canvas>
         ) : (
           <div className="flex items-center justify-center h-full text-[1.1vh] opacity-30">

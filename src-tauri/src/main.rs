@@ -283,6 +283,41 @@ async fn get_hardware_info() -> Result<serde_json::Value, String> {
 }
 
 #[tauri::command]
+async fn get_network_connections() -> Result<Vec<serde_json::Value>, String> {
+    let output = std::process::Command::new("ss")
+        .args(["-tun", "--no-header"])
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let mut connections = Vec::new();
+
+    for line in stdout.lines() {
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() >= 5 && parts[0] == "ESTAB" {
+            let peer = parts[4];
+            if let Some(ip) = peer.rsplit(':').nth(1) {
+                let ip_clean = ip.trim_start_matches('[').trim_end_matches(']');
+                if !ip_clean.starts_with("127.")
+                    && !ip_clean.starts_with("::1")
+                    && !ip_clean.starts_with("0.0.0.0")
+                    && !ip_clean.is_empty()
+                {
+                    connections.push(serde_json::json!({
+                        "ip": ip_clean,
+                        "port": peer.rsplit(':').next().unwrap_or("0"),
+                        "state": "ESTABLISHED"
+                    }));
+                }
+            }
+        }
+    }
+
+    connections.truncate(50);
+    Ok(connections)
+}
+
+#[tauri::command]
 async fn open_file_external(path: String) -> Result<(), String> {
     let editor = detect_editor().await;
     let terminals = [
@@ -463,6 +498,7 @@ fn main() {
             detect_editor,
             open_file_external,
             get_hardware_info,
+            get_network_connections,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
