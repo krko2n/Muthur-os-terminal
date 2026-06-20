@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+54b10a2 feat(keyboard): 13 international keyboard layouts with live switching
+bcdb7a7 docs: auto-update version history [skip ci]
 0abf92f feat(globe): network connections mode with live TCP geolocation
 ad078a2 docs: auto-update version history [skip ci]
 3668eff feat(ui): hardware inspector, disk bar, globe intro, final polish
@@ -50,5 +52,3 @@ e9e02a1 feat(globe): hide back-face lines, slower rotation, more detail
 5474530 fix(build): skip bundling in upgrade, handle missing linuxdeploy
 a1b1978 fix(system): remove duplicate derive macro on BatteryInfo
 f5f148b docs(readme): add min/recommended requirements, nav link
-815fe06 chore: remove internal files from repo, add to gitignore
-494bc05 docs: auto-update version history [skip ci]
