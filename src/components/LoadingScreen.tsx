@@ -1,49 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import MuthurLogo from './MuthurLogo';
-import { playSound } from '../sounds';
+import { playSound } from '../audio';
 
 const BOOT_LOG = [
-  'Welcome to MUTHUR-OS!',
-  'vm_page_bootstrap: 987323 free pages and 53061 wired pages',
-  'kext submap [0xffffff7f8072e000 - 0xffffff8000000000]',
-  'zone leak detection enabled',
-  'standard timeslicing quantum is 10000 us',
-  'TSC Deadline Timer supported and enabled',
-  'MUTHURACPICPU: ProcessorId=1 LocalApicId=0 Enabled',
-  'MUTHURACPICPU: ProcessorId=2 LocalApicId=2 Enabled',
-  'MUTHURACPICPU: ProcessorId=3 LocalApicId=1 Enabled',
-  'MUTHURACPICPU: ProcessorId=4 LocalApicId=3 Enabled',
-  'calling mpo_policy_init for SecurityNet',
-  'Security policy loaded: Seatbelt sandbox policy (Sandbox)',
-  'Security policy loaded: Quarantine policy (Quarantine)',
-  '',
-  'HN_ Framework successfully initialized',
-  'using 16384 buffer headers and 10240 cluster IO buffer headers',
-  'IOAPIC: Version 0x20 Vectors 64:87',
-  'ACPI: System State [S0 S3 S4 S5] (S3)',
-  '[ PCI configuration begin ]',
-  'MUTHURIntelCPUPowerManagement: Turbo Ratios 0046',
-  'MUTHURIntelCPUPowerManagement: initialization complete',
-  '[ PCI configuration end, bridges 12 devices 16 ]',
-  'mbinit: done [64 MB total pool size, (42/21) split]',
-  'com.MUTHUR.FSCompressionTypeZlib kmod start',
-  'com.MUTHUR.FSCompressionTypeZlib load succeeded',
-  '',
-  'MUTHURIntelCPUPowerManagementClient: ready',
-  'wl0: Broadcom BCM4331 802.11 Wireless Controller',
-  'FireWire (OHCI) built-in now active; max speed s800.',
-  'BSD root: disk0s2, major 14, minor 2',
-  'Kernel is LP64',
-  '',
-  'IOThunderboltSwitch: status = 0x00000000',
-  'AirPort: Link Up on en1',
-  '',
-  '===================================================',
-  '  MUTHUR-OS KERNEL v0.1.0 - BUILD 2026.06.19',
-  '  Neural Interface Active',
-  '  All Systems Nominal',
-  '===================================================',
-  '',
+  'MUTHUR CORE // COLD START',
+  'Power bus accepted',
+  'Display plane sealed',
+  'Input matrix armed',
+  'Audio bus calibrated',
+  'Operator profile resolved',
+  'Theme register loaded',
+  'Layout register loaded',
+  'Terminal bridge attached',
+  'Local command channel ready',
+  'Structured web channel ready',
+  'Orbital display cache verified',
+  'Control deck online',
+  'Micro-sim module armed',
+  'AI endpoint handshake queued',
+  'Session watchdog armed',
+  'Native shell handoff prepared',
+  'MUTHUR interface nominal',
   'Boot Complete',
 ];
 
@@ -61,14 +38,15 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
   useEffect(() => {
     try {
-      stdoutAudio.current = new Audio('/audio/keyboard.wav');
+      stdoutAudio.current = new Audio('/audio/ui-click.ogg');
       stdoutAudio.current.volume = 0.04;
     } catch {}
   }, []);
 
   useEffect(() => {
+    playSound('boot', 0.12);
     const fadeIn = setTimeout(() => setLogoOpacity(1), 100);
-    const startBoot = setTimeout(() => setPhase('boot'), 2500);
+    const startBoot = setTimeout(() => setPhase('boot'), 1800);
     return () => { clearTimeout(fadeIn); clearTimeout(startBoot); };
   }, []);
 
@@ -86,7 +64,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     const baseDelay = line === '' ? 80 :
                       line.startsWith('===') ? 150 :
                       line === 'Boot Complete' ? 400 :
-                      Math.max(20, 200 * Math.pow(1 - progress, 3));
+                      Math.max(45, 190 * Math.pow(1 - progress, 2));
 
     const timer = setTimeout(() => {
       setVisibleLines(prev => prev + 1);
@@ -104,12 +82,14 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
   useEffect(() => {
     if (phase !== 'title') return;
-    playSound('expand', 0.25);
+    playSound('theme', 0.18);
     const glitchStart = setTimeout(() => setGlitchActive(true), 500);
     const glitchEnd = setTimeout(() => setGlitchActive(false), 1200);
     const done = setTimeout(onComplete, 2000);
     return () => { clearTimeout(glitchStart); clearTimeout(glitchEnd); clearTimeout(done); };
   }, [phase, onComplete]);
+
+  const bootProgress = Math.min(100, Math.round((visibleLines / BOOT_LOG.length) * 100));
 
   if (phase === 'logo') {
     return (
@@ -118,9 +98,9 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           className="flex flex-col items-center gap-6"
           style={{ opacity: logoOpacity, transition: 'opacity 1s ease-in' }}
         >
-          <MuthurLogo size="12vh" color="#00ff41" shadowColor="rgba(0,255,65,0.08)" />
-          <div className="text-muthur-primary font-mono text-[1.2vh] tracking-[0.5em] uppercase opacity-60 animate-pulse">
-            INITIALIZING SYSTEM
+          <MuthurLogo size="12vh" color="var(--color-accent)" shadowColor="rgba(0,255,65,0.08)" />
+          <div className="text-muthur-primary font-display text-[1.2vh] tracking-[0.5em] uppercase opacity-70 animate-pulse">
+            CORE WAKE
           </div>
         </div>
       </div>
@@ -131,7 +111,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     return (
       <div className="w-screen h-screen bg-[#05080d] flex items-center justify-center overflow-hidden">
         <div className={`title-glitch ${glitchActive ? 'active' : ''}`}>
-          <h1 className="text-[10vh] font-mono font-bold text-muthur-primary tracking-[0.2em] text-glow">
+          <h1 className="text-[10vh] font-display font-bold text-muthur-primary tracking-[0.2em] text-glow">
             MUTHUR
           </h1>
         </div>
@@ -143,29 +123,50 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     <div className="w-screen h-screen bg-[#05080d] flex items-center justify-center overflow-hidden">
       <div
         ref={containerRef}
-        className="w-full h-full p-6 font-mono text-[11px] leading-[1.6] overflow-hidden"
+        className="w-full h-full p-8 font-mono overflow-hidden flex flex-col"
       >
-        {BOOT_LOG.slice(0, visibleLines).map((line, i) => (
-          <div
-            key={i}
-            className={`${
-              line.startsWith('===')
-                ? 'text-muthur-primary font-bold'
-                : line === 'Boot Complete'
-                ? 'text-muthur-primary text-glow'
-                : line.includes('Enabled') || line.includes('succeeded') || line.includes('ready') || line.includes('complete')
-                ? 'text-[#00ff41] opacity-70'
-                : line.includes('MUTHUR-OS KERNEL')
-                ? 'text-muthur-primary'
-                : 'text-[#aacfd1] opacity-50'
-            }`}
-          >
-            {line || ' '}
+        <div className="shrink-0 flex items-center justify-between border-b border-[rgba(0,255,65,0.18)] pb-4 mb-5">
+          <div>
+            <div className="text-muthur-primary font-display text-[2.2vh] tracking-[0.25em]">MUTHUR CORE</div>
+            <div className="text-muthur-secondary text-[1.1vh] tracking-[0.25em] opacity-50 mt-1">SESSION HANDOFF</div>
           </div>
-        ))}
-        {visibleLines < BOOT_LOG.length && (
-          <span className="inline-block w-[8px] h-[13px] bg-muthur-primary animate-pulse" />
-        )}
+          <div className="text-muthur-primary tabular-nums text-[1.4vh]">{bootProgress}%</div>
+        </div>
+
+        <div className="flex-1 min-h-0 overflow-hidden text-[12px] leading-[1.7]">
+          {BOOT_LOG.slice(0, visibleLines).map((line, i) => (
+            <div
+              key={i}
+              className={`${
+                line === 'Boot Complete'
+                  ? 'text-muthur-primary text-glow'
+                  : line.toLowerCase().includes('ready') || line.toLowerCase().includes('online') || line.toLowerCase().includes('loaded')
+                  ? 'text-muthur-primary opacity-80'
+                  : 'text-muthur-secondary opacity-55'
+              }`}
+            >
+              <span className="opacity-35 mr-3 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+              {line || ' '}
+            </div>
+          ))}
+          {visibleLines < BOOT_LOG.length && (
+            <span className="inline-block w-[8px] h-[13px] bg-muthur-primary animate-pulse" />
+          )}
+        </div>
+
+        <div className="shrink-0 mt-5">
+          <div className="h-[0.9vh] bg-[rgba(0,255,65,0.08)] border border-[rgba(0,255,65,0.18)] overflow-hidden">
+            <div
+              className="h-full bg-muthur-primary transition-all duration-200"
+              style={{ width: `${bootProgress}%` }}
+            />
+          </div>
+          <div className="mt-2 flex justify-between text-[1vh] text-muthur-secondary opacity-45 tracking-[0.2em]">
+            <span>WAKE</span>
+            <span>VERIFY</span>
+            <span>HANDOFF</span>
+          </div>
+        </div>
       </div>
     </div>
   );

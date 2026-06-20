@@ -162,7 +162,7 @@ export default function FileExplorer() {
       <div className="flex items-center justify-between px-[1vh] py-[0.4vh] border-b border-[rgba(0,255,65,0.15)] shrink-0">
         <span className="text-[1.3vh] tracking-widest opacity-60 flex items-center gap-[0.5vh]">
           <FileSystemIcon size={14} color="rgba(0,255,65,0.5)" />
-          FILESYSTEM
+          CONTROL DECK
         </span>
         <div className="flex items-center gap-[1vh]">
           <button

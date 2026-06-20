@@ -1,23 +1,49 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import Header from './components/Header';
+import Header from './components/NativeHeader';
 import LeftPanel from './components/LeftPanel';
 import CenterPanel from './components/CenterPanel';
 import RightPanel from './components/RightPanel';
 import BottomPanel from './components/BottomPanel';
 import CustomCursor from './components/CustomCursor';
 import LoadingScreen from './components/LoadingScreen';
-import { playSound } from './sounds';
+import { configureAudio, playSound } from './audio';
+import {
+  applyInterfaceSettings,
+  getLayoutPreset,
+  InterfaceSettings,
+  LayoutPresetId,
+  loadInterfaceSettings,
+  saveInterfaceSettings,
+} from './theme';
 
 function App() {
+  const initialSettings = useRef<InterfaceSettings | null>(null);
+  if (!initialSettings.current) initialSettings.current = loadInterfaceSettings();
+  const loadedSettings = initialSettings.current as InterfaceSettings;
+
   const [booted, setBooted] = useState(false);
   const [assembled, setAssembled] = useState(false);
   const [greeting, setGreeting] = useState('');
   const [systemStats, setSystemStats] = useState<any>(null);
-  const [leftWidth, setLeftWidth] = useState(22);
-  const [rightWidth, setRightWidth] = useState(22);
-  const [bottomHeight, setBottomHeight] = useState(35);
+  const [settings, setSettings] = useState<InterfaceSettings>(loadedSettings);
+  const [leftWidth, setLeftWidth] = useState(loadedSettings.layout.leftWidth);
+  const [rightWidth, setRightWidth] = useState(loadedSettings.layout.rightWidth);
+  const [bottomHeight, setBottomHeight] = useState(loadedSettings.layout.bottomHeight);
+  const [deckSplit, setDeckSplit] = useState(loadedSettings.layout.deckSplit);
   const dragging = useRef<'left' | 'right' | 'bottom' | null>(null);
+
+  useEffect(() => {
+    applyInterfaceSettings(settings);
+    configureAudio(settings.audioEnabled, settings.audioVolume);
+  }, [settings]);
+
+  useEffect(() => {
+    saveInterfaceSettings({
+      ...settings,
+      layout: { leftWidth, rightWidth, bottomHeight, deckSplit },
+    });
+  }, [settings, leftWidth, rightWidth, bottomHeight, deckSplit]);
 
   // Suppress browser-specific behaviors (context menu, shortcuts)
   useEffect(() => {
@@ -69,6 +95,9 @@ function App() {
   }, []);
 
   const handleMouseUp = useCallback(() => {
+    if (dragging.current) {
+      setSettings(prev => ({ ...prev, layoutPreset: 'custom' }));
+    }
     dragging.current = null;
     document.body.style.userSelect = '';
   }, []);
@@ -85,6 +114,16 @@ function App() {
   const startDrag = (which: 'left' | 'right' | 'bottom') => {
     dragging.current = which;
     document.body.style.userSelect = 'none';
+  };
+
+  const applyLayoutPreset = (presetId: LayoutPresetId) => {
+    const preset = getLayoutPreset(presetId);
+    setLeftWidth(preset.layout.leftWidth);
+    setRightWidth(preset.layout.rightWidth);
+    setBottomHeight(preset.layout.bottomHeight);
+    setDeckSplit(preset.layout.deckSplit);
+    setSettings(prev => ({ ...prev, layoutPreset: presetId }));
+    playSound('switch', 0.12);
   };
 
   useEffect(() => {
@@ -154,7 +193,16 @@ function App() {
 
         {/* Bottom */}
         <div style={{ height: `${bottomHeight}vh`, transitionDelay: '0.6s' }} className={`shrink-0 overflow-hidden panel-reveal ${assembled ? 'visible' : ''}`}>
-          <BottomPanel />
+          <BottomPanel
+            settings={settings}
+            deckSplit={deckSplit}
+            onDeckSplitChange={(next) => {
+              setDeckSplit(next);
+              setSettings(prev => ({ ...prev, layoutPreset: 'custom' }));
+            }}
+            onLayoutPresetChange={applyLayoutPreset}
+            onSettingsChange={(patch) => setSettings(prev => ({ ...prev, ...patch }))}
+          />
         </div>
       </div>
     </div>

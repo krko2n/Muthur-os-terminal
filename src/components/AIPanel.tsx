@@ -48,7 +48,7 @@ export default function AIPanel() {
         } catch (e) {
           setMessages(prev => [...prev, {
             role: 'assistant',
-            content: `NETWORK ERROR: Could not reach external servers.\n${e}`
+            content: `REMOTE LINK ERROR: Could not reach the requested web source.\n${e}`
           }]);
         }
       } else if (userMessage.startsWith('fetch ') || userMessage.startsWith('get ')) {

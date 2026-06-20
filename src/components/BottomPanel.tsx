@@ -1,9 +1,24 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import FileExplorer from './FileExplorer';
+import ControlDeck from './ControlDeck';
 import Keyboard from './Keyboard';
+import { InterfaceSettings, LayoutPresetId } from '../theme';
 
-export default function BottomPanel() {
-  const [splitPct, setSplitPct] = useState(43);
+interface BottomPanelProps {
+  settings: InterfaceSettings;
+  deckSplit: number;
+  onDeckSplitChange: (value: number) => void;
+  onLayoutPresetChange: (id: LayoutPresetId) => void;
+  onSettingsChange: (patch: Partial<InterfaceSettings>) => void;
+}
+
+export default function BottomPanel({
+  settings,
+  deckSplit,
+  onDeckSplitChange,
+  onLayoutPresetChange,
+  onSettingsChange,
+}: BottomPanelProps) {
+  const [splitPct, setSplitPct] = useState(deckSplit);
   const dragging = useRef(false);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -13,9 +28,18 @@ export default function BottomPanel() {
   }, []);
 
   const handleMouseUp = useCallback(() => {
+    if (dragging.current) {
+      onDeckSplitChange(splitPct);
+    }
     dragging.current = false;
     document.body.style.userSelect = '';
-  }, []);
+  }, [onDeckSplitChange, splitPct]);
+
+  useEffect(() => {
+    if (!dragging.current) {
+      setSplitPct(deckSplit);
+    }
+  }, [deckSplit]);
 
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
@@ -28,9 +52,18 @@ export default function BottomPanel() {
 
   return (
     <div className="h-full flex">
-      {/* File System */}
+      {/* Native controls */}
       <div style={{ width: `${splitPct}%` }} className="shrink-0 overflow-hidden">
-        <FileExplorer />
+        <ControlDeck
+          settings={settings}
+          deckSplit={splitPct}
+          onDeckSplitChange={(next) => {
+            setSplitPct(next);
+            onDeckSplitChange(next);
+          }}
+          onLayoutPresetChange={onLayoutPresetChange}
+          onSettingsChange={onSettingsChange}
+        />
       </div>
 
       {/* Resize handle */}

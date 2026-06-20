@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { playSound } from '../sounds';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { playSound } from '../audio';
 
 interface KeyDef {
   code: string;
@@ -93,6 +93,37 @@ const AVAILABLE_LAYOUTS = [
   'sv-SE', 'da-DK', 'nl-BE', 'hu-HU', 'tr-TR-Q',
 ];
 
+function normalizeKeyDef(keyDef: KeyDef): KeyDef {
+  const upper = keyDef.code.toUpperCase();
+  let code = keyDef.code;
+  let lower = keyDef.lower;
+  let shift = keyDef.shift;
+
+  if (upper === 'ESC') code = 'Escape';
+  else if (upper === 'BACK' || upper === 'DELETE') code = 'Backspace';
+  else if (upper === 'ENTER' || upper === 'RET') code = 'Enter';
+  else if (upper === 'TAB') code = 'Tab';
+  else if (upper === 'CAPS') code = 'CapsLock';
+  else if (upper === 'SHIFT') code = 'ShiftLeft';
+  else if (upper === 'CTRL') code = 'ControlLeft';
+  else if (upper === 'ALT' || upper === 'ALT GR') code = 'AltRight';
+  else if (upper === 'FN' || upper === 'SUPER') code = 'MetaRight';
+  else if (upper === 'ESCAPED|-- ICON: ARROW_UP') { code = 'ArrowUp'; lower = 'up'; shift = 'up'; }
+  else if (upper === 'ESCAPED|-- ICON: ARROW_DOWN') { code = 'ArrowDown'; lower = 'dn'; shift = 'dn'; }
+  else if (upper === 'ESCAPED|-- ICON: ARROW_LEFT') { code = 'ArrowLeft'; lower = 'lt'; shift = 'lt'; }
+  else if (upper === 'ESCAPED|-- ICON: ARROW_RIGHT') { code = 'ArrowRight'; lower = 'rt'; shift = 'rt'; }
+  else if (upper === 'DIGIT' && !keyDef.lower) code = 'Space';
+
+  return {
+    ...keyDef,
+    code,
+    lower,
+    shift,
+    isEnter: keyDef.isEnter || code === 'Enter',
+    isModifier: keyDef.isModifier || ['Escape', 'Tab', 'Backspace', 'CapsLock', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'MetaLeft', 'MetaRight', 'AltLeft', 'AltRight'].includes(code),
+  };
+}
+
 export default function Keyboard() {
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
   const [capsLock, setCapsLock] = useState(false);
@@ -115,7 +146,10 @@ export default function Keyboard() {
       .catch(() => setCustomRows(null));
   }, [layoutName]);
 
-  const activeRows = customRows || ROWS;
+  const activeRows = useMemo(
+    () => (customRows || ROWS).map(row => row.map(normalizeKeyDef)),
+    [customRows]
+  );
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') {
@@ -184,6 +218,10 @@ export default function Keyboard() {
     else if (keyDef.code === 'Tab') char = '\t';
     else if (keyDef.code === 'Backspace') char = '\x7f';
     else if (keyDef.code === 'Escape') char = '\x1b';
+    else if (keyDef.code === 'ArrowUp') char = '\x1b[A';
+    else if (keyDef.code === 'ArrowDown') char = '\x1b[B';
+    else if (keyDef.code === 'ArrowRight') char = '\x1b[C';
+    else if (keyDef.code === 'ArrowLeft') char = '\x1b[D';
     else char = getChar(keyDef);
 
     if (char) window.dispatchEvent(new CustomEvent('virtual-key', { detail: char }));
@@ -208,7 +246,7 @@ export default function Keyboard() {
         <select
           value={layoutName}
           onChange={(e) => setLayoutName(e.target.value)}
-          className="text-[0.5vw] bg-transparent border border-[rgba(0,255,65,0.2)] text-muthur-primary px-[0.3vw] py-[0.1vw] font-mono opacity-40 hover:opacity-80 focus:outline-none"
+          className="text-[1vh] bg-transparent border border-[rgba(0,255,65,0.2)] text-muthur-primary px-[0.5vh] py-[0.15vh] font-mono opacity-60 hover:opacity-100 focus:outline-none"
         >
           {AVAILABLE_LAYOUTS.map(l => (
             <option key={l} value={l} className="bg-[#05080d]">{l}</option>
@@ -239,7 +277,10 @@ export default function Keyboard() {
                 return (
                   <div
                     key={`${ri}-${ki}`}
-                    onClick={() => handleClick({ ...keyDef, code: 'Enter' })}
+                    onPointerDown={(event) => {
+                      event.preventDefault();
+                      handleClick({ ...keyDef, code: 'Enter' });
+                    }}
                     className={`
                       relative flex items-center justify-center
                       rounded-[3px] rounded-tl-none transition-all duration-75
@@ -247,7 +288,7 @@ export default function Keyboard() {
                       border-t-0
                       ${highlighted
                         ? 'key-active'
-                        : 'border border-[rgba(0,255,65,0.4)] border-t-0 text-muthur-primary opacity-0 hover:opacity-100'
+                        : 'border border-[rgba(0,255,65,0.4)] border-t-0 text-muthur-primary opacity-45 hover:opacity-100'
                       }
                     `}
                     style={{ flex: `${keyDef.w / totalW}`, fontSize: '0.55vw' }}
@@ -258,7 +299,10 @@ export default function Keyboard() {
               return (
                 <div
                   key={`${ri}-${ki}`}
-                  onClick={() => handleClick(keyDef)}
+                  onPointerDown={(event) => {
+                    event.preventDefault();
+                    handleClick(keyDef);
+                  }}
                   className={`
                     relative flex items-center justify-center
                     rounded-[3px] transition-all duration-75
@@ -267,10 +311,10 @@ export default function Keyboard() {
                     ${highlighted
                       ? 'key-active'
                       : isSpace
-                      ? 'border border-[rgba(0,255,65,0.4)] text-muthur-primary opacity-0 hover:opacity-100'
+                      ? 'border border-[rgba(0,255,65,0.4)] text-muthur-primary opacity-45 hover:opacity-100'
                       : keyDef.isEnter
-                      ? 'border border-[rgba(0,255,65,0.4)] text-muthur-primary opacity-0 hover:opacity-100'
-                      : 'border border-transparent text-muthur-primary opacity-0 hover:opacity-100 hover:border-[rgba(0,255,65,0.4)]'
+                      ? 'border border-[rgba(0,255,65,0.4)] text-muthur-primary opacity-55 hover:opacity-100'
+                      : 'border border-[rgba(0,255,65,0.14)] text-muthur-primary opacity-45 hover:opacity-100 hover:border-[rgba(0,255,65,0.4)]'
                     }
                   `}
                   style={{

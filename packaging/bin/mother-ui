@@ -4,7 +4,7 @@
 #
 # Usage:
 #   mother-ui enable   - Auto-launch MUTHUR fullscreen at login
-#   mother-ui disable  - Return to normal desktop, launch MUTHUR manually
+#   mother-ui disable  - Disable fullscreen startup
 #
 # Handles three login environments:
 #   1. greetd     - Modifies initial_session in /etc/greetd/config.toml
@@ -35,7 +35,7 @@ usage() {
     echo ""
     echo "Usage:"
     echo "  mother-ui enable    Enable MUTHUR fullscreen autostart"
-    echo "  mother-ui disable   Disable autostart, restore normal desktop"
+    echo "  mother-ui disable   Disable fullscreen startup"
     echo "  mother-ui status    Show current configuration"
     echo ""
     exit 1
@@ -60,9 +60,8 @@ check_prerequisites() {
 
     if [ "$login_system" = "greetd" ]; then
         if ! command -v cage &>/dev/null; then
-            echo -e "${RED}ERROR:${RESET} cage compositor not found."
-            echo -e "  Install with: ${BOLD}pacman -S cage${RESET}"
-            echo -e "  Cage is required for greetd kiosk session."
+            echo -e "${RED}ERROR:${RESET} native fullscreen session host unavailable."
+            echo -e "  Install the native session host package for your distro."
             exit 1
         fi
         if [ ! -f "$GREETD_CONFIG" ]; then
@@ -80,7 +79,7 @@ check_prerequisites() {
 # --- ENABLE ---
 
 enable_greetd() {
-    echo -e "${DIM}Configuring greetd for MUTHUR kiosk session...${RESET}"
+    echo -e "${DIM}Configuring greetd for MUTHUR native session...${RESET}"
 
     # Backup original config if not already backed up
     if [ ! -f "$GREETD_BACKUP" ]; then
@@ -214,7 +213,7 @@ do_disable() {
 
     echo ""
     echo -e "${GREEN}MUTHUR autostart disabled.${RESET}"
-    echo -e "${DIM}System will boot into normal desktop on next login.${RESET}"
+    echo -e "${DIM}Fullscreen startup is disabled for the next login.${RESET}"
 }
 
 # --- STATUS ---
@@ -226,9 +225,9 @@ do_status() {
     echo -e "${BOLD}Login system:${RESET} $login_system"
 
     if [ "$login_system" = "greetd" ] && grep -q '^\[initial_session\]' "$GREETD_CONFIG" 2>/dev/null; then
-        echo -e "${BOLD}greetd session:${RESET} ${GREEN}ENABLED${RESET} (MUTHUR kiosk)"
+        echo -e "${BOLD}Native session:${RESET} ${GREEN}ENABLED${RESET}"
     else
-        echo -e "${BOLD}greetd session:${RESET} ${DIM}not configured${RESET}"
+        echo -e "${BOLD}Native session:${RESET} ${DIM}not configured${RESET}"
     fi
 
     if [ -f "$AUTOSTART_FILE" ]; then
@@ -238,9 +237,9 @@ do_status() {
     fi
 
     if [ -f "/etc/systemd/logind.conf.d/muthur-kiosk.conf" ]; then
-        echo -e "${BOLD}Kiosk hardening:${RESET} ${YELLOW}ACTIVE${RESET}"
+        echo -e "${BOLD}Session hardening:${RESET} ${YELLOW}ACTIVE${RESET}"
     else
-        echo -e "${BOLD}Kiosk hardening:${RESET} ${DIM}not applied${RESET}"
+        echo -e "${BOLD}Session hardening:${RESET} ${DIM}not applied${RESET}"
     fi
 }
 

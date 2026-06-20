@@ -74,23 +74,23 @@ Leave `ollama serve` running in a separate terminal, then restart MUTHUR.
 │  MUTHUR://CORE              SYSTEM: ONLINE    12:34:56      │
 ├─────────┬───────────────────────────────┬───────────────────┤
 │         │                               │                   │
-│ SYSTEM  │        TERMINAL TABS          │   NETWORK         │
+│ SYSTEM  │        TERMINAL TABS          │   ORBITAL         │
 │  STATS  │   ┌────┬────┬────┐ [+ NEW]   │   [3D GLOBE]      │
 │         │   │T1  │T2  │T3  │            │                   │
 │ CPU ▓▓░ │   └────────────────┘          │   STATUS: OK      │
-│ RAM ▓▓▓ │                               │   LATENCY: 12ms   │
+│ STORAGE │                               │   SIGNALS: OK     │
 │         │   $ command prompt here_      │                   │
 │ TOP     │                               │ ─────────────────│
 │ PROCS   │                               │                   │
 │         │                               │   AI ASSISTANT    │
-│ NETWORK │                               │                   │
-│ RX/TX   │   [Terminal output area]      │   > Ask MUTHUR   │
+│ VOLUMES │                               │                   │
+│ READY   │   [Terminal output area]      │   > Ask MUTHUR   │
 │         │                               │                   │
 ├─────────┴───────────────────────────────┤                   │
-│  FILE EXPLORER                          │                   │
-│  ~/Documents/                           │                   │
-│  [DIR] projects/                        │                   │
-│  [DIR] downloads/                       │                   │
+│  CONTROL DECK                           │                   │
+│  THEMES / LAYOUT / SIM                  │                   │
+│  [SIM] SIGNAL LOCK                      │                   │
+│  [FONT] ORBITRON / RAJDHANI             │                   │
 └─────────────────────────────────────────┴───────────────────┘
 ```
 
@@ -119,14 +119,13 @@ Leave `ollama serve` running in a separate terminal, then restart MUTHUR.
 ### System Monitor
 - Updates every 2 seconds
 - Shows top 8 CPU-intensive processes
-- Memory shown in GB
-- Network shows cumulative RX/TX since boot
+- Storage volumes are shown instead of memory panels
+- The orbital display uses local fallback signals when remote data is unavailable
 
-### File Explorer
-- Click folders to navigate
-- Click "↑ UP" to go to parent directory
-- Type path and press Enter to jump to location
-- Shows file sizes and modification dates
+### Control Deck
+- Change themes, fonts, audio, and layout from the bottom-left deck
+- Use the layout presets for command, focus, wide, and simulation modes
+- Open the SIM tab for the built-in Signal Lock micro-game
 
 ### AI Assistant
 - **Command suggestions**: Type `#<what you want to do>`
@@ -192,7 +191,7 @@ glxinfo | grep "OpenGL version"
 
 ## Next Steps
 
-1. **Customize**: Edit `tailwind.config.js` to change colors
+1. **Customize**: Use the Control Deck to change colors, fonts, audio, and layout
 2. **Extend**: Add new widgets in `src/components/`
 3. **Theme**: Modify `src/index.css` for different CRT effects
 4. **AI Model**: Try different Ollama models (llama3.1, mixtral, etc.)

@@ -5,8 +5,8 @@ import { WebglAddon } from '@xterm/addon-webgl';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import '@xterm/xterm/css/xterm.css';
-import BrowserView from './BrowserView';
-import { playSound } from '../sounds';
+import NativeBrowserView from './NativeBrowserView';
+import { playSound } from '../audio';
 
 interface TerminalSession {
   id: string;
@@ -14,6 +14,45 @@ interface TerminalSession {
   fitAddon: FitAddon;
   name: string;
   type: 'shell' | 'browser';
+}
+
+const DEFAULT_WEB_TARGET = 'https://lite.duckduckgo.com/lite/';
+
+function cssVar(name: string, fallback: string) {
+  if (typeof window === 'undefined') return fallback;
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+}
+
+function getTerminalFont() {
+  return cssVar('--font-mono', '"Share Tech Mono", "Courier New", monospace');
+}
+
+function getTerminalTheme() {
+  const accent = cssVar('--color-accent', '#00ff41');
+  const text = cssVar('--color-text', '#aacfd1');
+  const danger = cssVar('--color-danger', '#ff006e');
+
+  return {
+    background: 'transparent',
+    foreground: text,
+    cursor: accent,
+    black: '#000000',
+    red: danger,
+    green: accent,
+    yellow: '#ffb13b',
+    blue: '#48ddff',
+    magenta: '#d96cff',
+    cyan: '#98ffd3',
+    white: text,
+    brightBlack: '#555555',
+    brightRed: danger,
+    brightGreen: accent,
+    brightYellow: '#ffd36a',
+    brightBlue: '#72e8ff',
+    brightMagenta: '#f0a4ff',
+    brightCyan: '#c2ffe8',
+    brightWhite: '#ffffff',
+  };
 }
 
 export default function Terminal() {
@@ -44,6 +83,23 @@ export default function Terminal() {
     return () => window.removeEventListener('virtual-key', handleVirtualKey);
   }, [sessions, activeSessionId]);
 
+  useEffect(() => {
+    const updateShellTheme = () => {
+      const theme = getTerminalTheme();
+      const fontFamily = getTerminalFont();
+      sessions.forEach(session => {
+        if (session.type === 'shell' && session.terminal) {
+          session.terminal.options.theme = theme;
+          session.terminal.options.fontFamily = fontFamily;
+          session.fitAddon.fit();
+        }
+      });
+    };
+
+    window.addEventListener('muthur-theme-change', updateShellTheme);
+    return () => window.removeEventListener('muthur-theme-change', updateShellTheme);
+  }, [sessions]);
+
   // Open file in editor: creates new terminal tab and runs editor
   useEffect(() => {
     const handleOpenFile = async (e: Event) => {
@@ -56,28 +112,8 @@ export default function Terminal() {
           cursorBlink: true,
           cursorStyle: 'block',
           fontSize: 15,
-          fontFamily: '"Share Tech Mono", "Fira Mono", "Courier New", monospace',
-          theme: {
-            background: 'transparent',
-            foreground: '#aacfd1',
-            cursor: '#00ff41',
-            black: '#000000',
-            red: '#ff006e',
-            green: '#00ff41',
-            yellow: '#ffd700',
-            blue: '#00d4ff',
-            magenta: '#ff00ff',
-            cyan: '#00ffff',
-            white: '#ffffff',
-            brightBlack: '#555555',
-            brightRed: '#ff0088',
-            brightGreen: '#00ff88',
-            brightYellow: '#ffff00',
-            brightBlue: '#0088ff',
-            brightMagenta: '#ff88ff',
-            brightCyan: '#88ffff',
-            brightWhite: '#ffffff',
-          },
+          fontFamily: getTerminalFont(),
+          theme: getTerminalTheme(),
           allowTransparency: true,
           scrollback: 5000,
         });
@@ -197,11 +233,13 @@ export default function Terminal() {
         id,
         terminal: null as any,
         fitAddon: null as any,
-        name: `NET-${sessionNum}`,
+        name: `WEB-${sessionNum}`,
         type: 'browser',
       };
       setSessions(prev => [...prev, fakeSession]);
       setActiveSessionId(id);
+      setBrowserInput(prev => prev || DEFAULT_WEB_TARGET);
+      playSound('scan', 0.08);
       return;
     }
 
@@ -212,28 +250,8 @@ export default function Terminal() {
         cursorBlink: true,
         cursorStyle: 'block',
         fontSize: 15,
-        fontFamily: '"Share Tech Mono", "Fira Mono", "Courier New", monospace',
-        theme: {
-          background: 'transparent',
-          foreground: '#aacfd1',
-          cursor: '#00ff41',
-          black: '#000000',
-          red: '#ff006e',
-          green: '#00ff41',
-          yellow: '#ffd700',
-          blue: '#00d4ff',
-          magenta: '#ff00ff',
-          cyan: '#00ffff',
-          white: '#ffffff',
-          brightBlack: '#555555',
-          brightRed: '#ff0088',
-          brightGreen: '#00ff88',
-          brightYellow: '#ffff00',
-          brightBlue: '#0088ff',
-          brightMagenta: '#ff88ff',
-          brightCyan: '#88ffff',
-          brightWhite: '#ffffff',
-        },
+        fontFamily: getTerminalFont(),
+        theme: getTerminalTheme(),
         allowTransparency: true,
         scrollback: 5000,
       });
@@ -363,14 +381,16 @@ export default function Terminal() {
 
   const navigateBrowser = (url: string) => {
     let normalized = url.trim();
+    if (!normalized) normalized = DEFAULT_WEB_TARGET;
     if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
       if (normalized.includes('.') && !normalized.includes(' ')) {
         normalized = 'https://' + normalized;
       } else {
-        normalized = `https://duckduckgo.com/html/?q=${encodeURIComponent(normalized)}`;
+        normalized = `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(normalized)}`;
       }
     }
     setBrowserInput(normalized);
+    playSound('folder', 0.08);
   };
 
   // Keyboard shortcuts for tab management
@@ -439,7 +459,7 @@ export default function Terminal() {
             onClick={() => createNewSession('browser')}
             className="tab-skew px-3 py-1 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
           >
-            <span className="tab-skew-content">+ NET</span>
+            <span className="tab-skew-content">+ WEB</span>
           </button>
         </div>
       </div>
@@ -465,7 +485,7 @@ export default function Terminal() {
             </button>
           </div>
           {/* Structured browser content */}
-          <BrowserView url={browserInput} onNavigate={navigateBrowser} />
+          <NativeBrowserView url={browserInput} onNavigate={navigateBrowser} />
         </div>
       ) : (
         <div ref={containerRef} className="flex-1 overflow-hidden" />

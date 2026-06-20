@@ -114,9 +114,9 @@ detect_os() {
 check_optional_deps() {
     dimtext "  Optional dependencies:"
     if command -v cage &>/dev/null; then
-        dimtext "    cage:    installed (kiosk mode available)"
+        dimtext "    native session host: installed"
     else
-        dimtext "    cage:    not found (install for kiosk mode: pacman -S cage)"
+        dimtext "    native session host: not found (needed for boot-to-MUTHUR startup)"
     fi
     if command -v greetd &>/dev/null || systemctl is-active --quiet greetd 2>/dev/null; then
         dimtext "    greetd:  installed (session login available)"
@@ -317,17 +317,11 @@ EOF
     fi
 
     # ── Compositor Profiles (reference copies, always refreshed) ──
-    mkdir -p "$CONFIG_DIR/compositors"
-    if [ -d "$SCRIPT_DIR/packaging/compositors" ]; then
-        cp -f "$SCRIPT_DIR/packaging/compositors/"* "$CONFIG_DIR/compositors/" 2>/dev/null || true
-        dimtext "  Compositor profiles: $CONFIG_DIR/compositors/"
-    fi
-
-    # ── Kiosk Blueprints (reference copies, never auto-applied) ──
+    # ── Session hardening blueprints (reference copies, never auto-applied) ──
     mkdir -p "$CONFIG_DIR/kiosk"
     if [ -d "$SCRIPT_DIR/packaging/kiosk" ]; then
         cp -f "$SCRIPT_DIR/packaging/kiosk/"* "$CONFIG_DIR/kiosk/" 2>/dev/null || true
-        dimtext "  Kiosk blueprints: $CONFIG_DIR/kiosk/"
+        dimtext "  Session hardening blueprints: $CONFIG_DIR/kiosk/"
     fi
 }
 
@@ -392,7 +386,7 @@ print_summary() {
     echo "  Configuration:"
     echo "    $CONFIG_DIR/config.toml"
     echo ""
-    echo "  Kiosk Mode (advanced):"
+    echo "  Native Session (advanced):"
     echo "    See: $CONFIG_DIR/kiosk/README-KIOSK.md"
     echo ""
     if command -v ollama &>/dev/null; then

@@ -3,14 +3,14 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { feature } from 'topojson-client';
 import { invoke } from '@tauri-apps/api/core';
-import { playSound } from '../sounds';
+import { playSound } from '../audio';
 
-type GlobeMode = 'conflicts' | 'network' | 'cyber';
+type GlobeMode = 'events' | 'orbitals' | 'cyber';
 
-interface NetworkPeer {
+interface SignalNode {
   lat: number;
   lng: number;
-  ip: string;
+  label: string;
 }
 
 interface ConflictArea {
@@ -111,7 +111,7 @@ function ConflictCircle({ center, radius: areaRadius, color, globeRadius }: { ce
   return <OccludedLine points={points} color={color} opacity={0.6} />;
 }
 
-function RotatingGlobe({ mode, worldLines, conflicts, networkPeers }: { mode: GlobeMode; worldLines: THREE.Vector3[][]; conflicts: ConflictArea[]; networkPeers: NetworkPeer[] }) {
+function RotatingGlobe({ mode, worldLines, conflicts, signalNodes }: { mode: GlobeMode; worldLines: THREE.Vector3[][]; conflicts: ConflictArea[]; signalNodes: SignalNode[] }) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((_state, delta) => {
@@ -163,7 +163,7 @@ function RotatingGlobe({ mode, worldLines, conflicts, networkPeers }: { mode: Gl
         <OccludedLine key={`world-${i}`} points={points} color="#00ff41" opacity={0.7} />
       ))}
 
-      {mode === 'conflicts' && conflicts.map((area, i) => (
+      {mode === 'events' && conflicts.map((area, i) => (
         <ConflictCircle
           key={`conflict-${i}`}
           center={[area.lat, area.lng]}
@@ -173,7 +173,7 @@ function RotatingGlobe({ mode, worldLines, conflicts, networkPeers }: { mode: Gl
         />
       ))}
 
-      {mode === 'conflicts' && conflicts.map((area, i) => (
+      {mode === 'events' && conflicts.map((area, i) => (
         <OccludedDot
           key={`cdot-${i}`}
           position={latLngToVector3(area.lat, area.lng, radius * 1.01)}
@@ -182,13 +182,12 @@ function RotatingGlobe({ mode, worldLines, conflicts, networkPeers }: { mode: Gl
         />
       ))}
 
-      {/* Network peers */}
-      {mode === 'network' && networkPeers.map((peer, i) => (
+      {mode !== 'events' && signalNodes.map((node, i) => (
         <OccludedDot
-          key={`net-${i}`}
-          position={latLngToVector3(peer.lat, peer.lng, radius * 1.02)}
-          color="#00d4ff"
-          size={0.04}
+          key={`signal-${i}`}
+          position={latLngToVector3(node.lat, node.lng, radius * 1.02)}
+          color={mode === 'cyber' ? '#ff3b53' : '#48ddff'}
+          size={mode === 'cyber' ? 0.035 : 0.045}
         />
       ))}
 
@@ -239,12 +238,28 @@ function Satellites({ radius }: { radius: number }) {
 }
 
 export default function Globe() {
-  const [mode, setMode] = useState<GlobeMode>('conflicts');
+  const [mode, setMode] = useState<GlobeMode>('events');
   const [worldLines, setWorldLines] = useState<THREE.Vector3[][]>([]);
   const [visibleLines, setVisibleLines] = useState(0);
   const [conflicts, setConflicts] = useState<ConflictArea[]>([]);
-  const [networkPeers, setNetworkPeers] = useState<NetworkPeer[]>([]);
   const [status, setStatus] = useState('LOADING...');
+
+  const fallbackEvents: ConflictArea[] = useMemo(() => [
+    { lat: 35.7, lng: 139.7, count: 18, country: 'Tokyo relay' },
+    { lat: 51.5, lng: -0.1, count: 14, country: 'London relay' },
+    { lat: 40.7, lng: -74.0, count: 15, country: 'New York relay' },
+    { lat: -33.9, lng: 151.2, count: 11, country: 'Sydney relay' },
+    { lat: 1.3, lng: 103.8, count: 13, country: 'Singapore relay' },
+  ], []);
+
+  const signalNodes: SignalNode[] = useMemo(() => [
+    { lat: 64.1, lng: -21.9, label: 'ARCTIC' },
+    { lat: 28.6, lng: 77.2, label: 'DELTA' },
+    { lat: -23.5, lng: -46.6, label: 'SOUTH' },
+    { lat: 52.5, lng: 13.4, label: 'EUROPA' },
+    { lat: 34.0, lng: -118.2, label: 'PACIFIC' },
+    { lat: -1.3, lng: 36.8, label: 'EQUATOR' },
+  ], []);
 
   useEffect(() => {
     if (worldLines.length > 0 && visibleLines < worldLines.length) {
@@ -255,29 +270,6 @@ export default function Globe() {
       return () => clearTimeout(timer);
     }
   }, [worldLines, visibleLines]);
-
-  useEffect(() => {
-    if (mode !== 'network') return;
-    const loadConnections = async () => {
-      try {
-        const conns = await invoke('get_network_connections') as any[];
-        const peers: NetworkPeer[] = [];
-        for (const conn of conns.slice(0, 10)) {
-          try {
-            const geo = await invoke('fetch_json', { url: `http://ip-api.com/json/${conn.ip}?fields=lat,lon,status` }) as string;
-            const data = JSON.parse(geo);
-            if (data.status === 'success') {
-              peers.push({ lat: data.lat, lng: data.lon, ip: conn.ip });
-            }
-          } catch {}
-        }
-        setNetworkPeers(peers);
-      } catch {}
-    };
-    loadConnections();
-    const interval = setInterval(loadConnections, 10000);
-    return () => clearInterval(interval);
-  }, [mode]);
 
   useEffect(() => {
     loadGlobeData();
@@ -328,7 +320,8 @@ export default function Globe() {
       setConflicts(areas);
       setStatus(`${data.Result.length} EVENTS`);
     } else {
-      setStatus(worldLines.length > 0 ? 'MAP ONLY' : 'NO DATA');
+      setConflicts(fallbackEvents);
+      setStatus(worldLines.length > 0 ? 'LOCAL SIGNALS' : 'LOCAL DATA');
     }
   };
 
@@ -370,8 +363,8 @@ export default function Globe() {
   };
 
   const modeLabels: Record<GlobeMode, string> = {
-    conflicts: 'CONFLICTS',
-    network: 'NETWORK',
+    events: 'EVENTS',
+    orbitals: 'ORBITALS',
     cyber: 'CYBER',
   };
 
@@ -386,7 +379,7 @@ export default function Globe() {
             frameloop="always"
             dpr={1}
           >
-            <RotatingGlobe mode={mode} worldLines={worldLines.slice(0, visibleLines)} conflicts={conflicts} networkPeers={networkPeers} />
+            <RotatingGlobe mode={mode} worldLines={worldLines.slice(0, visibleLines)} conflicts={conflicts} signalNodes={signalNodes} />
           </Canvas>
         ) : (
           <div className="flex items-center justify-center h-full text-[1.1vh] opacity-30">
@@ -399,7 +392,10 @@ export default function Globe() {
         {(Object.keys(modeLabels) as GlobeMode[]).map((m) => (
           <button
             key={m}
-            onClick={() => setMode(m)}
+            onClick={() => {
+              setMode(m);
+              playSound(m === 'orbitals' ? 'orbit' : 'switch', 0.08);
+            }}
             className={`px-[0.8vh] py-[0.2vh] text-[0.9vh] font-mono border transition-colors ${
               mode === m
                 ? 'text-[#ff4444] border-[#ff4444] bg-[rgba(255,68,68,0.1)]'

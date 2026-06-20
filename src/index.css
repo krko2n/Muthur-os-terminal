@@ -18,22 +18,108 @@
   src: url('/fonts/ShareTech-Regular.woff2') format('woff2');
 }
 
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/Orbitron-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('/fonts/Orbitron-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/Rajdhani-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url('/fonts/Rajdhani-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Audiowide';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/Audiowide-Regular.ttf') format('truetype');
+}
+
 :root {
   --color-r: 0;
   --color-g: 255;
   --color-b: 65;
+  --color-text-r: 170;
+  --color-text-g: 207;
+  --color-text-b: 209;
   --color-accent: rgb(var(--color-r), var(--color-g), var(--color-b));
   --color-accent-dim: rgba(var(--color-r), var(--color-g), var(--color-b), 0.3);
   --color-accent-faint: rgba(var(--color-r), var(--color-g), var(--color-b), 0.08);
   --color-bg: #05080d;
+  --color-panel: #081017;
   --color-grey: #1a1e22;
   --color-text: #aacfd1;
+  --color-danger: #ff3b53;
   --font-ui: 'Share Tech', 'Share Tech Mono', sans-serif;
+  --font-display: 'Share Tech Mono', 'Orbitron', monospace;
   --font-mono: 'Share Tech Mono', 'Courier New', monospace;
 }
 
 .font-ui {
   font-family: var(--font-ui);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.text-muthur-primary {
+  color: var(--color-accent) !important;
+}
+
+.text-muthur-secondary {
+  color: var(--color-text) !important;
+}
+
+.text-muthur-accent {
+  color: var(--color-danger) !important;
+}
+
+.bg-muthur-primary {
+  background-color: var(--color-accent) !important;
+}
+
+.bg-muthur-panel {
+  background-color: var(--color-panel) !important;
+}
+
+.bg-muthur-bg {
+  background-color: var(--color-bg) !important;
+}
+
+.border-muthur-primary {
+  border-color: var(--color-accent) !important;
+}
+
+.border-muthur-accent {
+  border-color: var(--color-danger) !important;
+}
+
+.border-muthur-border {
+  border-color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.15) !important;
 }
 
 * {
@@ -44,7 +130,7 @@
 }
 
 body {
-  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
   background:
     linear-gradient(90deg, var(--color-bg) 1.85vh, transparent 1%) center,
     linear-gradient(var(--color-bg) 1.85vh, transparent 1%) center,
@@ -160,7 +246,7 @@ body {
 
 /* Panel styling - minimal, like eDEX */
 .panel {
-  background: rgba(5, 8, 13, 0.92);
+  background: color-mix(in srgb, var(--color-panel) 92%, transparent);
   border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.15);
 }
 
@@ -326,7 +412,7 @@ button, [data-tauri-drag-region] {
   top: 0;
   left: 0;
   font-size: 10vh;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: var(--font-display);
   font-weight: bold;
   letter-spacing: 0.2em;
   color: var(--color-accent);

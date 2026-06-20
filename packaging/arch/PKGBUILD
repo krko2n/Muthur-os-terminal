@@ -15,11 +15,8 @@ depends=(
 )
 optdepends=(
   'ollama: AI assistant integration'
-  'cage: Lightweight kiosk compositor for session mode'
-  'gamescope: Advanced compositor with FSR upscaling'
-  'greetd: Minimal login manager'
-  'sway: Tiling Wayland compositor'
-  'hyprland: Modern Wayland compositor with animations'
+  'cage: Native fullscreen session host'
+  'greetd: Login manager for boot-to-MUTHUR startup'
 )
 provides=('muthur-os-terminal')
 conflicts=('muthur-os-terminal')
@@ -81,8 +78,7 @@ post_install() {
   echo "    Install ollama: pacman -S ollama"
   echo "    Start service: systemctl start ollama"
   echo ""
-  echo "  Session Mode (Phase 3 - future):"
-  echo "    Install cage: pacman -S cage"
+  echo "  Native session:"
   echo "    Select 'MUTHUR OS' at login screen"
   echo ""
   echo "Documentation:"

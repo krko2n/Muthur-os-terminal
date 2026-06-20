@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# MUTHUR OS Session Wrapper
-# Launches MUTHUR in fullscreen kiosk mode using Cage compositor
+# MUTHUR OS native session wrapper.
+# Launches MUTHUR as the fullscreen interface.
 #
 # Usage: Called by display manager when user selects "MUTHUR OS" session
 #
@@ -13,18 +13,21 @@ LOG_FILE="${XDG_RUNTIME_DIR:-/tmp}/muthur-session.log"
 exec 1>> "$LOG_FILE"
 exec 2>&1
 
-echo "[$(date)] MUTHUR session starting..."
+echo "[$(date)] MUTHUR native session starting"
 
 # Environment setup
 export XDG_SESSION_TYPE=wayland
 export XDG_CURRENT_DESKTOP=MUTHUR
-export MUTHUR_SESSION_MODE=kiosk
+export MUTHUR_SESSION_MODE=native
 
-# Check if Cage is installed
-if ! command -v cage &> /dev/null; then
-    echo "ERROR: cage compositor not found"
-    echo "Install with: pacman -S cage"
-    notify-send -u critical "MUTHUR Session Error" "cage compositor not installed" 2>/dev/null
+SESSION_HOST="${MUTHUR_SESSION_HOST:-}"
+if [ -z "$SESSION_HOST" ]; then
+    SESSION_HOST="$(command -v cage 2>/dev/null || true)"
+fi
+
+if [ -z "$SESSION_HOST" ]; then
+    echo "ERROR: native fullscreen session host unavailable"
+    notify-send -u critical "MUTHUR Session Error" "Native fullscreen session host unavailable" 2>/dev/null
     exit 1
 fi
 
@@ -38,8 +41,5 @@ fi
 # Wait for DRM/KMS to be ready
 sleep 0.5
 
-# Launch MUTHUR in Cage compositor
-# -d : suppress client-side decorations
-# No -s flag: VT switching disabled for kiosk security
-echo "[$(date)] Launching Cage with MUTHUR (kiosk mode)..."
-exec cage -d -- /usr/bin/muthur-os-terminal --fullscreen-force --session-mode
+echo "[$(date)] Handing display to MUTHUR"
+exec "$SESSION_HOST" -d -- /usr/bin/muthur-os-terminal --fullscreen-force --session-mode

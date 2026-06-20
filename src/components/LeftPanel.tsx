@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { CpuIcon, MemoryIcon } from './SystemIcons';
+import { CpuIcon, StorageIcon } from './SystemIcons';
 import HardwareInspector from './HardwareInspector';
 
 interface LeftPanelProps {
@@ -7,19 +7,10 @@ interface LeftPanelProps {
 }
 
 const CPU_HISTORY_LEN = 60;
-const RAM_DOTS = 200;
 
 export default function LeftPanel({ systemStats }: LeftPanelProps) {
   const [time, setTime] = useState(new Date());
   const [cpuHistory, setCpuHistory] = useState<number[]>(Array(CPU_HISTORY_LEN).fill(0));
-  const [ramDots, setRamDots] = useState<number[]>(() => {
-    const order = Array.from({ length: RAM_DOTS }, (_, i) => i);
-    for (let i = order.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [order[i], order[j]] = [order[j], order[i]];
-    }
-    return order;
-  });
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -43,7 +34,13 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    ctx.strokeStyle = 'rgba(0, 255, 65, 0.15)';
+    const root = getComputedStyle(document.documentElement);
+    const accent = root.getPropertyValue('--color-accent').trim() || '#00ff41';
+    const r = root.getPropertyValue('--color-r').trim() || '0';
+    const g = root.getPropertyValue('--color-g').trim() || '255';
+    const b = root.getPropertyValue('--color-b').trim() || '65';
+
+    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.15)`;
     ctx.lineWidth = 0.5;
     for (let i = 1; i < 4; i++) {
       const y = (i / 4) * h;
@@ -53,9 +50,9 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
       ctx.stroke();
     }
 
-    ctx.strokeStyle = '#00ff41';
+    ctx.strokeStyle = accent;
     ctx.lineWidth = 1.5;
-    ctx.shadowColor = 'rgba(0, 255, 65, 0.4)';
+    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
     ctx.shadowBlur = 4;
     ctx.beginPath();
     for (let i = 0; i < cpuHistory.length; i++) {
@@ -67,7 +64,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    ctx.fillStyle = 'rgba(0, 255, 65, 0.05)';
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.05)`;
     ctx.lineTo(w, h);
     ctx.lineTo(0, h);
     ctx.closePath();
@@ -82,8 +79,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
     return `${h}:${String(m).padStart(2, '0')}`;
   };
 
-  const memPercent = systemStats?.memory_percent || 0;
-  const activeDots = Math.round((memPercent / 100) * RAM_DOTS);
+  const disks = systemStats?.disk?.slice(0, 3) || [];
 
   return (
     <div className="h-full flex flex-col p-3 gap-2 overflow-hidden">
@@ -134,30 +130,34 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
         />
       </div>
 
-      {/* RAM Dot Grid */}
+      {/* Storage */}
       <div className="shrink-0">
         <div className="text-[10px] tracking-wider opacity-50 mb-1 flex items-center justify-between panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-1">
           <span className="flex items-center gap-1">
-            <MemoryIcon size={10} color="rgba(0,255,65,0.5)" />
-            RAM
+            <StorageIcon size={10} color="rgba(0,255,65,0.5)" />
+            STORAGE
           </span>
-          {systemStats && (
-            <span className="text-muthur-secondary tabular-nums">
-              {(systemStats.memory_used / 1024 / 1024 / 1024).toFixed(1)}/{(systemStats.memory_total / 1024 / 1024 / 1024).toFixed(0)}G
-            </span>
-          )}
+          <span className="text-muthur-secondary tabular-nums">
+            {disks.length ? `${disks.length} VOL` : '--'}
+          </span>
         </div>
-        <div className="grid gap-[2px]" style={{ gridTemplateColumns: 'repeat(20, 1fr)' }}>
-          {ramDots.map((dotIdx, i) => (
-            <div
-              key={i}
-              className="aspect-square rounded-[1px]"
-              style={{
-                background: `rgba(0,255,65,${dotIdx < activeDots ? 0.8 : 0.08})`,
-                transition: 'background 0.5s',
-              }}
-            />
-          ))}
+        <div className="space-y-[0.5vh]">
+          {disks.length ? disks.map((disk: any, index: number) => (
+            <div key={`${disk.mount_point}-${index}`} className="text-[10px]">
+              <div className="flex justify-between text-muthur-secondary opacity-60 mb-[0.2vh]">
+                <span className="truncate max-w-[12vh]">{disk.mount_point}</span>
+                <span className="tabular-nums text-muthur-primary">{disk.used_percent.toFixed(0)}%</span>
+              </div>
+              <div className="h-[0.6vh] bg-[rgba(0,255,65,0.06)] overflow-hidden">
+                <div
+                  className="h-full bg-muthur-primary transition-all duration-500"
+                  style={{ width: `${Math.min(100, disk.used_percent)}%` }}
+                />
+              </div>
+            </div>
+          )) : (
+            <div className="text-[10px] text-muthur-secondary opacity-40">NO VOLUMES</div>
+          )}
         </div>
       </div>
 
@@ -168,7 +168,6 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
           <span className="w-8">PID</span>
           <span className="flex-1">NAME</span>
           <span className="w-7 text-right">CPU</span>
-          <span className="w-8 text-right">MEM</span>
         </div>
         <div className="flex-1 overflow-hidden">
           {systemStats?.processes?.slice(0, 8).map((proc: any, i: number) => (
@@ -176,9 +175,6 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
               <span className="w-8 text-muthur-secondary opacity-50 tabular-nums">{proc.pid}</span>
               <span className="flex-1 truncate text-muthur-secondary">{proc.name}</span>
               <span className="w-7 text-right text-muthur-primary tabular-nums">{proc.cpu_usage.toFixed(0)}</span>
-              <span className="w-8 text-right text-muthur-secondary opacity-50 tabular-nums">
-                {(proc.memory / 1024 / 1024).toFixed(0)}M
-              </span>
             </div>
           ))}
         </div>
