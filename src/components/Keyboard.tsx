@@ -88,14 +88,19 @@ export default function Keyboard() {
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
   const [capsLock, setCapsLock] = useState(false);
   const [shiftHeld, setShiftHeld] = useState(false);
+  const [passwordMode, setPasswordMode] = useState(false);
   const [stickyShift, setStickyShift] = useState(false);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') {
+      setPasswordMode(prev => !prev);
+      return;
+    }
     setActiveKeys(prev => new Set(prev).add(e.code));
     if (e.code === 'CapsLock') setCapsLock(prev => !prev);
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') setShiftHeld(true);
-    playSound('keyboard', 0.08);
-  }, []);
+    if (!passwordMode) playSound('keyboard', 0.08);
+  }, [passwordMode]);
 
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
     setActiveKeys(prev => {
@@ -171,7 +176,7 @@ export default function Keyboard() {
   };
 
   return (
-    <div className="h-full w-full flex flex-col justify-center gap-[0.15vw] p-[0.3vw]">
+    <div className={`h-full w-full flex flex-col justify-center gap-[0.15vw] p-[0.3vw] transition-opacity duration-300 ${passwordMode ? 'opacity-30' : ''}`}>
       {ROWS.map((row, ri) => {
         const totalW = row.reduce((sum, k) => sum + k.w, 0);
         const delay = Math.abs(ri - 2) * 0.1;
@@ -196,7 +201,7 @@ export default function Keyboard() {
                   key={`${ri}-${ki}`}
                   onClick={() => handleClick(keyDef)}
                   className={`
-                    flex items-center justify-center
+                    relative flex items-center justify-center
                     rounded-[3px] transition-all duration-75
                     font-mono select-none uppercase
                     ${highlighted
@@ -212,6 +217,11 @@ export default function Keyboard() {
                   }}
                 >
                   {label}
+                  {!keyDef.isModifier && keyDef.shift !== keyDef.lower && !isShifted && (
+                    <span className="absolute top-[1px] right-[3px] text-[0.4vw] opacity-30">
+                      {keyDef.shift}
+                    </span>
+                  )}
                 </div>
               );
             })}

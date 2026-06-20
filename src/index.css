@@ -10,6 +10,14 @@
   src: url('/fonts/ShareTechMono-Regular.woff2') format('woff2');
 }
 
+@font-face {
+  font-family: 'Share Tech';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/ShareTech-Regular.woff2') format('woff2');
+}
+
 :root {
   --color-r: 0;
   --color-g: 255;
@@ -20,6 +28,12 @@
   --color-bg: #05080d;
   --color-grey: #1a1e22;
   --color-text: #aacfd1;
+  --font-ui: 'Share Tech', 'Share Tech Mono', sans-serif;
+  --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+}
+
+.font-ui {
+  font-family: var(--font-ui);
 }
 
 * {

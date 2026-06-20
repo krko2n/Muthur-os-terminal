@@ -60,9 +60,22 @@ export default function FileExplorer() {
   const [currentPath, setCurrentPath] = useState('');
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [listView, setListView] = useState(false);
 
   useEffect(() => {
     initPath();
+  }, []);
+
+  // Ctrl+Shift+L toggles list/grid view
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        setListView(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
   }, []);
 
   // Listen for CWD changes from shell (OSC 7)
@@ -134,52 +147,69 @@ export default function FileExplorer() {
           <FileSystemIcon size={14} color="rgba(0,255,65,0.5)" />
           FILESYSTEM
         </span>
-        <span className="text-[1.1vh] text-muthur-secondary opacity-40 truncate ml-4">
-          {currentPath}
-        </span>
+        <div className="flex items-center gap-[1vh]">
+          <button
+            onClick={() => setListView(prev => !prev)}
+            className="text-[1.0vh] text-muthur-secondary opacity-40 hover:opacity-100 border border-[rgba(0,255,65,0.15)] px-[0.5vh] py-[0.1vh]"
+          >
+            {listView ? 'GRID' : 'LIST'}
+          </button>
+          <span className="text-[1.0vh] text-muthur-secondary opacity-40 truncate max-w-[15vh]">
+            {currentPath}
+          </span>
+        </div>
       </div>
 
-      {/* Grid */}
+      {/* Content */}
       <div className="flex-1 overflow-auto scrollbar-thin p-[1vh]">
         {loading ? (
           <div className="flex items-center justify-center h-full opacity-30 text-[1.4vh]">
             LOADING...
+          </div>
+        ) : listView ? (
+          <div className="flex flex-col gap-[0.3vh]">
+            <div
+              onClick={goUp}
+              className="flex items-center gap-[1vh] px-[0.5vh] py-[0.3vh] hover:bg-[rgba(0,255,65,0.05)] text-muthur-primary"
+            >
+              <div className="w-[2vh] h-[2vh] shrink-0"><FileIcon type="up" /></div>
+              <span className="text-[1.2vh]">..</span>
+            </div>
+            {entries.map((entry, i) => (
+              <div
+                key={i}
+                onClick={() => handleEntryClick(entry)}
+                className={`flex items-center gap-[1vh] px-[0.5vh] py-[0.3vh] hover:bg-[rgba(0,255,65,0.05)] ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}`}
+                style={{ opacity: 0, animation: `fadeIn 0.2s ease forwards`, animationDelay: `${i * 20}ms` }}
+              >
+                <div className="w-[2vh] h-[2vh] shrink-0"><FileIcon type={getIconType(entry)} /></div>
+                <span className="text-[1.2vh] flex-1 truncate">{entry.name}</span>
+                <span className="text-[1.0vh] opacity-40 tabular-nums w-[6vh] text-right">
+                  {entry.is_dir ? 'DIR' : entry.size > 1024*1024 ? `${(entry.size/1024/1024).toFixed(1)}M` : entry.size > 1024 ? `${(entry.size/1024).toFixed(0)}K` : `${entry.size}B`}
+                </span>
+              </div>
+            ))}
           </div>
         ) : (
           <div
             className="grid gap-[1vh]"
             style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(8vh, 1fr))', gridAutoRows: '8vh' }}
           >
-            {/* Go up button */}
             <div
               onClick={goUp}
               className="flex flex-col items-center justify-center hover:bg-[rgba(0,255,65,0.05)] transition-colors rounded text-muthur-primary"
             >
-              <div className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]">
-                <FileIcon type="up" />
-              </div>
-              <span className="text-[1.1vh] opacity-70">Go up</span>
+              <div className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]"><FileIcon type="up" /></div>
+              <span className="text-[1.1vh] opacity-70">..</span>
             </div>
-
-            {/* Files */}
             {entries.map((entry, i) => (
               <div
                 key={i}
                 onClick={() => handleEntryClick(entry)}
-                className={`
-                  flex flex-col items-center justify-center
-                  hover:bg-[rgba(0,255,65,0.05)] transition-all rounded
-                  ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}
-                `}
-                style={{
-                  opacity: 0,
-                  animation: `fadeIn 0.3s ease forwards`,
-                  animationDelay: `${i * 30}ms`,
-                }}
+                className={`flex flex-col items-center justify-center hover:bg-[rgba(0,255,65,0.05)] transition-all rounded ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}`}
+                style={{ opacity: 0, animation: `fadeIn 0.3s ease forwards`, animationDelay: `${i * 30}ms` }}
               >
-                <div className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]">
-                  <FileIcon type={getIconType(entry)} />
-                </div>
+                <div className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]"><FileIcon type={getIconType(entry)} /></div>
                 <span className="text-[1.1vh] max-w-full truncate px-[0.2vh] text-center opacity-80">
                   {entry.name.length > 12 ? entry.name.slice(0, 10) + '..' : entry.name}
                 </span>
