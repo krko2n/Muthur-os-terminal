@@ -1,0 +1,436 @@
+{
+  "name": "de-DE",
+  "rows": [
+    [
+      {
+        "code": "Escape",
+        "lower": "ESC",
+        "shift": "ESC",
+        "w": 1.3,
+        "isModifier": true
+      },
+      {
+        "code": "^",
+        "lower": "^",
+        "shift": "°",
+        "w": 1
+      },
+      {
+        "code": "Digit1",
+        "lower": "1",
+        "shift": "!",
+        "w": 1
+      },
+      {
+        "code": "Digit2",
+        "lower": "2",
+        "shift": "\"",
+        "w": 1
+      },
+      {
+        "code": "Digit3",
+        "lower": "3",
+        "shift": "§",
+        "w": 1
+      },
+      {
+        "code": "Digit4",
+        "lower": "4",
+        "shift": "$",
+        "w": 1
+      },
+      {
+        "code": "Digit5",
+        "lower": "5",
+        "shift": "%",
+        "w": 1
+      },
+      {
+        "code": "Digit6",
+        "lower": "6",
+        "shift": "&",
+        "w": 1
+      },
+      {
+        "code": "Digit7",
+        "lower": "7",
+        "shift": "/",
+        "w": 1
+      },
+      {
+        "code": "Digit8",
+        "lower": "8",
+        "shift": "(",
+        "w": 1
+      },
+      {
+        "code": "Digit9",
+        "lower": "9",
+        "shift": ")",
+        "w": 1
+      },
+      {
+        "code": "Digit0",
+        "lower": "0",
+        "shift": "=",
+        "w": 1
+      },
+      {
+        "code": "KeySS",
+        "lower": "ß",
+        "shift": "?",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "´",
+        "lower": "´",
+        "shift": "`",
+        "w": 1
+      },
+      {
+        "code": "BACK",
+        "lower": "BACK",
+        "shift": "DELETE",
+        "w": 2
+      }
+    ],
+    [
+      {
+        "code": "TAB",
+        "lower": "TAB",
+        "shift": "TAB",
+        "w": 1.5
+      },
+      {
+        "code": "KeyQ",
+        "lower": "q",
+        "shift": "Q",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyW",
+        "lower": "w",
+        "shift": "W",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyE",
+        "lower": "e",
+        "shift": "E",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyR",
+        "lower": "r",
+        "shift": "R",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyT",
+        "lower": "t",
+        "shift": "T",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyZ",
+        "lower": "z",
+        "shift": "Z",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyU",
+        "lower": "u",
+        "shift": "U",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyI",
+        "lower": "i",
+        "shift": "I",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyO",
+        "lower": "o",
+        "shift": "O",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyP",
+        "lower": "p",
+        "shift": "P",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyÜ",
+        "lower": "ü",
+        "shift": "Ü",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "+",
+        "lower": "+",
+        "shift": "*",
+        "w": 1
+      },
+      {
+        "code": "ENTER",
+        "lower": "ENTER",
+        "shift": "ENTER",
+        "w": 1.5
+      }
+    ],
+    [
+      {
+        "code": "CAPS",
+        "lower": "CAPS",
+        "shift": "CAPS",
+        "w": 1.8
+      },
+      {
+        "code": "KeyA",
+        "lower": "a",
+        "shift": "A",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyS",
+        "lower": "s",
+        "shift": "S",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyD",
+        "lower": "d",
+        "shift": "D",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyF",
+        "lower": "f",
+        "shift": "F",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyG",
+        "lower": "g",
+        "shift": "G",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyH",
+        "lower": "h",
+        "shift": "H",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyJ",
+        "lower": "j",
+        "shift": "J",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyK",
+        "lower": "k",
+        "shift": "K",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyL",
+        "lower": "l",
+        "shift": "L",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyÖ",
+        "lower": "ö",
+        "shift": "Ö",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyÄ",
+        "lower": "ä",
+        "shift": "Ä",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "#",
+        "lower": "#",
+        "shift": "'",
+        "w": 1
+      },
+      {
+        "code": "Digit",
+        "lower": "",
+        "shift": "",
+        "w": 1
+      }
+    ],
+    [
+      {
+        "code": "SHIFT",
+        "lower": "SHIFT",
+        "shift": "SHIFT",
+        "w": 2.4
+      },
+      {
+        "code": "<",
+        "lower": "<",
+        "shift": ">",
+        "w": 1
+      },
+      {
+        "code": "KeyY",
+        "lower": "y",
+        "shift": "Y",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyX",
+        "lower": "x",
+        "shift": "X",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyC",
+        "lower": "c",
+        "shift": "C",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyV",
+        "lower": "v",
+        "shift": "V",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyB",
+        "lower": "b",
+        "shift": "B",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyN",
+        "lower": "n",
+        "shift": "N",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": "KeyM",
+        "lower": "m",
+        "shift": "M",
+        "w": 1,
+        "isLetter": true
+      },
+      {
+        "code": ",",
+        "lower": ",",
+        "shift": ";",
+        "w": 1
+      },
+      {
+        "code": ".",
+        "lower": ".",
+        "shift": ":",
+        "w": 1
+      },
+      {
+        "code": "-",
+        "lower": "-",
+        "shift": "_",
+        "w": 1
+      },
+      {
+        "code": "SHIFT",
+        "lower": "SHIFT",
+        "shift": "SHIFT",
+        "w": 2.4
+      },
+      {
+        "code": "ESCAPED|-- ICON: ARROW_UP",
+        "lower": "ESCAPED|-- ICON: ARROW_UP",
+        "shift": "ESCAPED|-- ICON: ARROW_UP",
+        "w": 1
+      }
+    ],
+    [
+      {
+        "code": "CTRL",
+        "lower": "CTRL",
+        "shift": "CTRL",
+        "w": 1.5
+      },
+      {
+        "code": "FN",
+        "lower": "FN",
+        "shift": "FN",
+        "w": 1.2
+      },
+      {
+        "code": "Digit",
+        "lower": "",
+        "shift": "",
+        "w": 7
+      },
+      {
+        "code": "ALT GR",
+        "lower": "ALT GR",
+        "shift": "ALT GR",
+        "w": 1.2
+      },
+      {
+        "code": "CTRL",
+        "lower": "CTRL",
+        "shift": "CTRL",
+        "w": 1.5
+      },
+      {
+        "code": "ESCAPED|-- ICON: ARROW_LEFT",
+        "lower": "ESCAPED|-- ICON: ARROW_LEFT",
+        "shift": "ESCAPED|-- ICON: ARROW_LEFT",
+        "w": 1
+      },
+      {
+        "code": "ESCAPED|-- ICON: ARROW_DOWN",
+        "lower": "ESCAPED|-- ICON: ARROW_DOWN",
+        "shift": "ESCAPED|-- ICON: ARROW_DOWN",
+        "w": 1
+      },
+      {
+        "code": "ESCAPED|-- ICON: ARROW_RIGHT",
+        "lower": "ESCAPED|-- ICON: ARROW_RIGHT",
+        "shift": "ESCAPED|-- ICON: ARROW_RIGHT",
+        "w": 1
+      }
+    ]
+  ]
+}

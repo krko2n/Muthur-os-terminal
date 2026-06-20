@@ -87,12 +87,35 @@ const ROWS: KeyDef[][] = [
   ],
 ];
 
+const AVAILABLE_LAYOUTS = [
+  'en-US', 'en-GB', 'en-DVORAK', 'en-COLEMAK',
+  'de-DE', 'fr-FR', 'es-ES', 'it-IT', 'pt-BR',
+  'sv-SE', 'da-DK', 'nl-BE', 'hu-HU', 'tr-TR-Q',
+];
+
 export default function Keyboard() {
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
   const [capsLock, setCapsLock] = useState(false);
   const [shiftHeld, setShiftHeld] = useState(false);
   const [passwordMode, setPasswordMode] = useState(false);
   const [stickyShift, setStickyShift] = useState(false);
+  const [layoutName, setLayoutName] = useState('en-US');
+  const [customRows, setCustomRows] = useState<KeyDef[][] | null>(null);
+
+  useEffect(() => {
+    if (layoutName === 'en-US') {
+      setCustomRows(null);
+      return;
+    }
+    fetch(`/keyboards/${layoutName}.json`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.rows) setCustomRows(data.rows);
+      })
+      .catch(() => setCustomRows(null));
+  }, [layoutName]);
+
+  const activeRows = customRows || ROWS;
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') {
@@ -180,7 +203,19 @@ export default function Keyboard() {
 
   return (
     <div className={`h-full w-full flex flex-col justify-center gap-[0.15vw] p-[0.3vw] transition-opacity duration-300 ${passwordMode ? 'opacity-30' : ''}`}>
-      {ROWS.map((row, ri) => {
+      {/* Layout selector */}
+      <div className="flex justify-end shrink-0 mb-[0.1vw]">
+        <select
+          value={layoutName}
+          onChange={(e) => setLayoutName(e.target.value)}
+          className="text-[0.5vw] bg-transparent border border-[rgba(0,255,65,0.2)] text-muthur-primary px-[0.3vw] py-[0.1vw] font-mono opacity-40 hover:opacity-80 focus:outline-none"
+        >
+          {AVAILABLE_LAYOUTS.map(l => (
+            <option key={l} value={l} className="bg-[#05080d]">{l}</option>
+          ))}
+        </select>
+      </div>
+      {activeRows.map((row, ri) => {
         const totalW = row.reduce((sum, k) => sum + k.w, 0);
         const delay = Math.abs(ri - 2) * 0.1;
         return (
