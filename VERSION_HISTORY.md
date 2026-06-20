@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+3668eff feat(ui): hardware inspector, disk bar, globe intro, final polish
+90a4a79 docs: auto-update version history [skip ci]
 8f5c07e feat(keyboard): ISO L-shaped Enter key spanning two rows
 26340d6 docs: auto-update version history [skip ci]
 9844663 feat(ui): system monitors, list view, password mode, second font
@@ -50,5 +52,3 @@ f5f148b docs(readme): add min/recommended requirements, nav link
 494bc05 docs: auto-update version history [skip ci]
 e8f48b6 feat(readme): add banner.png, whitelist in gitignore
 61b89e8 docs: auto-update version history [skip ci]
-8b22ae3 chore: use PNG banner, remove unused docs and files
-907efb7 docs: auto-update version history [skip ci]
