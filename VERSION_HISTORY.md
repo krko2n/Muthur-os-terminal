@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+4d94e76 fix: open files in internal terminal tab instead of external window
+9c4045f docs: auto-update generated docs [skip ci]
 dffd7ef feat: virtual games folder in file explorer with tab launch
 cd1f68d docs: auto-update generated docs [skip ci]
 811a226 feat: games as launchable fullscreen tabs from file explorer
@@ -50,5 +52,3 @@ ccbbc61 Add sci-fi themes, offline packs, and arcade games
 bcdb7a7 docs: auto-update version history [skip ci]
 0abf92f feat(globe): network connections mode with live TCP geolocation
 ad078a2 docs: auto-update version history [skip ci]
-3668eff feat(ui): hardware inspector, disk bar, globe intro, final polish
-90a4a79 docs: auto-update version history [skip ci]
