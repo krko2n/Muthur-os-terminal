@@ -35,6 +35,22 @@ interface NativeBrowserViewProps {
 
 const SEARCH_HOME = 'https://lite.duckduckgo.com/lite/';
 
+const LOCAL_MANUAL: BrowserDocument = {
+  title: 'MUTHUR Offline Manual',
+  url: 'muthur://manual',
+  links: [],
+  blocks: [
+    { type: 'Heading', level: 1, text: 'MUTHUR OFFLINE MANUAL' },
+    { type: 'Paragraph', text: 'This local page works without a network connection. Use it as the built-in help node for setup, updates, offline packs, terminal commands, and themes.' },
+    { type: 'Heading', level: 2, text: 'Useful Commands' },
+    { type: 'BulletList', items: ['make update - professional update flow', 'scripts/muthur-health-check.sh - installer health check', 'scripts/muthur-offline-pack.sh - voluntary AI/wiki/maps pack', 'kys - safe shutdown command'] },
+    { type: 'Heading', level: 2, text: 'AI Helper' },
+    { type: 'Paragraph', text: 'In the AI panel, start a message with # to ask MUTHUR to suggest a terminal command before you run it.' },
+    { type: 'Heading', level: 2, text: 'Offline Pack' },
+    { type: 'Paragraph', text: 'Offline AI, wiki, docs, and map packs are optional. Install and update ask before downloading large add-ons.' },
+  ],
+};
+
 function getUrlHost(value: string) {
   try {
     return new URL(value).hostname.toUpperCase();
@@ -81,6 +97,15 @@ export default function NativeBrowserView({ url, onNavigate }: NativeBrowserView
   const fetchPage = async (targetUrl: string) => {
     const target = targetUrl.trim();
     if (!target) return;
+
+    if (target === 'muthur://manual') {
+      setLoading(false);
+      setProgress(100);
+      setError(null);
+      setDoc(LOCAL_MANUAL);
+      playSound('granted', 0.07);
+      return;
+    }
 
     requestIdRef.current += 1;
     const requestId = requestIdRef.current;

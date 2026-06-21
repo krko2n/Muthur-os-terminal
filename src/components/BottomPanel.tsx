@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import ControlDeck from './ControlDeck';
+import OperationsDeck from './OperationsDeck';
 import Keyboard from './Keyboard';
 import { InterfaceSettings, LayoutPresetId } from '../theme';
 
@@ -8,7 +8,11 @@ interface BottomPanelProps {
   deckSplit: number;
   onDeckSplitChange: (value: number) => void;
   onLayoutPresetChange: (id: LayoutPresetId) => void;
+  onLayoutChange: (patch: Partial<InterfaceSettings['layout']>) => void;
   onSettingsChange: (patch: Partial<InterfaceSettings>) => void;
+  onReplaceSettings: (settings: InterfaceSettings) => void;
+  onOpenPalette: () => void;
+  onOpenShutdown: () => void;
 }
 
 export default function BottomPanel({
@@ -16,7 +20,11 @@ export default function BottomPanel({
   deckSplit,
   onDeckSplitChange,
   onLayoutPresetChange,
+  onLayoutChange,
   onSettingsChange,
+  onReplaceSettings,
+  onOpenPalette,
+  onOpenShutdown,
 }: BottomPanelProps) {
   const [splitPct, setSplitPct] = useState(deckSplit);
   const dragging = useRef(false);
@@ -54,7 +62,7 @@ export default function BottomPanel({
     <div className="h-full flex">
       {/* Native controls */}
       <div style={{ width: `${splitPct}%` }} className="shrink-0 overflow-hidden">
-        <ControlDeck
+        <OperationsDeck
           settings={settings}
           deckSplit={splitPct}
           onDeckSplitChange={(next) => {
@@ -62,7 +70,11 @@ export default function BottomPanel({
             onDeckSplitChange(next);
           }}
           onLayoutPresetChange={onLayoutPresetChange}
+          onLayoutChange={onLayoutChange}
           onSettingsChange={onSettingsChange}
+          onReplaceSettings={onReplaceSettings}
+          onOpenPalette={onOpenPalette}
+          onOpenShutdown={onOpenShutdown}
         />
       </div>
 

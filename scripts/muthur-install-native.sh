@@ -54,6 +54,11 @@ load_toolchains
 command -v npm >/dev/null 2>&1 || fail "npm was not found. Install Node.js first."
 command -v cargo >/dev/null 2>&1 || fail "cargo was not found. Install Rust first."
 
+if [ -f "$ROOT_DIR/scripts/muthur-health-check.sh" ]; then
+    step "Running health check"
+    bash "$ROOT_DIR/scripts/muthur-health-check.sh" || warn "Health check reported warnings/errors; continuing native install"
+fi
+
 step "Installing frontend dependencies"
 npm ci --quiet || npm install --quiet
 info "Dependencies ready"
@@ -89,6 +94,34 @@ fi
 
 if [ -f "$ROOT_DIR/examples/config.toml.example" ] && [ ! -f "$CONFIG_DIR/config.toml" ]; then
     cp "$ROOT_DIR/examples/config.toml.example" "$CONFIG_DIR/config.toml"
+fi
+
+if [ -t 0 ] && [ -f "$ROOT_DIR/scripts/muthur-offline-pack.sh" ]; then
+    echo ""
+    pack_state="$(bash "$ROOT_DIR/scripts/muthur-offline-pack.sh" --status 2>/dev/null || true)"
+    offline_answer=""
+    if [ "$pack_state" = "current" ]; then
+        echo -e "${DIM}Offline pack current${RESET}"
+        offline_answer="n"
+    elif [ "$pack_state" = "stale" ]; then
+        read -r -p "Update optional offline AI/wiki/maps pack now? [y/N] " offline_answer || offline_answer=""
+    else
+        read -r -p "Install optional offline AI/wiki/maps pack now? [y/N] " offline_answer || offline_answer=""
+    fi
+    case "$offline_answer" in
+        y|Y)
+            if [ "$pack_state" = "stale" ]; then
+                bash "$ROOT_DIR/scripts/muthur-offline-pack.sh" --auto || warn "Offline pack update did not finish cleanly"
+            else
+                bash "$ROOT_DIR/scripts/muthur-offline-pack.sh" --install || warn "Offline pack step did not finish cleanly"
+            fi
+            ;;
+        *)
+            if [ "$pack_state" != "current" ]; then
+                warn "Offline pack skipped. Run later: scripts/muthur-offline-pack.sh"
+            fi
+            ;;
+    esac
 fi
 
 SIZE=$(du -h "$INSTALL_DIR/muthur" | cut -f1)

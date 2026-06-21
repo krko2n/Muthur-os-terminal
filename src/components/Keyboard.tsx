@@ -131,7 +131,22 @@ export default function Keyboard() {
   const [passwordMode, setPasswordMode] = useState(false);
   const [stickyShift, setStickyShift] = useState(false);
   const [layoutName, setLayoutName] = useState('en-US');
+  const [remapPreset, setRemapPreset] = useState('terminal');
   const [customRows, setCustomRows] = useState<KeyDef[][] | null>(null);
+
+  useEffect(() => {
+    const handleSettings = (event: Event) => {
+      const settings = (event as CustomEvent).detail;
+      if (typeof settings?.keyboardLayout === 'string') {
+        setLayoutName(settings.keyboardLayout);
+      }
+      if (typeof settings?.keyboardPreset === 'string') {
+        setRemapPreset(settings.keyboardPreset);
+      }
+    };
+    window.addEventListener('muthur-settings-change', handleSettings);
+    return () => window.removeEventListener('muthur-settings-change', handleSettings);
+  }, []);
 
   useEffect(() => {
     if (layoutName === 'en-US') {
@@ -200,6 +215,13 @@ export default function Keyboard() {
   };
 
   const handleClick = (keyDef: KeyDef) => {
+    const gamingRemap: Record<string, string> = {
+      KeyW: '\x1b[A',
+      KeyA: '\x1b[D',
+      KeyS: '\x1b[B',
+      KeyD: '\x1b[C',
+    };
+
     if (keyDef.code === 'ShiftLeft' || keyDef.code === 'ShiftRight') {
       setStickyShift(prev => !prev);
       return;
@@ -213,7 +235,8 @@ export default function Keyboard() {
     }
 
     let char = '';
-    if (keyDef.code === 'Space') char = ' ';
+    if (remapPreset === 'gaming' && gamingRemap[keyDef.code]) char = gamingRemap[keyDef.code];
+    else if (keyDef.code === 'Space') char = ' ';
     else if (keyDef.code === 'Enter') char = '\r';
     else if (keyDef.code === 'Tab') char = '\t';
     else if (keyDef.code === 'Backspace') char = '\x7f';
@@ -245,7 +268,10 @@ export default function Keyboard() {
       <div className="flex justify-end shrink-0 mb-[0.1vw]">
         <select
           value={layoutName}
-          onChange={(e) => setLayoutName(e.target.value)}
+          onChange={(e) => {
+            setLayoutName(e.target.value);
+            window.dispatchEvent(new CustomEvent('muthur-keyboard-layout-change', { detail: e.target.value }));
+          }}
           className="text-[1vh] bg-transparent border border-[rgba(0,255,65,0.2)] text-muthur-primary px-[0.5vh] py-[0.15vh] font-mono opacity-60 hover:opacity-100 focus:outline-none"
         >
           {AVAILABLE_LAYOUTS.map(l => (

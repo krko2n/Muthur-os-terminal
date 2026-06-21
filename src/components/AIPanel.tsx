@@ -9,7 +9,7 @@ interface Message {
 
 export default function AIPanel() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'system', content: 'MUTHUR AI online.\nReady to help with anything you need.\n\nCommands:\n  web <query> - search the internet\n  fetch <url> - get page content\n  # <context> - suggest a command' }
+    { role: 'system', content: 'MUTHUR AI online.\n\nCommands:\n  # <goal> - suggest a terminal command before you run it\n  web <query> - search the internet\n  fetch <url> - get page content\n\nOffline pack:\n  install AI/wiki/maps voluntarily with scripts/muthur-offline-pack.sh' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);

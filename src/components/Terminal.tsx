@@ -7,6 +7,7 @@ import { listen } from '@tauri-apps/api/event';
 import '@xterm/xterm/css/xterm.css';
 import NativeBrowserView from './NativeBrowserView';
 import { playSound } from '../audio';
+import { Bookmark, DEFAULT_BOOKMARKS } from '../theme';
 
 interface TerminalSession {
   id: string;
@@ -25,6 +26,16 @@ function cssVar(name: string, fallback: string) {
 
 function getTerminalFont() {
   return cssVar('--font-mono', '"Share Tech Mono", "Courier New", monospace');
+}
+
+function getTerminalFontSize() {
+  const parsed = Number(cssVar('--terminal-font-size', '15'));
+  return Number.isFinite(parsed) ? parsed : 15;
+}
+
+function getTerminalCursorStyle(): 'block' | 'underline' | 'bar' {
+  const value = cssVar('--terminal-cursor-style', 'block');
+  return value === 'underline' || value === 'bar' ? value : 'block';
 }
 
 function getTerminalTheme() {
@@ -60,6 +71,7 @@ export default function Terminal() {
   const [sessions, setSessions] = useState<TerminalSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [browserInput, setBrowserInput] = useState('');
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>(DEFAULT_BOOKMARKS);
 
   useEffect(() => {
     createNewSession('shell');
@@ -87,10 +99,14 @@ export default function Terminal() {
     const updateShellTheme = () => {
       const theme = getTerminalTheme();
       const fontFamily = getTerminalFont();
+      const fontSize = getTerminalFontSize();
+      const cursorStyle = getTerminalCursorStyle();
       sessions.forEach(session => {
         if (session.type === 'shell' && session.terminal) {
           session.terminal.options.theme = theme;
           session.terminal.options.fontFamily = fontFamily;
+          session.terminal.options.fontSize = fontSize;
+          session.terminal.options.cursorStyle = cursorStyle;
           session.fitAddon.fit();
         }
       });
@@ -99,6 +115,17 @@ export default function Terminal() {
     window.addEventListener('muthur-theme-change', updateShellTheme);
     return () => window.removeEventListener('muthur-theme-change', updateShellTheme);
   }, [sessions]);
+
+  useEffect(() => {
+    const handleSettings = (event: Event) => {
+      const settings = (event as CustomEvent).detail;
+      if (Array.isArray(settings?.bookmarks)) {
+        setBookmarks(settings.bookmarks);
+      }
+    };
+    window.addEventListener('muthur-settings-change', handleSettings);
+    return () => window.removeEventListener('muthur-settings-change', handleSettings);
+  }, []);
 
   // Open file in editor: creates new terminal tab and runs editor
   useEffect(() => {
@@ -110,8 +137,8 @@ export default function Terminal() {
         const sessionId = await invoke('create_terminal_session') as string;
         const terminal = new XTerm({
           cursorBlink: true,
-          cursorStyle: 'block',
-          fontSize: 15,
+          cursorStyle: getTerminalCursorStyle(),
+          fontSize: getTerminalFontSize(),
           fontFamily: getTerminalFont(),
           theme: getTerminalTheme(),
           allowTransparency: true,
@@ -248,8 +275,8 @@ export default function Terminal() {
     try {
       const terminal = new XTerm({
         cursorBlink: true,
-        cursorStyle: 'block',
-        fontSize: 15,
+        cursorStyle: getTerminalCursorStyle(),
+        fontSize: getTerminalFontSize(),
         fontFamily: getTerminalFont(),
         theme: getTerminalTheme(),
         allowTransparency: true,
@@ -382,6 +409,11 @@ export default function Terminal() {
   const navigateBrowser = (url: string) => {
     let normalized = url.trim();
     if (!normalized) normalized = DEFAULT_WEB_TARGET;
+    if (normalized.startsWith('muthur://')) {
+      setBrowserInput(normalized);
+      playSound('folder', 0.08);
+      return;
+    }
     if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
       if (normalized.includes('.') && !normalized.includes(' ')) {
         normalized = 'https://' + normalized;
@@ -483,6 +515,18 @@ export default function Terminal() {
             >
               GO
             </button>
+          </div>
+          <div className="flex gap-1 px-3 py-1 border-b border-[rgba(0,255,65,0.08)] shrink-0 overflow-x-auto scrollbar-thin">
+            {bookmarks.slice(0, 8).map(bookmark => (
+              <button
+                key={bookmark.id}
+                onClick={() => navigateBrowser(bookmark.url)}
+                className="shrink-0 px-2 py-0.5 text-[10px] border border-[rgba(0,255,65,0.16)] text-muthur-secondary opacity-60 hover:opacity-100 hover:border-muthur-primary tracking-wider"
+                title={bookmark.url}
+              >
+                {bookmark.label}
+              </button>
+            ))}
           </div>
           {/* Structured browser content */}
           <NativeBrowserView url={browserInput} onNavigate={navigateBrowser} />

@@ -121,6 +121,7 @@ rewind_progress
 draw_progress 22 "Checking toolchains..."
 command -v npm >/dev/null 2>&1 || fail "npm was not found. Install Node.js first."
 command -v cargo >/dev/null 2>&1 || fail "cargo was not found. Install Rust first."
+[ -f "$ROOT_DIR/scripts/muthur-health-check.sh" ] && bash "$ROOT_DIR/scripts/muthur-health-check.sh" >> "$BUILD_LOG" 2>&1 || true
 sleep 0.15
 
 run_step 32 "Installing frontend dependencies..." npm ci --quiet
@@ -179,3 +180,27 @@ printf "  ${DIM}Version:${RESET} v%s\n" "$NEW_VERSION"
 printf "  ${DIM}Binary:${RESET}  %s\n" "$SIZE"
 printf "  ${DIM}Path:${RESET}    /usr/local/bin/muthur\n"
 printf "\n"
+
+if [ -t 0 ] && [ -f "$ROOT_DIR/scripts/muthur-offline-pack.sh" ]; then
+    pack_state="$(bash "$ROOT_DIR/scripts/muthur-offline-pack.sh" --status 2>/dev/null || true)"
+    offline_answer=""
+    case "$pack_state" in
+        current)
+            printf "  ${DIM}Offline pack current.${RESET}\n"
+            ;;
+        stale)
+            read -r -p "  Offline pack needs an update. Refresh selected modules now? [y/N] " offline_answer || offline_answer=""
+            case "$offline_answer" in
+                y|Y) bash "$ROOT_DIR/scripts/muthur-offline-pack.sh" --auto ;;
+                *) printf "  ${DIM}Offline pack update skipped. Run later: scripts/muthur-offline-pack.sh --update${RESET}\n" ;;
+            esac
+            ;;
+        *)
+            read -r -p "  Optional offline pack is not installed. Install it now? [y/N] " offline_answer || offline_answer=""
+            case "$offline_answer" in
+                y|Y) bash "$ROOT_DIR/scripts/muthur-offline-pack.sh" --install ;;
+                *) printf "  ${DIM}Offline pack skipped. Run later: scripts/muthur-offline-pack.sh${RESET}\n" ;;
+            esac
+            ;;
+    esac
+fi

@@ -124,9 +124,9 @@ check_optional_deps() {
         dimtext "    greetd:  not found (install for auto-login: pacman -S greetd)"
     fi
     if command -v ollama &>/dev/null; then
-        dimtext "    ollama:  installed (AI features available)"
+        dimtext "    ollama:  installed (optional offline AI available)"
     else
-        dimtext "    ollama:  not found (install for AI: curl -fsSL https://ollama.com/install.sh | sh)"
+        dimtext "    ollama:  not found (optional offline pack can install it)"
     fi
     echo ""
 }
@@ -208,6 +208,57 @@ install_ollama() {
         step "Pulling AI model (llama3.2)..."
         ollama pull llama3.2 2>/dev/null || warn "Model pull failed - retry with: ollama pull llama3.2"
     fi
+}
+
+run_health_check() {
+    if [ -f "$SCRIPT_DIR/scripts/muthur-health-check.sh" ]; then
+        step "Running installer health check..."
+        bash "$SCRIPT_DIR/scripts/muthur-health-check.sh" || warn "Health check reported warnings/errors; continuing installer path"
+    fi
+}
+
+offer_offline_pack() {
+    if [ "$QUIET" = "--quiet" ]; then
+        dimtext "  Offline pack skipped in quiet mode"
+        return 0
+    fi
+
+    if [ ! -f "$SCRIPT_DIR/scripts/muthur-offline-pack.sh" ]; then
+        warn "Offline pack helper missing"
+        return 0
+    fi
+
+    local pack_state
+    pack_state="$(bash "$SCRIPT_DIR/scripts/muthur-offline-pack.sh" --status 2>/dev/null || true)"
+
+    if [ "$pack_state" = "current" ]; then
+        dimtext "  Offline pack current"
+        return 0
+    fi
+
+    echo ""
+    echo -e "${BOLD}Optional offline pack${NC}"
+    if [ "$pack_state" = "stale" ]; then
+        echo "  Your offline pack is installed but needs a refresh."
+        echo "  If accepted, existing selected modules update automatically."
+        read -r -p "  Update optional offline pack now? [y/N] " answer || answer=""
+    else
+        echo "  AI model, local docs, wiki archive, and map bundles can be added now."
+        echo "  Large downloads are voluntary and can be skipped."
+        read -r -p "  Install optional offline pack now? [y/N] " answer || answer=""
+    fi
+    case "$answer" in
+        y|Y)
+            if [ "$pack_state" = "stale" ]; then
+                bash "$SCRIPT_DIR/scripts/muthur-offline-pack.sh" --auto || warn "Offline pack update did not finish cleanly"
+            else
+                bash "$SCRIPT_DIR/scripts/muthur-offline-pack.sh" --install || warn "Offline pack step did not finish cleanly"
+            fi
+            ;;
+        *)
+            dimtext "  Offline pack skipped. Run later: scripts/muthur-offline-pack.sh"
+            ;;
+    esac
 }
 
 # ─── Build ─────────────────────────────────────────────────────────────────
@@ -424,11 +475,12 @@ main() {
 
     preflight
     install_deps
+    run_health_check
     install_rust
     install_node
-    install_ollama
     build_app
     install_assets
+    offer_offline_pack
     verify_installation
     print_summary
 }
