@@ -1,6 +1,6 @@
 # MUTHUR OS Terminal - Makefile
 
-.PHONY: help install update uninstall build dev clean test verify version
+.PHONY: help install install-interactive update quick-upgrade uninstall build dev clean test verify version
 
 help:
 	@echo "MUTHUR OS Terminal - Available Commands"
@@ -17,28 +17,28 @@ help:
 	@echo ""
 
 install:
-	@chmod +x install-auto.sh
-	@./install-auto.sh
+	@chmod +x scripts/install-auto.sh
+	@./scripts/install-auto.sh
 
 install-interactive:
-	@chmod +x install.sh
-	@./install.sh
+	@chmod +x scripts/install.sh
+	@./scripts/install.sh
 
 update:
-	@chmod +x upgrade.sh
-	@./upgrade.sh
+	@chmod +x scripts/upgrade.sh
+	@./scripts/upgrade.sh
 
 quick-upgrade:
-	@chmod +x quick-upgrade.sh
-	@./quick-upgrade.sh
+	@chmod +x scripts/quick-upgrade.sh
+	@./scripts/quick-upgrade.sh
 
 uninstall:
-	@chmod +x uninstall.sh
-	@./uninstall.sh
+	@chmod +x scripts/uninstall.sh
+	@./scripts/uninstall.sh
 
 build:
-	@chmod +x build.sh
-	@./build.sh
+	@chmod +x scripts/build.sh
+	@./scripts/build.sh
 
 dev:
 	@npm run tauri dev
@@ -49,13 +49,13 @@ clean:
 	@echo "[OK] Clean complete"
 
 test:
-	@chmod +x test.sh
-	@./test.sh
+	@chmod +x scripts/test.sh
+	@./scripts/test.sh
 
 verify:
-	@chmod +x verify-setup.sh
-	@./verify-setup.sh
+	@chmod +x scripts/verify-setup.sh
+	@./scripts/verify-setup.sh
 
 version:
-	@chmod +x check-version.sh
-	@./check-version.sh
+	@chmod +x scripts/check-version.sh
+	@./scripts/check-version.sh

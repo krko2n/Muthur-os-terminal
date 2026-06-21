@@ -5,8 +5,16 @@ node_modules/
 # Build outputs
 dist/
 dist-ssr/
+dist-verify*/
 target/
+target-codex*/
 src-tauri/target/
+src-tauri/target-codex*/
+
+# Temp/generated artifacts
+tmp/
+output/
+*.tmp
 
 # Environment
 .env
