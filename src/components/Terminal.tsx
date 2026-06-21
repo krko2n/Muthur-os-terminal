@@ -9,13 +9,15 @@ import NativeBrowserView from './NativeBrowserView';
 import OperationsDeck from './OperationsDeck';
 import { playSound } from '../audio';
 import { Bookmark, DEFAULT_BOOKMARKS, InterfaceSettings, LayoutPresetId } from '../theme';
+import { GameId, GAME_REGISTRY, SignalLock, SectorTactics, VoidCards } from './games';
 
 interface TerminalSession {
   id: string;
   terminal: XTerm | null;
   fitAddon: FitAddon | null;
   name: string;
-  type: 'shell' | 'browser' | 'settings';
+  type: 'shell' | 'browser' | 'settings' | 'game';
+  gameId?: GameId;
 }
 
 const DEFAULT_WEB_TARGET = 'muthur://manual';
@@ -275,6 +277,33 @@ export default function Terminal({
       console.error('Write failed:', e);
     }
   };
+
+  const openGame = (gameId: GameId) => {
+    const gameDef = GAME_REGISTRY.find(g => g.id === gameId);
+    if (!gameDef) return;
+    const id = `game-${gameId}-${Date.now()}`;
+    const gameSession: TerminalSession = {
+      id,
+      terminal: null,
+      fitAddon: null,
+      name: gameDef.name,
+      type: 'game',
+      gameId,
+    };
+    setSessions(prev => [...prev, gameSession]);
+    setActiveSessionId(id);
+    playSound('game', 0.1);
+  };
+
+  // Listen for game-open events from file explorer
+  useEffect(() => {
+    const handleOpenGame = (e: Event) => {
+      const gameId = (e as CustomEvent).detail as GameId;
+      if (gameId) openGame(gameId);
+    };
+    window.addEventListener('open-game', handleOpenGame);
+    return () => window.removeEventListener('open-game', handleOpenGame);
+  }, [sessions]);
 
   const createNewSession = async (type: 'shell' | 'browser' | 'settings') => {
     if (type === 'settings') {
