@@ -362,7 +362,7 @@ async fn get_current_dir() -> Result<String, String> {
 #[tauri::command]
 async fn fetch_json(url: String) -> Result<String, String> {
     let client = reqwest::Client::builder()
-        .user_agent("MUTHUR/0.1")
+        .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0")
         .timeout(std::time::Duration::from_secs(15))
         .build()
         .map_err(|e| e.to_string())?;
@@ -383,7 +383,7 @@ async fn fetch_json(url: String) -> Result<String, String> {
 #[tauri::command]
 async fn fetch_url(url: String) -> Result<String, String> {
     let client = reqwest::Client::builder()
-        .user_agent("Mozilla/5.0 (X11; Linux x86_64) MUTHUR/0.1")
+        .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0")
         .timeout(std::time::Duration::from_secs(10))
         .build()
         .map_err(|e| e.to_string())?;
@@ -411,7 +411,7 @@ async fn fetch_url(url: String) -> Result<String, String> {
 #[tauri::command]
 async fn fetch_url_structured(url: String) -> Result<serde_json::Value, String> {
     let client = reqwest::Client::builder()
-        .user_agent("Mozilla/5.0 (X11; Linux x86_64) MUTHUR/0.1")
+        .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0")
         .timeout(std::time::Duration::from_secs(15))
         .redirect(reqwest::redirect::Policy::limited(10))
         .build()

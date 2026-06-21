@@ -96,6 +96,22 @@ const audioCache: Map<string, HTMLAudioElement> = new Map();
 let audioEnabled = true;
 let masterVolume = 0.65;
 let soundPack: SoundPack = 'ship';
+let audioUnlocked = false;
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  const silent = new Audio();
+  silent.volume = 0;
+  silent.play().catch(() => {});
+  document.removeEventListener('click', unlockAudio);
+  document.removeEventListener('keydown', unlockAudio);
+  document.removeEventListener('pointerdown', unlockAudio);
+}
+
+document.addEventListener('click', unlockAudio, { once: true });
+document.addEventListener('keydown', unlockAudio, { once: true });
+document.addEventListener('pointerdown', unlockAudio, { once: true });
 
 const PACK_GAIN: Record<SoundPack, number> = {
   ship: 1,

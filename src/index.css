@@ -453,15 +453,25 @@ body.muthur-cinematic .panel-reveal {
   z-index: 2;
   max-width: 10.5vh;
   min-width: 8.2vh;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.22);
+  background: rgba(0, 0, 0, 0.92);
+  border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.35);
   color: var(--color-accent);
   font-family: var(--font-mono);
   font-size: clamp(8px, 0.66vw, 11px);
   letter-spacing: 0.08em;
-  padding: 1px 4px;
+  padding: 2px 6px;
   outline: none;
-  opacity: 0.82;
+  opacity: 0.9;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.edex-layout-select option {
+  background: #05080d;
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  padding: 4px 8px;
 }
 
 .edex-keyboard-grid {
@@ -591,8 +601,12 @@ body.muthur-cinematic .panel-reveal {
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 96%, white 4%), var(--color-accent));
   box-shadow:
-    0 0 14px rgba(var(--color-r), var(--color-g), var(--color-b), 0.52),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    0 0 22px rgba(var(--color-r), var(--color-g), var(--color-b), 0.75),
+    0 0 48px rgba(var(--color-r), var(--color-g), var(--color-b), 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 4px var(--color-bg);
+  transform: scale(0.97);
+  transition: all 0.05s ease-out;
 }
 
 .edex-key-active .edex-key-shift {
