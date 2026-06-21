@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+16fa011 feat: add PHANTOM and NEON theme presets
+ecd90b1 docs: auto-update generated docs [skip ci]
 7a7f088 feat: add game tutorials with controls overlay and help button
 0bb636a docs: auto-update generated docs [skip ci]
 9b60cd4 feat: colored ASCII image rendering with half-block pixel art
@@ -50,5 +52,3 @@ ad078a2 docs: auto-update version history [skip ci]
 0379dc3 docs: auto-update version history [skip ci]
 b69b99b feat(ui): complete eDEX-UI feature parity batch
 1226c57 docs: auto-update version history [skip ci]
-4102fd1 feat(ui): network status module, terminal sounds, panel decorations
-d16de42 docs: auto-update version history [skip ci]
