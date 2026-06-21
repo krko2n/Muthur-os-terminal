@@ -97,6 +97,7 @@ export default function Terminal({
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [browserInput, setBrowserInput] = useState('');
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(DEFAULT_BOOKMARKS);
+  const [gameFullscreen, setGameFullscreen] = useState(false);
 
   useEffect(() => {
     createNewSession('shell');
@@ -531,7 +532,6 @@ export default function Terminal({
   const isBrowser = activeSession?.type === 'browser';
   const isSettings = activeSession?.type === 'settings';
   const isGame = activeSession?.type === 'game';
-  const [gameFullscreen, setGameFullscreen] = useState(false);
 
   const renderGameContent = (gameId?: GameId) => {
     switch (gameId) {
