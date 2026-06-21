@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+9b60cd4 feat: colored ASCII image rendering with half-block pixel art
+b55dfb7 docs: auto-update generated docs [skip ci]
 61da524 fix: dark language selector, brighter key glow, audio unlock, browser UA
 96eb474 docs: auto-update generated docs [skip ci]
 d5173fa feat: rewrite upgrade scripts to preserve user data across updates
@@ -50,5 +52,3 @@ b69b99b feat(ui): complete eDEX-UI feature parity batch
 d16de42 docs: auto-update version history [skip ci]
 100001c feat(ui): eDEX-UI high-priority visual signatures
 6ef0371 docs: add detailed eDEX-UI comparison report with improvement roadmap
-e498331 docs: auto-update version history [skip ci]
-10dd078 fix(ci): remove VERSION_HISTORY.md from .gitignore
