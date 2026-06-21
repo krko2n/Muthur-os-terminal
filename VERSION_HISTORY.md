@@ -2,6 +2,9 @@
 
 Auto-generated from git log.
 
+e947cd8 Improve workspace layout and web readability
+2656d73 docs: add live line count and file count badges to README
+feb4718 docs: auto-update version history [skip ci]
 ae0b9d4 Overhaul MUTHUR OS terminal
 fdd7e81 docs: auto-update version history [skip ci]
 6f44bc2 Add offline pack manager, map viewer, and game saves
@@ -49,6 +52,3 @@ eb9125c fix(keyboard): sticky shift on click, fill entire container space
 81e6b47 fix(ui): layout proportions, working web tab, AI personality, globe loading
 9dcc0ce feat(ui): clickable keyboard, grid filesystem, resizable panels, AI personality
 1bf8547 fix(ui): proper eDEX-UI design system - no overlap, correct proportions
-a6906cd feat(ui): eDEX-UI style layout with keyboard, grid filesystem, fixed globe
-f8caa96 fix(ui): major overhaul - terminal output, browser, network, layout, cursor
-7d15e3f fix(system): pass bool arg to Networks::refresh() for sysinfo 0.39
