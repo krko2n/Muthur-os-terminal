@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+3447f1c feat: enhanced AI, audio system, theme loadouts, and operations deck
+ea52038 docs: auto-update generated docs [skip ci]
 6ec93fe docs: make README counters self-updating
 1969007 docs: auto-update version history [skip ci]
 3c9dd88 Add sound packs and prebuilt interface loadouts
@@ -50,5 +52,3 @@ ae7e530 fix(clippy): resolve all 4 clippy errors blocking CI
 a3dbd75 fix(ci): build frontend before cargo test
 4fc3db6 fix(ci): handle missing lockfiles, fix version-update workflow
 e5b93ef feat(phase3): WebGL renderer, shell integration, per-session locks
-cdbf013 fix(build): disable reqwest default-features to avoid TLS conflicts
-b3085d2 feat(phase2): loading screen, logo system, build fix, security hardening
