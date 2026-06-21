@@ -11,9 +11,12 @@ mod system;
 use ai::OllamaClient;
 use pty::{PtyManager, SessionId};
 use std::io::Write;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use system::SystemMonitor;
 use tauri::{Manager, State, Window};
+
+const OFFLINE_PACK_VERSION: &str = "2026.06.20.1";
 
 pub struct AppState {
     pty_manager: Arc<Mutex<PtyManager>>,
@@ -97,6 +100,179 @@ async fn list_directory(path: String) -> Result<Vec<serde_json::Value>, String> 
         }));
     }
     Ok(results)
+}
+
+fn offline_pack_dir() -> PathBuf {
+    if let Ok(path) = std::env::var("MUTHUR_OFFLINE_DIR") {
+        return PathBuf::from(path);
+    }
+
+    if let Ok(path) = std::env::var("XDG_DATA_HOME") {
+        return PathBuf::from(path).join("muthur").join("offline");
+    }
+
+    std::env::var("HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| PathBuf::from("."))
+        .join(".local")
+        .join("share")
+        .join("muthur")
+        .join("offline")
+}
+
+fn path_size(path: &Path) -> u64 {
+    let Ok(metadata) = std::fs::metadata(path) else {
+        return 0;
+    };
+
+    if metadata.is_file() {
+        return metadata.len();
+    }
+
+    let Ok(entries) = std::fs::read_dir(path) else {
+        return 0;
+    };
+
+    entries
+        .flatten()
+        .map(|entry| path_size(&entry.path()))
+        .sum()
+}
+
+fn modified_epoch(path: &Path) -> Option<u64> {
+    std::fs::metadata(path)
+        .ok()
+        .and_then(|metadata| metadata.modified().ok())
+        .and_then(|time| time.duration_since(std::time::UNIX_EPOCH).ok())
+        .map(|duration| duration.as_secs())
+}
+
+fn read_json_file(path: &Path) -> serde_json::Value {
+    std::fs::read_to_string(path)
+        .ok()
+        .and_then(|raw| serde_json::from_str(&raw).ok())
+        .unwrap_or_else(|| serde_json::json!({}))
+}
+
+fn sqlite3_query(path: &Path, query: &str) -> Option<String> {
+    let output = std::process::Command::new("sqlite3")
+        .arg("-readonly")
+        .arg(path)
+        .arg(query)
+        .output()
+        .ok()?;
+
+    if output.status.success() {
+        Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
+    } else {
+        None
+    }
+}
+
+fn read_mbtiles_metadata(path: &Path) -> serde_json::Value {
+    let mut metadata = serde_json::Map::new();
+
+    if let Some(raw) = sqlite3_query(path, "select name || '=' || value from metadata;") {
+        for line in raw.lines() {
+            if let Some((name, value)) = line.split_once('=') {
+                metadata.insert(name.to_string(), serde_json::json!(value));
+            }
+        }
+    }
+
+    let tile_count = sqlite3_query(path, "select count(1) from tiles;")
+        .and_then(|value| value.parse::<u64>().ok());
+    let zoom_range = sqlite3_query(
+        path,
+        "select min(zoom_level) || ':' || max(zoom_level) from tiles;",
+    )
+    .unwrap_or_default();
+
+    serde_json::json!({
+        "metadata": metadata,
+        "tileCount": tile_count,
+        "zoomRange": zoom_range,
+        "metadataReadable": !metadata.is_empty() || tile_count.is_some()
+    })
+}
+
+fn collect_mbtiles(path: &Path, results: &mut Vec<serde_json::Value>) {
+    let Ok(entries) = std::fs::read_dir(path) else {
+        return;
+    };
+
+    for entry in entries.flatten() {
+        let entry_path = entry.path();
+        if entry_path.is_dir() {
+            collect_mbtiles(&entry_path, results);
+            continue;
+        }
+
+        let is_mbtiles = entry_path
+            .extension()
+            .and_then(|extension| extension.to_str())
+            .map(|extension| extension.eq_ignore_ascii_case("mbtiles"))
+            .unwrap_or(false);
+
+        if !is_mbtiles {
+            continue;
+        }
+
+        let metadata = read_mbtiles_metadata(&entry_path);
+        results.push(serde_json::json!({
+            "name": entry_path.file_name().and_then(|name| name.to_str()).unwrap_or("map.mbtiles"),
+            "path": entry_path.to_string_lossy(),
+            "sizeBytes": std::fs::metadata(&entry_path).map(|metadata| metadata.len()).unwrap_or(0),
+            "modified": modified_epoch(&entry_path),
+            "metadata": metadata
+        }));
+    }
+}
+
+#[tauri::command]
+async fn get_offline_pack_status() -> Result<serde_json::Value, String> {
+    let pack_dir = offline_pack_dir();
+    let manifest_path = pack_dir.join("manifest.json");
+    let manifest = read_json_file(&manifest_path);
+    let exists = pack_dir.exists();
+    let version = manifest
+        .get("version")
+        .and_then(|value| value.as_str())
+        .unwrap_or("");
+    let status = if !manifest_path.exists() {
+        "missing"
+    } else if version == OFFLINE_PACK_VERSION {
+        "current"
+    } else {
+        "stale"
+    };
+
+    let mut maps = Vec::new();
+    let maps_dir = pack_dir.join("maps");
+    if maps_dir.exists() {
+        collect_mbtiles(&maps_dir, &mut maps);
+    }
+
+    Ok(serde_json::json!({
+        "exists": exists,
+        "path": pack_dir.to_string_lossy(),
+        "manifestPath": manifest_path.to_string_lossy(),
+        "status": status,
+        "currentVersion": OFFLINE_PACK_VERSION,
+        "version": version,
+        "updatedAt": manifest.get("updatedAt").cloned().unwrap_or(serde_json::Value::Null),
+        "sizeBytes": if exists { path_size(&pack_dir) } else { 0 },
+        "modules": {
+            "ai": manifest.get("ai").and_then(|value| value.as_bool()).unwrap_or(false),
+            "wiki": manifest.get("wiki").and_then(|value| value.as_bool()).unwrap_or(false),
+            "maps": manifest.get("maps").and_then(|value| value.as_bool()).unwrap_or(false),
+            "docs": manifest.get("docs").and_then(|value| value.as_bool()).unwrap_or(false)
+        },
+        "aiModel": manifest.get("aiModel").and_then(|value| value.as_str()).unwrap_or("llama3.2"),
+        "wikiPack": manifest.get("wikiPack").and_then(|value| value.as_str()).unwrap_or("wikipedia_en_simple_all"),
+        "mapRegion": manifest.get("mapRegion").and_then(|value| value.as_str()).unwrap_or("world-low"),
+        "maps": maps
+    }))
 }
 
 #[tauri::command]
@@ -487,6 +663,7 @@ fn main() {
             resize_terminal,
             close_terminal_session,
             get_system_stats,
+            get_offline_pack_status,
             list_directory,
             ai_suggest_command,
             ai_chat,

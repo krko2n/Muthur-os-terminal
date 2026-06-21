@@ -3,7 +3,7 @@ export type FontId = 'sharetech' | 'orbitron' | 'rajdhani' | 'audiowide' | 'bios
 export type LayoutPresetId = 'command' | 'focus' | 'wide' | 'simulation' | 'cinema' | 'custom';
 export type SoundPackId = 'ship' | 'quiet' | 'retro' | 'horror' | 'combat';
 export type BootPresetId = 'core' | 'bios' | 'crt' | 'silent';
-export type TerminalProfileId = 'ops' | 'bios' | 'matrix' | 'plain';
+export type TerminalProfileId = 'ops' | 'bios' | 'cmos' | 'matrix' | 'plain' | 'daily';
 export type KeyboardPresetId = 'terminal' | 'bios' | 'gaming';
 
 export interface ThemePreset {
@@ -286,8 +286,10 @@ export const BOOT_PRESETS = [
 export const TERMINAL_PROFILES = [
   { id: 'ops' as TerminalProfileId, label: 'OPS', fontSize: 15, cursor: 'block', description: 'dense everyday shell' },
   { id: 'bios' as TerminalProfileId, label: 'BIOS', fontSize: 16, cursor: 'block', description: 'fat old setup terminal' },
+  { id: 'cmos' as TerminalProfileId, label: 'CMOS FULL', fontSize: 17, cursor: 'block', description: 'full setup utility scale' },
   { id: 'matrix' as TerminalProfileId, label: 'MATRIX', fontSize: 14, cursor: 'underline', description: 'fast green monitor' },
   { id: 'plain' as TerminalProfileId, label: 'PLAIN', fontSize: 15, cursor: 'bar', description: 'calmer readable terminal' },
+  { id: 'daily' as TerminalProfileId, label: 'DAILY', fontSize: 16, cursor: 'bar', description: 'quiet readable daily-driver mode' },
 ];
 
 export const KEYBOARD_PRESETS = [

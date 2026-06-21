@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { playSound } from '../audio';
 import {
   BOOT_PRESETS,
@@ -31,6 +32,66 @@ interface OperationsDeckProps {
 type DeckTab = 'style' | 'layout' | 'ops' | 'offline' | 'games' | 'log';
 type GameMode = 'signal' | 'tactics' | 'cards';
 
+interface OfflineMapEntry {
+  name: string;
+  path: string;
+  sizeBytes: number;
+  modified?: number;
+  metadata?: {
+    metadata?: Record<string, string>;
+    tileCount?: number;
+    zoomRange?: string;
+    metadataReadable?: boolean;
+  };
+}
+
+interface OfflinePackRuntimeStatus {
+  exists: boolean;
+  path: string;
+  manifestPath: string;
+  status: 'missing' | 'current' | 'stale';
+  currentVersion: string;
+  version: string;
+  updatedAt?: string;
+  sizeBytes: number;
+  modules: Record<'ai' | 'wiki' | 'maps' | 'docs', boolean>;
+  aiModel: string;
+  wikiPack: string;
+  mapRegion: string;
+  maps: OfflineMapEntry[];
+}
+
+interface GameResult {
+  game: GameMode;
+  score: number;
+  moves?: number;
+  streak?: number;
+  summary: string;
+}
+
+interface GameRecord {
+  plays: number;
+  highScore: number;
+  bestMoves?: number;
+  bestStreak?: number;
+  lastSummary: string;
+  lastPlayed: string;
+}
+
+interface GameSlot {
+  id: string;
+  label: string;
+  game: GameMode;
+  score: number;
+  summary: string;
+  savedAt: string;
+}
+
+interface GameMemory {
+  records: Partial<Record<GameMode, GameRecord>>;
+  slots: GameSlot[];
+}
+
 const PLAYABLE_GAMES: Array<{ id: GameMode; name: string; signal: string; stat: string }> = [
   { id: 'signal', name: 'SIGNAL LOCK', signal: 'hit the sweep exactly on the target', stat: '30s' },
   { id: 'tactics', name: 'SECTOR TACTICS', signal: 'chess-like board duel against station logic', stat: 'long' },
@@ -44,6 +105,77 @@ const GAME_IDEAS = [
   { name: 'REACTOR PULSE', signal: 'hold power output inside a moving band', stat: '40s' },
   { name: 'EVA THREAD', signal: 'plot oxygen-safe paths through hull breaches', stat: '90s' },
 ];
+
+const GAME_MEMORY_KEY = 'muthur-game-memory';
+
+const EMPTY_GAME_MEMORY: GameMemory = {
+  records: {},
+  slots: [
+    { id: 'slot-a', label: 'SLOT A', game: 'signal', score: 0, summary: 'EMPTY', savedAt: '' },
+    { id: 'slot-b', label: 'SLOT B', game: 'tactics', score: 0, summary: 'EMPTY', savedAt: '' },
+    { id: 'slot-c', label: 'SLOT C', game: 'cards', score: 0, summary: 'EMPTY', savedAt: '' },
+  ],
+};
+
+function formatBytes(value: number) {
+  if (!Number.isFinite(value) || value <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let size = value;
+  let unit = 0;
+  while (size >= 1024 && unit < units.length - 1) {
+    size /= 1024;
+    unit += 1;
+  }
+  return `${size >= 10 || unit === 0 ? size.toFixed(0) : size.toFixed(1)} ${units[unit]}`;
+}
+
+function formatStamp(value?: string | number) {
+  if (!value) return 'UNKNOWN';
+  const date = typeof value === 'number' ? new Date(value * 1000) : new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString(undefined, { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }).toUpperCase();
+}
+
+function loadGameMemory(): GameMemory {
+  if (typeof window === 'undefined') return EMPTY_GAME_MEMORY;
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(GAME_MEMORY_KEY) || '{}') as Partial<GameMemory>;
+    return {
+      records: parsed.records ?? {},
+      slots: parsed.slots?.length ? parsed.slots : EMPTY_GAME_MEMORY.slots,
+    };
+  } catch {
+    return EMPTY_GAME_MEMORY;
+  }
+}
+
+function saveGameMemory(memory: GameMemory) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(GAME_MEMORY_KEY, JSON.stringify(memory));
+}
+
+function applyGameResult(memory: GameMemory, result: GameResult): GameMemory {
+  const previous = memory.records[result.game] ?? {
+    plays: 0,
+    highScore: 0,
+    lastSummary: 'NONE',
+    lastPlayed: '',
+  };
+  const nextRecord: GameRecord = {
+    ...previous,
+    plays: previous.plays + 1,
+    highScore: Math.max(previous.highScore, result.score),
+    bestMoves: result.moves == null ? previous.bestMoves : Math.min(previous.bestMoves ?? result.moves, result.moves),
+    bestStreak: result.streak == null ? previous.bestStreak : Math.max(previous.bestStreak ?? 0, result.streak),
+    lastSummary: result.summary,
+    lastPlayed: new Date().toISOString(),
+  };
+
+  return {
+    ...memory,
+    records: { ...memory.records, [result.game]: nextRecord },
+  };
+}
 
 export default function OperationsDeck({
   settings,
@@ -410,14 +542,36 @@ function OpsTab({
 function OfflineTab({ settings, onSettingsChange }: { settings: InterfaceSettings; onSettingsChange: (patch: Partial<InterfaceSettings>) => void }) {
   const offline = settings.offlinePack;
   const update = (patch: Partial<OfflinePackSettings>) => onSettingsChange({ offlinePack: { ...offline, ...patch } });
+  const [packStatus, setPackStatus] = useState<OfflinePackRuntimeStatus | null>(null);
+  const [packError, setPackError] = useState('');
+  const [loadingPack, setLoadingPack] = useState(false);
   const selected = [
     offline.ai ? `MUTHUR_AI_MODEL=${offline.aiModel}` : '',
     offline.wiki ? `MUTHUR_WIKI_PACK=${offline.wikiPack}` : '',
     offline.maps ? `MUTHUR_MAP_REGION=${offline.mapRegion}` : '',
   ].filter(Boolean).join(' ');
 
+  const refreshPack = () => {
+    setLoadingPack(true);
+    setPackError('');
+    invoke('get_offline_pack_status')
+      .then((result) => {
+        setPackStatus(result as OfflinePackRuntimeStatus);
+        playSound('scan', 0.06);
+      })
+      .catch((error) => {
+        setPackError(String(error));
+        playSound('error', 0.08);
+      })
+      .finally(() => setLoadingPack(false));
+  };
+
+  useEffect(() => {
+    refreshPack();
+  }, []);
+
   return (
-    <div className="grid grid-cols-[1fr_1fr] gap-[1vh] min-h-full">
+    <div className="grid grid-cols-[0.9fr_1.05fr_1.05fr] gap-[1vh] min-h-full">
       <section className="min-w-0">
         <ControlHeader icon={<StorageIcon size={13} />} label="VOLUNTARY OFFLINE PACK" />
         <div className="grid grid-cols-2 gap-[0.6vh]">
@@ -434,40 +588,154 @@ function OfflineTab({ settings, onSettingsChange }: { settings: InterfaceSetting
         </div>
       </section>
 
-      <section className="min-w-0">
-        <ControlHeader icon={<StorageIcon size={13} />} label="INSTALL STEP" />
-        <div className="border border-[rgba(0,255,65,0.12)] p-[1vh] h-[calc(100%-2.1vh)] flex flex-col">
-          <div className="text-[1vh] text-muthur-secondary opacity-65 leading-relaxed">
-            Install and update now ask before downloading offline add-ons. Nothing huge is pulled unless the operator accepts the optional pack.
+      <section className="min-w-0 flex flex-col">
+        <ControlHeader icon={<StorageIcon size={13} />} label="PACK MANAGER" />
+        <div className="border border-[rgba(0,255,65,0.12)] p-[0.75vh] flex-1 min-h-0 flex flex-col">
+          <div className="grid grid-cols-3 gap-[0.5vh]">
+            <Metric label="STATUS" value={packStatus?.status?.toUpperCase() ?? (loadingPack ? 'SCANNING' : 'UNKNOWN')} />
+            <Metric label="SIZE" value={formatBytes(packStatus?.sizeBytes ?? 0)} />
+            <Metric label="VERSION" value={packStatus?.version || 'NONE'} />
           </div>
-          <pre className="mt-[1vh] flex-1 min-h-0 overflow-auto bg-[rgba(0,255,65,0.035)] border border-[rgba(0,255,65,0.1)] p-[0.8vh] text-[0.85vh] text-muthur-primary whitespace-pre-wrap">
+          <div className="mt-[0.7vh] grid grid-cols-4 gap-[0.45vh]">
+            {(['ai', 'wiki', 'maps', 'docs'] as const).map((module) => (
+              <div
+                key={module}
+                className={`border px-[0.45vh] py-[0.35vh] text-center text-[0.75vh] tracking-wider ${
+                  packStatus?.modules?.[module] ? 'border-muthur-primary text-muthur-primary' : 'border-[rgba(0,255,65,0.1)] text-muthur-secondary opacity-45'
+                }`}
+              >
+                {module.toUpperCase()}
+              </div>
+            ))}
+          </div>
+          <div className="mt-[0.7vh] grid grid-cols-2 gap-[0.5vh]">
+            <StatusCard title="CURRENT" value={packStatus?.currentVersion ?? 'UNKNOWN'} body="bundled pack format" />
+            <StatusCard title="UPDATED" value={formatStamp(packStatus?.updatedAt)} body="manifest timestamp" />
+          </div>
+          <pre className="mt-[0.8vh] flex-1 min-h-0 overflow-auto bg-[rgba(0,255,65,0.035)] border border-[rgba(0,255,65,0.1)] p-[0.65vh] text-[0.78vh] text-muthur-primary whitespace-pre-wrap">
 {`${selected || '# choose modules on the left'}
 scripts/muthur-offline-pack.sh --status
 scripts/muthur-offline-pack.sh --install
 scripts/muthur-offline-pack.sh --update`}
           </pre>
-          <div className="grid grid-cols-2 gap-[0.6vh] mt-[0.8vh]">
-            <StatusCard title="LOCATION" value="~/.local/share/muthur/offline" body="AI/wiki/maps/docs cache" />
-            <StatusCard title="MODE" value="OPTIONAL" body="missing, current, stale status" />
+          {packError && <div className="mt-[0.5vh] text-[0.75vh] text-muthur-accent truncate">{packError}</div>}
+          <div className="grid grid-cols-[1fr_auto] gap-[0.5vh] mt-[0.6vh]">
+            <div className="text-[0.72vh] text-muthur-secondary opacity-45 truncate">{packStatus?.path ?? '~/.local/share/muthur/offline'}</div>
+            <button onClick={refreshPack} className="px-[0.7vh] border border-muthur-primary text-muthur-primary text-[0.75vh] tracking-wider">
+              {loadingPack ? 'SCAN' : 'REFRESH'}
+            </button>
           </div>
         </div>
       </section>
+
+      <LocalMapViewer maps={packStatus?.maps ?? []} configuredRegion={offline.mapRegion} />
     </div>
+  );
+}
+
+function LocalMapViewer({ maps, configuredRegion }: { maps: OfflineMapEntry[]; configuredRegion: string }) {
+  const [selectedPath, setSelectedPath] = useState('');
+  const [zoom, setZoom] = useState(3);
+  const [lat, setLat] = useState(0);
+  const [lon, setLon] = useState(0);
+  const selectedMap = maps.find((map) => map.path === selectedPath) ?? maps[0];
+  const metadata = selectedMap?.metadata?.metadata ?? {};
+  const bounds = metadata.bounds || metadata.center || configuredRegion;
+
+  useEffect(() => {
+    if (!selectedPath && maps[0]) setSelectedPath(maps[0].path);
+  }, [maps, selectedPath]);
+
+  const x = Math.round(((lon + 180) / 360) * Math.pow(2, zoom));
+  const y = Math.round(((90 - lat) / 180) * Math.pow(2, zoom));
+
+  return (
+    <section className="min-w-0 flex flex-col">
+      <ControlHeader icon={<StorageIcon size={13} />} label="LOCAL MAP VIEWER" />
+      <div className="border border-[rgba(0,255,65,0.12)] p-[0.75vh] flex-1 min-h-0 flex flex-col">
+        <div className="grid grid-cols-[1fr_auto] gap-[0.5vh]">
+          <select
+            value={selectedMap?.path ?? ''}
+            onChange={(event) => setSelectedPath(event.target.value)}
+            className="min-w-0 bg-transparent border border-[rgba(0,255,65,0.18)] px-[0.45vh] py-[0.25vh] text-[0.8vh] text-muthur-primary"
+          >
+            {maps.length === 0 && <option value="">NO MBTILES</option>}
+            {maps.map((map) => <option key={map.path} value={map.path}>{map.name}</option>)}
+          </select>
+          <div className="text-[0.75vh] text-muthur-secondary opacity-50 tabular-nums">{formatBytes(selectedMap?.sizeBytes ?? 0)}</div>
+        </div>
+
+        <div className="mt-[0.6vh] relative h-[13vh] border border-[rgba(0,255,65,0.16)] bg-[rgba(0,255,65,0.025)] overflow-hidden">
+          <div className="absolute inset-0 opacity-35" style={{
+            backgroundImage: 'linear-gradient(rgba(var(--color-r), var(--color-g), var(--color-b), 0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--color-r), var(--color-g), var(--color-b), 0.16) 1px, transparent 1px)',
+            backgroundSize: '16.6% 20%, 16.6% 20%',
+          }} />
+          <div className="absolute inset-x-0 top-1/2 border-t border-muthur-primary opacity-70" />
+          <div className="absolute inset-y-0 left-1/2 border-l border-muthur-primary opacity-70" />
+          <div className="absolute left-[calc(50%-0.45vh)] top-[calc(50%-0.45vh)] w-[0.9vh] h-[0.9vh] border border-muthur-accent bg-[rgba(255,59,83,0.18)]" />
+          <div className="absolute left-[0.5vh] top-[0.45vh] text-[0.7vh] text-muthur-secondary opacity-45">Z{zoom} X{x} Y{y}</div>
+          <div className="absolute right-[0.5vh] bottom-[0.45vh] text-[0.7vh] text-muthur-primary opacity-70 truncate max-w-[70%]">{selectedMap?.name ?? 'NO LOCAL MAP'}</div>
+        </div>
+
+        <div className="mt-[0.65vh] space-y-[0.45vh]">
+          <LabeledSlider label="ZOOM" value={zoom} min={1} max={14} step={1} onChange={setZoom} suffix="" />
+          <LabeledSlider label="LAT" value={lat} min={-85} max={85} step={1} onChange={setLat} suffix="" />
+          <LabeledSlider label="LON" value={lon} min={-180} max={180} step={1} onChange={setLon} suffix="" />
+        </div>
+
+        <div className="mt-[0.55vh] grid grid-cols-2 gap-[0.45vh]">
+          <StatusCard title="TILES" value={String(selectedMap?.metadata?.tileCount ?? 0)} body={selectedMap?.metadata?.zoomRange || 'zoom unknown'} />
+          <StatusCard title="BOUNDS" value={String(bounds || 'UNKNOWN')} body={selectedMap?.metadata?.metadataReadable ? 'metadata read' : 'file scan only'} />
+        </div>
+      </div>
+    </section>
   );
 }
 
 function GamesTab() {
   const [mode, setMode] = useState<GameMode>('signal');
+  const [memory, setMemory] = useState<GameMemory>(() => loadGameMemory());
+  const [snapshot, setSnapshot] = useState<GameResult>({ game: 'signal', score: 0, summary: 'SIGNAL READY' });
   const selectGame = (next: GameMode) => {
     setMode(next);
+    setSnapshot({ game: next, score: 0, summary: 'READY' });
     playSound('switch', 0.08);
+  };
+
+  const recordResult = (result: GameResult) => {
+    setSnapshot(result);
+    setMemory((prev) => {
+      const next = applyGameResult(prev, result);
+      saveGameMemory(next);
+      return next;
+    });
+  };
+
+  const saveSlot = (slotId: string) => {
+    setMemory((prev) => {
+      const next = {
+        ...prev,
+        slots: prev.slots.map((slot) => slot.id === slotId
+          ? {
+              ...slot,
+              game: snapshot.game,
+              score: snapshot.score,
+              summary: snapshot.summary,
+              savedAt: new Date().toISOString(),
+            }
+          : slot),
+      };
+      saveGameMemory(next);
+      return next;
+    });
+    playSound('granted', 0.08);
   };
 
   return (
     <div className="grid grid-cols-[1fr_0.86fr] gap-[1vh] h-full">
-      {mode === 'signal' && <SignalLockGame />}
-      {mode === 'tactics' && <SectorTacticsGame />}
-      {mode === 'cards' && <VoidCardsGame />}
+      {mode === 'signal' && <SignalLockGame onResult={recordResult} onSnapshot={setSnapshot} />}
+      {mode === 'tactics' && <SectorTacticsGame onResult={recordResult} onSnapshot={setSnapshot} />}
+      {mode === 'cards' && <VoidCardsGame onResult={recordResult} onSnapshot={setSnapshot} />}
       <section className="min-w-0 flex flex-col">
         <ControlHeader icon={<GameIcon size={13} />} label="OFFLINE ARCADE" />
         <div className="border border-[rgba(0,255,65,0.12)] p-[0.7vh] flex-1 min-h-0 overflow-auto">
@@ -487,6 +755,35 @@ function GamesTab() {
                   <span className="text-[0.75vh] text-muthur-secondary opacity-45 tabular-nums">{game.stat}</span>
                 </div>
                 <div className="text-[0.78vh] leading-tight text-muthur-secondary opacity-50 truncate">{game.signal}</div>
+              </button>
+            ))}
+          </div>
+
+          <ControlHeader icon={<GameIcon size={13} />} label="HIGH SCORES / SLOTS" />
+          <div className="grid grid-cols-3 gap-[0.45vh]">
+            {PLAYABLE_GAMES.map((game) => {
+              const record = memory.records[game.id];
+              return (
+                <div key={game.id} className="border border-[rgba(0,255,65,0.1)] p-[0.45vh] min-w-0">
+                  <div className="text-[0.7vh] text-muthur-secondary opacity-40 truncate">{game.name}</div>
+                  <div className="text-[0.9vh] text-muthur-primary tabular-nums">{record?.highScore ?? 0}</div>
+                  <div className="text-[0.65vh] text-muthur-secondary opacity-45 truncate">
+                    {record?.bestMoves ? `${record.bestMoves} moves` : record?.bestStreak ? `${record.bestStreak} streak` : `${record?.plays ?? 0} plays`}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-[0.5vh] grid grid-cols-3 gap-[0.45vh]">
+            {memory.slots.map((slot) => (
+              <button
+                key={slot.id}
+                onClick={() => saveSlot(slot.id)}
+                className="border border-[rgba(0,255,65,0.12)] p-[0.45vh] text-left hover:border-muthur-primary transition-colors"
+              >
+                <div className="text-[0.72vh] text-muthur-primary tracking-wider">{slot.label}</div>
+                <div className="text-[0.65vh] text-muthur-secondary opacity-45 truncate">{slot.summary}</div>
+                <div className="text-[0.65vh] text-muthur-secondary opacity-35 truncate">{slot.savedAt ? formatStamp(slot.savedAt) : 'EMPTY'}</div>
               </button>
             ))}
           </div>
@@ -593,13 +890,19 @@ function LogTab({ settings, onSettingsChange }: { settings: InterfaceSettings; o
   );
 }
 
-function SignalLockGame() {
+interface GameCallbacks {
+  onResult: (result: GameResult) => void;
+  onSnapshot: (result: GameResult) => void;
+}
+
+function SignalLockGame({ onResult, onSnapshot }: GameCallbacks) {
   const [running, setRunning] = useState(false);
   const [sweep, setSweep] = useState(0);
   const [target, setTarget] = useState(4);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [status, setStatus] = useState('ARMED');
+  const [resultSaved, setResultSaved] = useState(false);
 
   const targetSeed = useMemo(() => [1, 7, 3, 8, 0, 5, 2, 6, 4], []);
 
@@ -621,6 +924,17 @@ function SignalLockGame() {
     return () => window.clearInterval(timer);
   }, [running]);
 
+  useEffect(() => {
+    onSnapshot({ game: 'signal', score, summary: `${status} ${score}PTS ${timeLeft}s` });
+  }, [onSnapshot, score, status, timeLeft]);
+
+  useEffect(() => {
+    if (!running && timeLeft === 0 && status === 'COMPLETE' && !resultSaved) {
+      onResult({ game: 'signal', score, summary: `SIGNAL ${score}PTS` });
+      setResultSaved(true);
+    }
+  }, [onResult, resultSaved, running, score, status, timeLeft]);
+
   const reset = () => {
     setRunning(true);
     setSweep(0);
@@ -628,6 +942,7 @@ function SignalLockGame() {
     setScore(0);
     setTimeLeft(30);
     setStatus('TRACKING');
+    setResultSaved(false);
     playSound('thrust', 0.08);
   };
 
@@ -822,7 +1137,7 @@ function advanceSystemTurn(units: TacticalUnit[]) {
   return { units, over: false, status: 'SYSTEM WAIT' };
 }
 
-function SectorTacticsGame() {
+function SectorTacticsGame({ onResult, onSnapshot }: GameCallbacks) {
   const [units, setUnits] = useState<TacticalUnit[]>(() => createTacticsUnits());
   const [selectedId, setSelectedId] = useState('cmd');
   const [status, setStatus] = useState('CAPTURE X CORE');
@@ -830,6 +1145,13 @@ function SectorTacticsGame() {
   const [over, setOver] = useState(false);
   const selected = units.find((unit) => unit.id === selectedId && unit.side === 'crew') ?? units.find((unit) => unit.side === 'crew');
   const legalMoves = selected ? getLegalTacticalMoves(selected, units) : [];
+  const crewCount = units.filter((unit) => unit.side === 'crew').length;
+  const systemCount = units.filter((unit) => unit.side === 'system').length;
+
+  useEffect(() => {
+    const score = Math.max(0, 600 - moves * 20 + crewCount * 30 - systemCount * 10);
+    onSnapshot({ game: 'tactics', score, moves, summary: `${status} ${moves}M` });
+  }, [crewCount, moves, onSnapshot, status, systemCount]);
 
   const reset = () => {
     setUnits(createTacticsUnits());
@@ -861,15 +1183,18 @@ function SectorTacticsGame() {
     }
 
     const capturedCore = occupant?.role === 'core';
+    const nextMoves = moves + 1;
     const afterCrewMove = units
       .filter((unit) => !(unit.side === 'system' && unit.row === row && unit.col === col))
       .map((unit) => (unit.id === selected.id ? { ...unit, row, col } : unit));
-    setMoves((prev) => prev + 1);
+    setMoves(nextMoves);
 
     if (capturedCore) {
+      const score = Math.max(100, 700 - nextMoves * 25 + afterCrewMove.filter((unit) => unit.side === 'crew').length * 35);
       setUnits(afterCrewMove);
       setStatus('CORE CAPTURED');
       setOver(true);
+      onResult({ game: 'tactics', score, moves: nextMoves, summary: `CORE ${nextMoves}M ${score}PTS` });
       playSound('game', 0.14);
       return;
     }
@@ -878,11 +1203,11 @@ function SectorTacticsGame() {
     setUnits(systemTurn.units);
     setStatus(systemTurn.over ? 'COMMAND LOST' : systemTurn.status);
     setOver(systemTurn.over);
+    if (systemTurn.over) {
+      onResult({ game: 'tactics', score: 0, moves: nextMoves, summary: `LOST ${nextMoves}M` });
+    }
     playSound(systemTurn.over ? 'error' : 'scan', 0.08);
   };
-
-  const crewCount = units.filter((unit) => unit.side === 'crew').length;
-  const systemCount = units.filter((unit) => unit.side === 'system').length;
 
   return (
     <section className="min-w-0 flex flex-col">
@@ -959,7 +1284,7 @@ function cardLabel(card: ArcadeCard) {
   return `${card.suit}-${rank}`;
 }
 
-function VoidCardsGame() {
+function VoidCardsGame({ onResult, onSnapshot }: GameCallbacks) {
   const initialDeck = useMemo(() => createArcadeDeck(), []);
   const [deck, setDeck] = useState<ArcadeCard[]>(initialDeck.slice(1));
   const [current, setCurrent] = useState<ArcadeCard>(initialDeck[0]);
@@ -968,6 +1293,10 @@ function VoidCardsGame() {
   const [round, setRound] = useState(1);
   const [status, setStatus] = useState('PREDICT NEXT');
   const [lastCard, setLastCard] = useState<ArcadeCard | null>(null);
+
+  useEffect(() => {
+    onSnapshot({ game: 'cards', score, streak, summary: `${score}PTS S${streak} R${round}` });
+  }, [onSnapshot, round, score, streak]);
 
   const reset = () => {
     const nextDeck = createArcadeDeck();
@@ -995,13 +1324,16 @@ function VoidCardsGame() {
 
     if (correct) {
       const nextStreak = streak + 1;
+      const nextScore = score + 10 + nextStreak * 5;
       setStreak(nextStreak);
-      setScore((prev) => prev + 10 + nextStreak * 5);
+      setScore(nextScore);
       setStatus(`GOOD ${nextStreak}`);
+      onResult({ game: 'cards', score: nextScore, streak: nextStreak, summary: `${nextScore}PTS STREAK ${nextStreak}` });
       playSound('game', 0.1);
     } else {
       setStreak(0);
-      setScore((prev) => Math.max(0, prev - 8));
+      const nextScore = Math.max(0, score - 8);
+      setScore(nextScore);
       setStatus('BAD READ');
       playSound('error', 0.07);
     }
@@ -1104,12 +1436,12 @@ function Slider({ value, min, max, step, onChange }: { value: number; min: numbe
   );
 }
 
-function LabeledSlider(props: { label: string; value: number; min: number; max: number; step: number; onChange: (value: number) => void }) {
+function LabeledSlider(props: { label: string; value: number; min: number; max: number; step: number; onChange: (value: number) => void; suffix?: string }) {
   return (
     <div>
       <div className="flex items-center justify-between text-[0.88vh] text-muthur-secondary opacity-60 mb-[0.2vh]">
         <span>{props.label}</span>
-        <span className="text-muthur-primary tabular-nums">{Math.round(props.value)}%</span>
+        <span className="text-muthur-primary tabular-nums">{Math.round(props.value)}{props.suffix ?? '%'}</span>
       </div>
       <Slider {...props} />
     </div>
