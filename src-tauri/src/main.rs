@@ -248,7 +248,11 @@ fn has_file_extension(path: &Path, extensions: &[&str], depth: usize) -> bool {
         if entry_path
             .extension()
             .and_then(|extension| extension.to_str())
-            .map(|extension| extensions.iter().any(|allowed| extension.eq_ignore_ascii_case(allowed)))
+            .map(|extension| {
+                extensions
+                    .iter()
+                    .any(|allowed| extension.eq_ignore_ascii_case(allowed))
+            })
             .unwrap_or(false)
         {
             return true;
