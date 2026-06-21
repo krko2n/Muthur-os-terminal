@@ -2,6 +2,9 @@
 
 Auto-generated from git log.
 
+6f44bc2 Add offline pack manager, map viewer, and game saves
+ccbbc61 Add sci-fi themes, offline packs, and arcade games
+95dadd5 docs: auto-update version history [skip ci]
 55f6619 Refactor MUTHUR session and control deck wording
 014125d docs: auto-update version history [skip ci]
 54b10a2 feat(keyboard): 13 international keyboard layouts with live switching
@@ -49,6 +52,3 @@ f8caa96 fix(ui): major overhaul - terminal output, browser, network, layout, cur
 7d15e3f fix(system): pass bool arg to Networks::refresh() for sysinfo 0.39
 b71cdbc feat(globe): real world map from TopoJSON, live conflict data from UCDP
 f4a807f fix(core): fix system stats, terminal, file explorer, globe data
-6ed601c fix(globe): restore Line import, fix TS2304 error feat(upgrade): GIF-style progress bar with timer and live status
-e9e02a1 feat(globe): hide back-face lines, slower rotation, more detail
-5474530 fix(build): skip bundling in upgrade, handle missing linuxdeploy
