@@ -122,12 +122,14 @@ function badge(label, value, color) {
   return `https://img.shields.io/badge/${shieldSegment(label)}-${shieldSegment(value)}-${color}?style=flat-square&labelColor=0d1117`;
 }
 
-const files = trackedFiles().filter(isCounted);
-const lines = files.reduce((sum, file) => sum + lineCount(file), 0);
+const allFiles = trackedFiles();
+const countable = allFiles.filter(isCounted);
+const lines = countable.reduce((sum, file) => sum + lineCount(file), 0);
+const totalFiles = allFiles.filter((f) => !EXCLUDED.some((p) => p.test(f))).length;
 const generated = [
   START,
-  `![Source Lines](${badge('source lines', formatNumber(lines), '00ff41')})`,
-  `![Project Files](${badge('project files', formatNumber(files.length), '00d4ff')})`,
+  `![Lines of Code](${badge('lines of code', formatNumber(lines), '00ff41')})`,
+  `![Total Files](${badge('total files', formatNumber(totalFiles), '00d4ff')})`,
   END,
 ].join('\n');
 
@@ -140,4 +142,4 @@ if (!pattern.test(readme)) {
 const next = readme.replace(pattern, generated);
 fs.writeFileSync(README, next);
 
-console.log(`README stats updated: ${formatNumber(lines)} source lines, ${formatNumber(files.length)} project files`);
+console.log(`README stats updated: ${formatNumber(lines)} lines of code, ${formatNumber(totalFiles)} total files`);
