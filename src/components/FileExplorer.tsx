@@ -194,18 +194,27 @@ export default function FileExplorer() {
     if (entry.is_dir) {
       loadDirectory(entry.path);
       playSound('folder', 0.12);
-      window.dispatchEvent(new CustomEvent('fs-cd', { detail: entry.path }));
-    } else {
-      try {
-        await invoke('open_file_external', { path: entry.path });
-        playSound('expand', 0.12);
-      } catch (e) {
-        console.error('Failed to open file externally:', e);
+      // Don't dispatch fs-cd for virtual paths
+      if (!entry.path.startsWith(VIRTUAL_GAMES_PATH)) {
+        window.dispatchEvent(new CustomEvent('fs-cd', { detail: entry.path }));
       }
+    } else if (entry.name.endsWith('.game')) {
+      // Handle .game files: open in a game tab
+      const gameId = entry.name.replace('.game', '') as GameId;
+      window.dispatchEvent(new CustomEvent('open-game', { detail: gameId }));
+      playSound('game', 0.12);
+    } else {
+      window.dispatchEvent(new CustomEvent('open-file', { detail: entry.path }));
+      playSound('expand', 0.12);
     }
   };
 
   const goUp = () => {
+    // If inside virtual games path, go back to where user came from (init path)
+    if (currentPath === VIRTUAL_GAMES_PATH) {
+      initPath();
+      return;
+    }
     const normalized = currentPath.replace(/\\/g, '/');
     const parts = normalized.split('/');
     if (parts.length > 1) {
