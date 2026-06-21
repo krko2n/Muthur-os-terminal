@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+7a7f088 feat: add game tutorials with controls overlay and help button
+0bb636a docs: auto-update generated docs [skip ci]
 9b60cd4 feat: colored ASCII image rendering with half-block pixel art
 b55dfb7 docs: auto-update generated docs [skip ci]
 61da524 fix: dark language selector, brighter key glow, audio unlock, browser UA
@@ -50,5 +52,3 @@ b69b99b feat(ui): complete eDEX-UI feature parity batch
 1226c57 docs: auto-update version history [skip ci]
 4102fd1 feat(ui): network status module, terminal sounds, panel decorations
 d16de42 docs: auto-update version history [skip ci]
-100001c feat(ui): eDEX-UI high-priority visual signatures
-6ef0371 docs: add detailed eDEX-UI comparison report with improvement roadmap
