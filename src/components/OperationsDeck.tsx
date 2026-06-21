@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { playSound } from '../audio';
 import {
@@ -106,6 +106,161 @@ const GAME_IDEAS = [
   { name: 'REACTOR PULSE', signal: 'hold power output inside a moving band', stat: '40s' },
   { name: 'EVA THREAD', signal: 'plot oxygen-safe paths through hull breaches', stat: '90s' },
 ];
+
+interface GameTutorial {
+  name: string;
+  objective: string;
+  controls: Array<{ key: string; action: string }>;
+}
+
+const GAME_TUTORIALS: Record<GameMode, GameTutorial> = {
+  signal: {
+    name: 'SIGNAL LOCK',
+    objective: 'Hit the sweep exactly when it lands on the red target cell to score points within 30 seconds.',
+    controls: [
+      { key: 'CLICK / ARM', action: 'Start the game or lock the signal' },
+      { key: 'LEFT CLICK', action: 'Click any grid cell to attempt a lock' },
+      { key: 'TIMING', action: 'Green sweep moves across 9 cells -- hit it on the red target' },
+    ],
+  },
+  tactics: {
+    name: 'SECTOR TACTICS',
+    objective: 'Move your crew units to capture the enemy CORE (X) before drones eliminate your COMMAND (C).',
+    controls: [
+      { key: 'CLICK UNIT', action: 'Select a crew unit (C, S, or L)' },
+      { key: 'CLICK CELL', action: 'Move selected unit to a highlighted legal cell' },
+      { key: 'C = COMMAND', action: 'Moves 1 step in any direction (including diagonal)' },
+      { key: 'S = SCOUT', action: 'Moves 1 step orthogonally (up/down/left/right)' },
+      { key: 'L = LANCE', action: 'Moves up to 2 steps orthogonally' },
+    ],
+  },
+  cards: {
+    name: 'VOID CARDS',
+    objective: 'Predict whether the next card rank will be HIGHER, LOWER, or EQUAL to build streaks and score.',
+    controls: [
+      { key: 'HIGHER', action: 'Predict next card has a higher rank' },
+      { key: 'EQUAL', action: 'Predict next card has the same rank' },
+      { key: 'LOWER', action: 'Predict next card has a lower rank' },
+      { key: 'SHUFFLE', action: 'Reset the deck and start over' },
+    ],
+  },
+};
+
+// Tracks which games have shown their tutorial this session (not persisted)
+const sessionTutorialShown: Set<GameMode> = new Set();
+
+function GameTutorialOverlay({ game, onDismiss }: { game: GameMode; onDismiss: () => void }) {
+  const tutorial = GAME_TUTORIALS[game];
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  const dismiss = useCallback(() => {
+    sessionTutorialShown.add(game);
+    onDismiss();
+    playSound('switch', 0.06);
+  }, [game, onDismiss]);
+
+  useEffect(() => {
+    const handleKey = (event: KeyboardEvent) => {
+      event.preventDefault();
+      dismiss();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [dismiss]);
+
+  useEffect(() => {
+    overlayRef.current?.focus();
+  }, []);
+
+  return (
+    <div
+      ref={overlayRef}
+      tabIndex={-1}
+      onClick={dismiss}
+      className="absolute inset-0 z-50 flex items-center justify-center"
+      style={{
+        background: 'rgba(2, 4, 8, 0.92)',
+        backdropFilter: 'blur(2px)',
+      }}
+    >
+      <div
+        className="border p-[2vh] max-w-[42vh] w-full"
+        style={{
+          borderColor: 'var(--color-accent)',
+          background: 'rgba(5, 8, 13, 0.96)',
+          boxShadow: '0 0 18px rgba(var(--color-r, 0), var(--color-g, 255), var(--color-b, 65), 0.15), inset 0 0 30px rgba(0,0,0,0.5)',
+        }}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div
+          className="text-[1.4vh] tracking-[0.3em] font-display mb-[0.8vh] pb-[0.6vh] border-b"
+          style={{ color: 'var(--color-accent)', borderColor: 'rgba(var(--color-r, 0), var(--color-g, 255), var(--color-b, 65), 0.25)' }}
+        >
+          HOW TO PLAY
+        </div>
+        <div className="text-[1.3vh] tracking-widest font-display mb-[1vh]" style={{ color: 'var(--color-accent)' }}>
+          {tutorial.name}
+        </div>
+        <div className="text-[1vh] leading-relaxed mb-[1.2vh] opacity-80" style={{ color: 'var(--color-text, #b8c4b0)' }}>
+          {tutorial.objective}
+        </div>
+        <div
+          className="text-[0.9vh] tracking-widest mb-[0.8vh] opacity-60"
+          style={{ color: 'var(--color-accent)' }}
+        >
+          CONTROLS
+        </div>
+        <div className="space-y-[0.5vh] mb-[1.5vh]">
+          {tutorial.controls.map((control) => (
+            <div key={control.key} className="grid grid-cols-[11vh_1fr] gap-[1vh] items-start">
+              <span
+                className="text-[0.9vh] tracking-wider px-[0.5vh] py-[0.2vh] border text-center"
+                style={{
+                  borderColor: 'rgba(var(--color-r, 0), var(--color-g, 255), var(--color-b, 65), 0.3)',
+                  color: 'var(--color-accent)',
+                }}
+              >
+                {control.key}
+              </span>
+              <span className="text-[0.88vh] opacity-70" style={{ color: 'var(--color-text, #b8c4b0)' }}>
+                {control.action}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div
+          className="text-[0.95vh] tracking-widest text-center py-[0.8vh] border animate-pulse"
+          style={{
+            borderColor: 'rgba(var(--color-r, 0), var(--color-g, 255), var(--color-b, 65), 0.25)',
+            color: 'var(--color-accent)',
+          }}
+        >
+          PRESS ANY KEY OR CLICK TO START
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HelpButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick();
+        playSound('folder', 0.06);
+      }}
+      className="px-[0.6vh] py-[0.15vh] border text-[0.82vh] tracking-wider transition-all hover:bg-[rgba(0,255,65,0.1)]"
+      style={{
+        borderColor: 'rgba(var(--color-r, 0), var(--color-g, 255), var(--color-b, 65), 0.3)',
+        color: 'var(--color-accent)',
+      }}
+      title="Show game controls and rules"
+    >
+      HELP
+    </button>
+  );
+}
 
 const GAME_MEMORY_KEY = 'muthur-game-memory';
 
@@ -955,6 +1110,7 @@ interface GameCallbacks {
 }
 
 function SignalLockGame({ onResult, onSnapshot }: GameCallbacks) {
+  const [showTutorial, setShowTutorial] = useState(() => !sessionTutorialShown.has('signal'));
   const [running, setRunning] = useState(false);
   const [sweep, setSweep] = useState(0);
   const [target, setTarget] = useState(4);
@@ -1030,8 +1186,12 @@ function SignalLockGame({ onResult, onSnapshot }: GameCallbacks) {
   };
 
   return (
-    <section className="min-w-0 flex flex-col">
-      <ControlHeader icon={<GameIcon size={13} />} label="SIGNAL LOCK" />
+    <section className="min-w-0 flex flex-col relative">
+      {showTutorial && <GameTutorialOverlay game="signal" onDismiss={() => setShowTutorial(false)} />}
+      <div className="flex items-center justify-between">
+        <ControlHeader icon={<GameIcon size={13} />} label="SIGNAL LOCK" />
+        <HelpButton onClick={() => setShowTutorial(true)} />
+      </div>
       <div className="grid grid-cols-[1fr_0.72fr] gap-[0.7vh] flex-1 min-h-0">
         <div className="grid grid-cols-3 gap-[0.6vh] min-h-0">
           {Array.from({ length: 9 }, (_, index) => {
@@ -1063,7 +1223,7 @@ function SignalLockGame({ onResult, onSnapshot }: GameCallbacks) {
             <div className="h-full bg-muthur-primary transition-all" style={{ width: `${(timeLeft / 30) * 100}%` }} />
           </div>
           <button onClick={running ? lock : reset} className="h-[3vh] border border-muthur-primary text-muthur-primary tracking-widest text-[1vh]">
-            {running ? 'LOCK' : 'ARM'}
+            {running ? 'LOCK [CLICK]' : 'ARM [CLICK]'}
           </button>
         </div>
       </div>
@@ -1197,6 +1357,7 @@ function advanceSystemTurn(units: TacticalUnit[]) {
 }
 
 function SectorTacticsGame({ onResult, onSnapshot }: GameCallbacks) {
+  const [showTutorial, setShowTutorial] = useState(() => !sessionTutorialShown.has('tactics'));
   const [units, setUnits] = useState<TacticalUnit[]>(() => createTacticsUnits());
   const [selectedId, setSelectedId] = useState('cmd');
   const [status, setStatus] = useState('CAPTURE X CORE');
@@ -1269,8 +1430,12 @@ function SectorTacticsGame({ onResult, onSnapshot }: GameCallbacks) {
   };
 
   return (
-    <section className="min-w-0 flex flex-col">
-      <ControlHeader icon={<GameIcon size={13} />} label="SECTOR TACTICS" />
+    <section className="min-w-0 flex flex-col relative">
+      {showTutorial && <GameTutorialOverlay game="tactics" onDismiss={() => setShowTutorial(false)} />}
+      <div className="flex items-center justify-between">
+        <ControlHeader icon={<GameIcon size={13} />} label="SECTOR TACTICS" />
+        <HelpButton onClick={() => setShowTutorial(true)} />
+      </div>
       <div className="grid grid-cols-[1fr_0.72fr] gap-[0.7vh] flex-1 min-h-0">
         <div className="grid grid-cols-6 gap-[0.35vh] min-h-0 content-start">
           {Array.from({ length: TACTICS_SIZE * TACTICS_SIZE }, (_, index) => {
@@ -1308,10 +1473,10 @@ function SectorTacticsGame({ onResult, onSnapshot }: GameCallbacks) {
             <Metric label="SYSTEM" value={String(systemCount)} />
           </div>
           <div className="text-[0.82vh] text-muthur-secondary opacity-55 leading-relaxed">
-            C moves diagonally, S moves one lane, L moves two lanes. Capture X before the drones pin command.
+            [CLICK] unit to select, [CLICK] highlighted cell to move. Capture X before drones pin C.
           </div>
           <button onClick={reset} className="h-[3vh] border border-muthur-primary text-muthur-primary tracking-widest text-[1vh]">
-            RESET
+            RESET [CLICK]
           </button>
         </div>
       </div>
@@ -1344,6 +1509,7 @@ function cardLabel(card: ArcadeCard) {
 }
 
 function VoidCardsGame({ onResult, onSnapshot }: GameCallbacks) {
+  const [showTutorial, setShowTutorial] = useState(() => !sessionTutorialShown.has('cards'));
   const initialDeck = useMemo(() => createArcadeDeck(), []);
   const [deck, setDeck] = useState<ArcadeCard[]>(initialDeck.slice(1));
   const [current, setCurrent] = useState<ArcadeCard>(initialDeck[0]);
@@ -1399,8 +1565,12 @@ function VoidCardsGame({ onResult, onSnapshot }: GameCallbacks) {
   };
 
   return (
-    <section className="min-w-0 flex flex-col">
-      <ControlHeader icon={<GameIcon size={13} />} label="VOID CARDS" />
+    <section className="min-w-0 flex flex-col relative">
+      {showTutorial && <GameTutorialOverlay game="cards" onDismiss={() => setShowTutorial(false)} />}
+      <div className="flex items-center justify-between">
+        <ControlHeader icon={<GameIcon size={13} />} label="VOID CARDS" />
+        <HelpButton onClick={() => setShowTutorial(true)} />
+      </div>
       <div className="grid grid-cols-[1fr_0.72fr] gap-[0.7vh] flex-1 min-h-0">
         <div className="grid grid-rows-[1fr_auto] gap-[0.7vh] min-h-0">
           <div className="grid grid-cols-2 gap-[0.7vh] min-h-0">
@@ -1416,9 +1586,9 @@ function VoidCardsGame({ onResult, onSnapshot }: GameCallbacks) {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-[0.55vh]">
-            <button onClick={() => predict('hi')} className="h-[3vh] border border-muthur-primary text-muthur-primary tracking-widest text-[0.95vh]">HIGHER</button>
-            <button onClick={() => predict('eq')} className="h-[3vh] border border-[rgba(0,255,65,0.28)] text-muthur-secondary tracking-widest text-[0.95vh]">EQUAL</button>
-            <button onClick={() => predict('lo')} className="h-[3vh] border border-muthur-accent text-muthur-accent tracking-widest text-[0.95vh]">LOWER</button>
+            <button onClick={() => predict('hi')} className="h-[3vh] border border-muthur-primary text-muthur-primary tracking-widest text-[0.95vh]">HIGHER [H]</button>
+            <button onClick={() => predict('eq')} className="h-[3vh] border border-[rgba(0,255,65,0.28)] text-muthur-secondary tracking-widest text-[0.95vh]">EQUAL [E]</button>
+            <button onClick={() => predict('lo')} className="h-[3vh] border border-muthur-accent text-muthur-accent tracking-widest text-[0.95vh]">LOWER [L]</button>
           </div>
         </div>
         <div className="border border-[rgba(0,255,65,0.12)] p-[0.8vh] min-w-0 flex flex-col justify-between">
@@ -1433,7 +1603,7 @@ function VoidCardsGame({ onResult, onSnapshot }: GameCallbacks) {
           </div>
           <Metric label="DECK" value={`${deck.length} CARDS`} />
           <button onClick={reset} className="h-[3vh] border border-muthur-primary text-muthur-primary tracking-widest text-[1vh]">
-            SHUFFLE
+            SHUFFLE [CLICK]
           </button>
         </div>
       </div>
