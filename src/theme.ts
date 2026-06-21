@@ -1,4 +1,4 @@
-export type ThemeId = 'mother' | 'amber' | 'cryo' | 'surgical' | 'noir' | 'bios' | 'crt' | 'phosphor' | 'oxide' | 'void' | 'field' | 'hazmat' | 'medbay' | 'deepsea' | 'signal';
+export type ThemeId = 'mother' | 'amber' | 'cryo' | 'surgical' | 'noir' | 'bios' | 'crt' | 'phosphor' | 'oxide' | 'void' | 'field' | 'hazmat' | 'medbay' | 'deepsea' | 'signal' | 'phantom' | 'neon';
 export type FontId = 'sharetech' | 'orbitron' | 'rajdhani' | 'audiowide' | 'bios';
 export type LayoutPresetId = 'command' | 'focus' | 'wide' | 'simulation' | 'cinema' | 'custom';
 export type SoundPackId = 'ship' | 'quiet' | 'retro' | 'horror' | 'combat' | 'field' | 'recorder' | 'alarm' | 'analog';
@@ -284,6 +284,30 @@ export const THEME_PRESETS: ThemePreset[] = [
     text: '#ffd8ce',
     danger: '#ffe064',
     surface: '#070302',
+    vibe: 'crt',
+  },
+  {
+    id: 'phantom',
+    label: 'PHANTOM',
+    accent: '#00f0ff',
+    background: '#0a0e17',
+    panel: '#0d1320',
+    grey: '#161d2e',
+    text: '#d8eef4',
+    danger: '#ff3b6e',
+    surface: '#080c14',
+    vibe: 'core',
+  },
+  {
+    id: 'neon',
+    label: 'NEON',
+    accent: '#ff2d6b',
+    background: '#050508',
+    panel: '#0c0a12',
+    grey: '#1a1520',
+    text: '#f0eaf8',
+    danger: '#ffb800',
+    surface: '#030305',
     vibe: 'crt',
   },
 ];
