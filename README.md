@@ -464,4 +464,9 @@ MIT -- see [LICENSE](LICENSE).
 
 [Report Bug](https://github.com/krko2n/Muthur-os-terminal/issues) | [Request Feature](https://github.com/krko2n/Muthur-os-terminal/issues) | [Discussions](https://github.com/krko2n/Muthur-os-terminal/discussions)
 
+---
+
+![Lines of Code](https://tokei.rs/b1/github/krko2n/Muthur-os-terminal?category=lines&style=flat-square&color=00ff41&labelColor=0d1117)
+![Files](https://tokei.rs/b1/github/krko2n/Muthur-os-terminal?category=files&style=flat-square&color=00d4ff&labelColor=0d1117)
+
 </div>
