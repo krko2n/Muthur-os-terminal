@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+61da524 fix: dark language selector, brighter key glow, audio unlock, browser UA
+96eb474 docs: auto-update generated docs [skip ci]
 d5173fa feat: rewrite upgrade scripts to preserve user data across updates
 9b0808c docs: auto-update generated docs [skip ci]
 d400008 style: fix cargo fmt formatting in main.rs
@@ -50,5 +52,3 @@ d16de42 docs: auto-update version history [skip ci]
 6ef0371 docs: add detailed eDEX-UI comparison report with improvement roadmap
 e498331 docs: auto-update version history [skip ci]
 10dd078 fix(ci): remove VERSION_HISTORY.md from .gitignore
-45ddf2e fix(ci): cargo fmt + version-update workflow resilience
-0abaafa feat(ui): eDEX-style boot, cursor trail, sound effects, keyboard + browser fixes
