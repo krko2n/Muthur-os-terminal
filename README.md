@@ -467,8 +467,8 @@ MIT -- see [LICENSE](LICENSE).
 ---
 
 <!-- MUTHUR-STATS:START -->
-![Lines of Code](https://img.shields.io/badge/lines%20of%20code-797%2C514-00ff41?style=flat-square&labelColor=0d1117)
-![Total Files](https://img.shields.io/badge/total%20files-538-00d4ff?style=flat-square&labelColor=0d1117)
+![Lines of Code](https://img.shields.io/badge/lines%20of%20code-23%2C594-00ff41?style=flat-square&labelColor=0d1117)
+![Total Files](https://img.shields.io/badge/total%20files-124-00d4ff?style=flat-square&labelColor=0d1117)
 <!-- MUTHUR-STATS:END -->
 
 </div>

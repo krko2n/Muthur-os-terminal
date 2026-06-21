@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+0d6ccf2 fix: correct README stats badges to reflect actual repo size
+daca464 docs: auto-update generated docs [skip ci]
 3447f1c feat: enhanced AI, audio system, theme loadouts, and operations deck
 ea52038 docs: auto-update generated docs [skip ci]
 6ec93fe docs: make README counters self-updating
@@ -50,5 +52,3 @@ d415281 feat(batch3): globe data fix, file-open editor, kys shutdown command
 29abc0c feat(batch1): fix PTY output delay, search bar visibility, add header
 ae7e530 fix(clippy): resolve all 4 clippy errors blocking CI
 a3dbd75 fix(ci): build frontend before cargo test
-4fc3db6 fix(ci): handle missing lockfiles, fix version-update workflow
-e5b93ef feat(phase3): WebGL renderer, shell integration, per-session locks
