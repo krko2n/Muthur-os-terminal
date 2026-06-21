@@ -1,8 +1,13 @@
-use image::{imageops, GrayImage};
+use image::{imageops, GrayImage, RgbaImage};
+use serde::Serialize;
 
 const MAX_WIDTH: u32 = 120;
 const MAX_HEIGHT: u32 = 200;
 const MAX_IMAGE_BYTES: usize = 5 * 1024 * 1024;
+
+// Color ASCII settings
+const COLOR_MAX_COLS: u32 = 80;
+const COLOR_MAX_ROWS: u32 = 60;
 
 const BAYER_MATRIX: [[u8; 4]; 4] = [
     [0, 136, 34, 170],
@@ -109,6 +114,11 @@ pub fn convert_to_braille(image_bytes: &[u8]) -> Result<String, String> {
 }
 
 pub async fn fetch_and_convert(url: &str) -> Result<String, String> {
+    let bytes = fetch_image_bytes(url).await?;
+    convert_to_braille(&bytes)
+}
+
+async fn fetch_image_bytes(url: &str) -> Result<Vec<u8>, String> {
     let client = reqwest::Client::builder()
         .user_agent("MUTHUR/0.1")
         .timeout(std::time::Duration::from_secs(10))
@@ -126,5 +136,102 @@ pub async fn fetch_and_convert(url: &str) -> Result<String, String> {
     }
 
     let bytes = response.bytes().await.map_err(|e| e.to_string())?;
-    convert_to_braille(&bytes)
+    Ok(bytes.to_vec())
+}
+
+// --- Colored ASCII rendering using half-block characters ---
+
+#[derive(Serialize, Clone)]
+pub struct ColorCell {
+    pub ch: String,
+    pub fg: [u8; 3],
+    pub bg: [u8; 3],
+}
+
+#[derive(Serialize)]
+pub struct ColorAsciiResult {
+    pub rows: Vec<Vec<ColorCell>>,
+    pub width: u32,
+    pub height: u32,
+}
+
+/// Convert image bytes to a colored ASCII grid using half-block characters.
+/// Each cell represents 2 vertical pixels: the upper pixel is the foreground color
+/// of a half-block char, and the lower pixel is the background color.
+pub fn convert_to_color_ascii(image_bytes: &[u8]) -> Result<ColorAsciiResult, String> {
+    if image_bytes.len() > MAX_IMAGE_BYTES {
+        return Err("Image too large (>5MB)".to_string());
+    }
+
+    let img = image::load_from_memory(image_bytes).map_err(|e| format!("Decode failed: {}", e))?;
+
+    let (src_w, src_h) = (img.width(), img.height());
+    if src_w == 0 || src_h == 0 {
+        return Err("Image has zero dimensions".to_string());
+    }
+
+    // Calculate target pixel dimensions
+    // Each cell = 1 column wide, 2 pixels tall (half-block technique)
+    let mut cols = COLOR_MAX_COLS;
+    let pixel_w = cols;
+    let mut pixel_h = (src_h as u64 * pixel_w as u64 / src_w as u64) as u32;
+
+    // Ensure even height for half-block pairing
+    pixel_h = (pixel_h / 2) * 2;
+
+    let rows = pixel_h / 2;
+    if rows > COLOR_MAX_ROWS {
+        let pixel_h_new = COLOR_MAX_ROWS * 2;
+        cols = (src_w as u64 * pixel_h_new as u64 / src_h as u64) as u32;
+        pixel_h = pixel_h_new;
+    }
+
+    if cols < 1 || pixel_h < 2 {
+        return Err("Image too small to render".to_string());
+    }
+
+    // Resize to target pixel dimensions in RGBA
+    let rgba: RgbaImage = imageops::resize(
+        &img.to_rgba8(),
+        cols,
+        pixel_h,
+        imageops::FilterType::Lanczos3,
+    );
+
+    let final_rows = pixel_h / 2;
+    let mut result_rows: Vec<Vec<ColorCell>> = Vec::with_capacity(final_rows as usize);
+
+    for row in 0..final_rows {
+        let y_top = row * 2;
+        let y_bot = y_top + 1;
+        let mut row_cells: Vec<ColorCell> = Vec::with_capacity(cols as usize);
+
+        for x in 0..cols {
+            let top_pixel = rgba.get_pixel(x, y_top);
+            let bot_pixel = rgba.get_pixel(x, y_bot);
+
+            // Use upper half-block: foreground = top pixel, background = bottom pixel
+            let fg = [top_pixel[0], top_pixel[1], top_pixel[2]];
+            let bg = [bot_pixel[0], bot_pixel[1], bot_pixel[2]];
+
+            row_cells.push(ColorCell {
+                ch: "\u{2580}".to_string(), // Upper half block
+                fg,
+                bg,
+            });
+        }
+
+        result_rows.push(row_cells);
+    }
+
+    Ok(ColorAsciiResult {
+        rows: result_rows,
+        width: cols,
+        height: final_rows,
+    })
+}
+
+pub async fn fetch_and_convert_color(url: &str) -> Result<ColorAsciiResult, String> {
+    let bytes = fetch_image_bytes(url).await?;
+    convert_to_color_ascii(&bytes)
 }

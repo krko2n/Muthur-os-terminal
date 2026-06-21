@@ -409,8 +409,20 @@ function BlockRenderer({ block, onLinkClick }: { block: TextBlock; onLinkClick: 
   }
 }
 
+interface ColorCell {
+  ch: string;
+  fg: [number, number, number];
+  bg: [number, number, number];
+}
+
+interface ColorAsciiResult {
+  rows: ColorCell[][];
+  width: number;
+  height: number;
+}
+
 function AsciiImage({ alt, url }: { alt: string; url: string }) {
-  const [braille, setBraille] = useState<string | null>(null);
+  const [colorData, setColorData] = useState<ColorAsciiResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
 
@@ -424,9 +436,9 @@ function AsciiImage({ alt, url }: { alt: string; url: string }) {
     setLoading(true);
     setFailed(false);
 
-    invoke('render_image_ascii', { url })
+    invoke('render_image_color_ascii', { url })
       .then((result) => {
-        setBraille(result as string);
+        setColorData(result as ColorAsciiResult);
         setLoading(false);
       })
       .catch(() => {
@@ -443,7 +455,7 @@ function AsciiImage({ alt, url }: { alt: string; url: string }) {
     );
   }
 
-  if (failed || !braille) {
+  if (failed || !colorData) {
     return (
       <div className="text-muthur-secondary opacity-40 text-xs py-1">
         [IMG: {alt}]
@@ -452,6 +464,22 @@ function AsciiImage({ alt, url }: { alt: string; url: string }) {
   }
 
   return (
-    <pre className="ascii-braille my-1 leading-none">{braille}</pre>
+    <pre className="my-1 leading-[1] text-[6px] font-mono overflow-x-auto" style={{ letterSpacing: 0 }}>
+      {colorData.rows.map((row, ri) => (
+        <div key={ri} style={{ height: '1.1em', whiteSpace: 'nowrap' }}>
+          {row.map((cell, ci) => (
+            <span
+              key={ci}
+              style={{
+                color: `rgb(${cell.fg[0]},${cell.fg[1]},${cell.fg[2]})`,
+                backgroundColor: `rgb(${cell.bg[0]},${cell.bg[1]},${cell.bg[2]})`,
+              }}
+            >
+              {cell.ch}
+            </span>
+          ))}
+        </div>
+      ))}
+    </pre>
   );
 }

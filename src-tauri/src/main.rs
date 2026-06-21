@@ -444,6 +444,12 @@ async fn render_image_ascii(url: String) -> Result<String, String> {
 }
 
 #[tauri::command]
+async fn render_image_color_ascii(url: String) -> Result<serde_json::Value, String> {
+    let result = ascii_image::fetch_and_convert_color(&url).await?;
+    serde_json::to_value(result).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn detect_editor() -> String {
     if let Ok(editor) = std::env::var("EDITOR") {
         if !editor.is_empty() {
@@ -724,6 +730,7 @@ fn main() {
             fetch_url,
             fetch_url_structured,
             render_image_ascii,
+            render_image_color_ascii,
             detect_editor,
             open_file_external,
             get_hardware_info,
