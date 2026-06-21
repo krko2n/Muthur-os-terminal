@@ -10,6 +10,7 @@ import {
   LAYOUT_PRESETS,
   OfflinePackSettings,
   SOUND_PACKS,
+  SYSTEM_LOADOUTS,
   TERMINAL_PROFILES,
   THEME_PRESETS,
   exportInterfaceSettings,
@@ -245,10 +246,52 @@ function StyleTab({ settings, onSettingsChange }: { settings: InterfaceSettings;
   const updateCustom = (patch: Partial<InterfaceSettings['customTheme']>) => {
     onSettingsChange({ customTheme: { ...settings.customTheme, ...patch } });
   };
+  const applyLoadout = (loadout: (typeof SYSTEM_LOADOUTS)[number]) => {
+    onSettingsChange({
+      ...loadout.settings,
+      customTheme: { ...settings.customTheme, enabled: false },
+    });
+    playSound('theme', 0.12);
+    window.setTimeout(() => playSound('panels', 0.08), 130);
+  };
 
   return (
     <div className="grid grid-cols-[1.1fr_0.9fr] gap-[1vh] min-h-full">
       <section className="min-w-0">
+        <ControlHeader icon={<PaletteIcon size={13} />} label="PREBUILT LOADOUTS" />
+        <div className="grid grid-cols-2 gap-[0.6vh] mb-[1vh]">
+          {SYSTEM_LOADOUTS.map((loadout) => {
+            const theme = THEME_PRESETS.find((preset) => preset.id === loadout.settings.themeId) ?? THEME_PRESETS[0];
+            const active = settings.themeId === loadout.settings.themeId
+              && settings.soundPack === loadout.settings.soundPack
+              && settings.bootPreset === loadout.settings.bootPreset
+              && settings.terminalProfile === loadout.settings.terminalProfile;
+            return (
+              <button
+                key={loadout.id}
+                onClick={() => applyLoadout(loadout)}
+                className={`min-h-[5.4vh] border text-left px-[0.75vh] py-[0.55vh] transition-all ${
+                  active
+                    ? 'border-muthur-primary bg-[rgba(0,255,65,0.09)]'
+                    : 'border-[rgba(0,255,65,0.12)] hover:border-[rgba(0,255,65,0.35)]'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-[0.6vh]">
+                  <span className="text-[0.98vh] tracking-wider text-muthur-primary truncate">{loadout.label}</span>
+                  <span className="grid grid-cols-3 gap-[0.18vh] w-[3.3vh] shrink-0">
+                    {[theme.accent, theme.panel, theme.danger].map((color) => (
+                      <span key={color} className="h-[0.65vh]" style={{ background: color }} />
+                    ))}
+                  </span>
+                </div>
+                <div className="text-[0.78vh] text-muthur-secondary opacity-62 leading-tight mt-[0.35vh] line-clamp-2">
+                  {loadout.description}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
         <ControlHeader icon={<PaletteIcon size={13} />} label="COLOR / THEME" />
         <div className="grid grid-cols-2 gap-[0.6vh]">
           {THEME_PRESETS.map((theme) => (
@@ -355,6 +398,22 @@ function StyleTab({ settings, onSettingsChange }: { settings: InterfaceSettings;
             />
           </div>
           <Slider value={settings.audioVolume} min={0} max={1} step={0.01} onChange={(audioVolume) => onSettingsChange({ audioVolume })} />
+          <div className="grid grid-cols-4 gap-[0.45vh] mt-[0.7vh]">
+            {[
+              ['KEY', 'keyboard'],
+              ['PANEL', 'panels'],
+              ['SCAN', 'scan'],
+              ['ALERT', 'error'],
+            ].map(([label, sound]) => (
+              <button
+                key={label}
+                onClick={() => playSound(sound as Parameters<typeof playSound>[0], 0.18)}
+                className="h-[2.5vh] border border-[rgba(0,255,65,0.18)] text-[0.78vh] tracking-wider text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
     </div>

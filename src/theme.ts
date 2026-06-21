@@ -1,7 +1,7 @@
-export type ThemeId = 'mother' | 'amber' | 'cryo' | 'surgical' | 'noir' | 'bios' | 'crt' | 'phosphor' | 'oxide' | 'void';
+export type ThemeId = 'mother' | 'amber' | 'cryo' | 'surgical' | 'noir' | 'bios' | 'crt' | 'phosphor' | 'oxide' | 'void' | 'field' | 'hazmat' | 'medbay' | 'deepsea' | 'signal';
 export type FontId = 'sharetech' | 'orbitron' | 'rajdhani' | 'audiowide' | 'bios';
 export type LayoutPresetId = 'command' | 'focus' | 'wide' | 'simulation' | 'cinema' | 'custom';
-export type SoundPackId = 'ship' | 'quiet' | 'retro' | 'horror' | 'combat';
+export type SoundPackId = 'ship' | 'quiet' | 'retro' | 'horror' | 'combat' | 'field' | 'recorder' | 'alarm' | 'analog';
 export type BootPresetId = 'core' | 'bios' | 'crt' | 'silent';
 export type TerminalProfileId = 'ops' | 'bios' | 'cmos' | 'matrix' | 'plain' | 'daily';
 export type KeyboardPresetId = 'terminal' | 'bios' | 'gaming';
@@ -99,6 +99,13 @@ export interface InterfaceSettings {
   bookmarks: Bookmark[];
   missionLog: MissionItem[];
   pluginSlots: PluginSlot[];
+}
+
+export interface SystemLoadout {
+  id: string;
+  label: string;
+  description: string;
+  settings: Partial<InterfaceSettings>;
 }
 
 const STORAGE_KEY = 'muthur-interface-settings';
@@ -219,6 +226,66 @@ export const THEME_PRESETS: ThemePreset[] = [
     surface: '#03050a',
     vibe: 'core',
   },
+  {
+    id: 'field',
+    label: 'FIELD KIT',
+    accent: '#c7f36a',
+    background: '#060905',
+    panel: '#10170b',
+    grey: '#1f2817',
+    text: '#dce8b2',
+    danger: '#ffb13b',
+    surface: '#090d07',
+    vibe: 'core',
+  },
+  {
+    id: 'hazmat',
+    label: 'HAZMAT',
+    accent: '#ffe45c',
+    background: '#080802',
+    panel: '#151306',
+    grey: '#272411',
+    text: '#fff2b5',
+    danger: '#ff493f',
+    surface: '#0d0c03',
+    vibe: 'core',
+  },
+  {
+    id: 'medbay',
+    label: 'MEDBAY',
+    accent: '#b6fff2',
+    background: '#030a0c',
+    panel: '#071418',
+    grey: '#142126',
+    text: '#e9fffb',
+    danger: '#ff5570',
+    surface: '#041014',
+    vibe: 'core',
+  },
+  {
+    id: 'deepsea',
+    label: 'DEEP SEA',
+    accent: '#67c7ff',
+    background: '#02070f',
+    panel: '#06101f',
+    grey: '#111c30',
+    text: '#cfe8ff',
+    danger: '#ff8f2f',
+    surface: '#030914',
+    vibe: 'core',
+  },
+  {
+    id: 'signal',
+    label: 'SIGNAL RED',
+    accent: '#ff6b4a',
+    background: '#090504',
+    panel: '#160908',
+    grey: '#251210',
+    text: '#ffd8ce',
+    danger: '#ffe064',
+    surface: '#070302',
+    vibe: 'crt',
+  },
 ];
 
 export const FONT_PRESETS: FontPreset[] = [
@@ -274,6 +341,10 @@ export const SOUND_PACKS = [
   { id: 'retro' as SoundPackId, label: 'RETRO BIOS', description: 'short beeps and key ticks' },
   { id: 'horror' as SoundPackId, label: 'HULL DARK', description: 'deeper mechanical alerts' },
   { id: 'combat' as SoundPackId, label: 'COMBAT', description: 'sharper lock and warning hits' },
+  { id: 'field' as SoundPackId, label: 'FIELD KIT', description: 'bigger survival console switches' },
+  { id: 'recorder' as SoundPackId, label: 'RECORDER', description: 'CRT monitor scan and archive tones' },
+  { id: 'alarm' as SoundPackId, label: 'ALARM BUS', description: 'urgent warning and lockdown hits' },
+  { id: 'analog' as SoundPackId, label: 'ANALOG BAY', description: 'old terminal mechanical relays' },
 ];
 
 export const BOOT_PRESETS = [
@@ -296,6 +367,147 @@ export const KEYBOARD_PRESETS = [
   { id: 'terminal' as KeyboardPresetId, label: 'TERMINAL', description: 'normal shell typing' },
   { id: 'bios' as KeyboardPresetId, label: 'BIOS NAV', description: 'setup-screen style controls' },
   { id: 'gaming' as KeyboardPresetId, label: 'WASD NAV', description: 'virtual WASD taps send arrow keys' },
+];
+
+export const SYSTEM_LOADOUTS: SystemLoadout[] = [
+  {
+    id: 'muthur-core',
+    label: 'MUTHUR CORE',
+    description: 'classic green cockpit workstation',
+    settings: {
+      themeId: 'mother',
+      fontId: 'sharetech',
+      layoutPreset: 'command',
+      soundPack: 'ship',
+      bootPreset: 'core',
+      terminalProfile: 'ops',
+      keyboardPreset: 'terminal',
+      cinematicMode: false,
+      performanceMode: false,
+    },
+  },
+  {
+    id: 'cmos-blue',
+    label: 'CMOS BLUE',
+    description: 'old setup utility, chunky and readable',
+    settings: {
+      themeId: 'bios',
+      fontId: 'bios',
+      layoutPreset: 'wide',
+      soundPack: 'retro',
+      bootPreset: 'bios',
+      terminalProfile: 'cmos',
+      keyboardPreset: 'bios',
+      cinematicMode: false,
+      performanceMode: false,
+    },
+  },
+  {
+    id: 'recorder-crt',
+    label: 'RECORDER CRT',
+    description: 'green monitor with scan-heavy audio',
+    settings: {
+      themeId: 'crt',
+      fontId: 'sharetech',
+      layoutPreset: 'simulation',
+      soundPack: 'recorder',
+      bootPreset: 'crt',
+      terminalProfile: 'matrix',
+      keyboardPreset: 'terminal',
+      cinematicMode: true,
+      performanceMode: false,
+    },
+  },
+  {
+    id: 'survival-field',
+    label: 'SURVIVAL FIELD',
+    description: 'offline knowledge, maps, and rugged audio',
+    settings: {
+      themeId: 'field',
+      fontId: 'rajdhani',
+      layoutPreset: 'command',
+      soundPack: 'field',
+      bootPreset: 'core',
+      terminalProfile: 'daily',
+      keyboardPreset: 'terminal',
+      cinematicMode: false,
+      performanceMode: false,
+      offlinePack: {
+        enabled: true,
+        ai: true,
+        wiki: true,
+        maps: true,
+        docs: true,
+        aiModel: 'llama3.2',
+        mapRegion: 'world-low',
+        wikiPack: 'wikipedia_en_simple_all',
+      },
+    },
+  },
+  {
+    id: 'hazmat-lockdown',
+    label: 'HAZMAT LOCK',
+    description: 'high-warning dystopia mode',
+    settings: {
+      themeId: 'hazmat',
+      fontId: 'orbitron',
+      layoutPreset: 'focus',
+      soundPack: 'alarm',
+      bootPreset: 'crt',
+      terminalProfile: 'ops',
+      keyboardPreset: 'bios',
+      cinematicMode: true,
+      performanceMode: false,
+    },
+  },
+  {
+    id: 'medbay-calm',
+    label: 'MEDBAY CALM',
+    description: 'quiet readable emergency station',
+    settings: {
+      themeId: 'medbay',
+      fontId: 'rajdhani',
+      layoutPreset: 'wide',
+      soundPack: 'quiet',
+      bootPreset: 'silent',
+      terminalProfile: 'daily',
+      keyboardPreset: 'terminal',
+      cinematicMode: false,
+      performanceMode: true,
+    },
+  },
+  {
+    id: 'analog-bay',
+    label: 'ANALOG BAY',
+    description: 'older hardware relay board',
+    settings: {
+      themeId: 'amber',
+      fontId: 'bios',
+      layoutPreset: 'command',
+      soundPack: 'analog',
+      bootPreset: 'bios',
+      terminalProfile: 'bios',
+      keyboardPreset: 'bios',
+      cinematicMode: false,
+      performanceMode: false,
+    },
+  },
+  {
+    id: 'deep-watch',
+    label: 'DEEP WATCH',
+    description: 'blue long-shift surveillance console',
+    settings: {
+      themeId: 'deepsea',
+      fontId: 'orbitron',
+      layoutPreset: 'cinema',
+      soundPack: 'horror',
+      bootPreset: 'core',
+      terminalProfile: 'plain',
+      keyboardPreset: 'terminal',
+      cinematicMode: true,
+      performanceMode: false,
+    },
+  },
 ];
 
 export const DEFAULT_BOOKMARKS: Bookmark[] = [
