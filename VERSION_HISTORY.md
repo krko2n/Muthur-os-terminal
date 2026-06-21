@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+dffd7ef feat: virtual games folder in file explorer with tab launch
+cd1f68d docs: auto-update generated docs [skip ci]
 811a226 feat: games as launchable fullscreen tabs from file explorer
 22d2b59 feat: full sci-fi cursor CSS system with SVG data URIs
 a35e8d7 feat: sci-fi cursor set with angular SVGs and cyan glow
@@ -50,5 +52,3 @@ bcdb7a7 docs: auto-update version history [skip ci]
 ad078a2 docs: auto-update version history [skip ci]
 3668eff feat(ui): hardware inspector, disk bar, globe intro, final polish
 90a4a79 docs: auto-update version history [skip ci]
-8f5c07e feat(keyboard): ISO L-shaped Enter key spanning two rows
-26340d6 docs: auto-update version history [skip ci]
