@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { playSound } from '../audio';
 
 interface KeyDef {
@@ -10,6 +11,16 @@ interface KeyDef {
   isModifier?: boolean;
   isEnter?: boolean;
   isEnterBottom?: boolean;
+}
+
+interface OfflinePackStatus {
+  status?: string;
+  modules?: {
+    ai?: boolean;
+    wiki?: boolean;
+    maps?: boolean;
+    docs?: boolean;
+  };
 }
 
 const ROWS: KeyDef[][] = [
@@ -133,6 +144,7 @@ export default function Keyboard() {
   const [layoutName, setLayoutName] = useState('en-US');
   const [remapPreset, setRemapPreset] = useState('terminal');
   const [customRows, setCustomRows] = useState<KeyDef[][] | null>(null);
+  const [offlineStatus, setOfflineStatus] = useState<OfflinePackStatus | null>(null);
 
   useEffect(() => {
     const handleSettings = (event: Event) => {
@@ -160,6 +172,24 @@ export default function Keyboard() {
       })
       .catch(() => setCustomRows(null));
   }, [layoutName]);
+
+  useEffect(() => {
+    let alive = true;
+    const refresh = async () => {
+      try {
+        const status = await invoke('get_offline_pack_status') as OfflinePackStatus;
+        if (alive) setOfflineStatus(status);
+      } catch {
+        if (alive) setOfflineStatus(null);
+      }
+    };
+    refresh();
+    const interval = window.setInterval(refresh, 15000);
+    return () => {
+      alive = false;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   const activeRows = useMemo(
     () => (customRows || ROWS).map(row => row.map(normalizeKeyDef)),
@@ -196,6 +226,12 @@ export default function Keyboard() {
   }, [handleKeyDown, handleKeyUp]);
 
   const isShifted = shiftHeld || stickyShift;
+  const archiveLabel = offlineStatus?.modules?.wiki
+    ? 'WIKI HOT'
+    : offlineStatus?.modules?.docs
+    ? 'FIELD DOCS'
+    : 'CACHE STANDBY';
+  const aiLabel = offlineStatus?.modules?.ai ? 'LLM LOCAL' : 'LLM STANDBY';
 
   const getLabel = (keyDef: KeyDef): string => {
     if (keyDef.isModifier) return keyDef.lower;
@@ -263,31 +299,37 @@ export default function Keyboard() {
   };
 
   return (
-    <div className={`h-full w-full flex flex-col justify-center gap-[0.15vw] p-[0.3vw] transition-opacity duration-300 ${passwordMode ? 'opacity-30' : ''}`}>
-      {/* Layout selector */}
-      <div className="flex justify-end shrink-0 mb-[0.1vw]">
+    <div className={`edex-keyboard-shell ${passwordMode ? 'opacity-35' : ''}`}>
+      <div className="edex-keyboard-header">
+        <div className="flex items-center gap-[0.7vh] min-w-0">
+          <span className="edex-keyboard-title">INPUT MATRIX</span>
+          <span className="edex-status-chip">{remapPreset.toUpperCase()}</span>
+          <span className="edex-status-chip">{archiveLabel}</span>
+          <span className="edex-status-chip">{aiLabel}</span>
+        </div>
         <select
           value={layoutName}
           onChange={(e) => {
             setLayoutName(e.target.value);
             window.dispatchEvent(new CustomEvent('muthur-keyboard-layout-change', { detail: e.target.value }));
           }}
-          className="text-[1vh] bg-transparent border border-[rgba(0,255,65,0.2)] text-muthur-primary px-[0.5vh] py-[0.15vh] font-mono opacity-60 hover:opacity-100 focus:outline-none"
+          className="edex-layout-select"
         >
           {AVAILABLE_LAYOUTS.map(l => (
             <option key={l} value={l} className="bg-[#05080d]">{l}</option>
           ))}
         </select>
       </div>
+
+      <div className="edex-keyboard-grid">
       {activeRows.map((row, ri) => {
         const totalW = row.reduce((sum, k) => sum + k.w, 0);
         const delay = Math.abs(ri - 2) * 0.1;
         return (
           <div
             key={ri}
-            className="flex gap-[0.15vw] items-stretch keyboard-row-intro"
+            className="edex-keyboard-row keyboard-row-intro"
             style={{
-              height: '18%',
               animationDelay: `${delay}s`,
             }}
           >
@@ -307,18 +349,11 @@ export default function Keyboard() {
                       event.preventDefault();
                       handleClick({ ...keyDef, code: 'Enter' });
                     }}
-                    className={`
-                      relative flex items-center justify-center
-                      rounded-[3px] rounded-tl-none transition-all duration-75
-                      font-mono select-none uppercase
-                      border-t-0
-                      ${highlighted
-                        ? 'key-active'
-                        : 'border border-[rgba(0,255,65,0.4)] border-t-0 text-muthur-primary opacity-45 hover:opacity-100'
-                      }
-                    `}
-                    style={{ flex: `${keyDef.w / totalW}`, fontSize: '0.55vw' }}
-                  />
+                    className={`edex-key edex-key-enter-bottom ${highlighted ? 'edex-key-active' : ''}`}
+                    style={{ flex: `${keyDef.w / totalW}` }}
+                  >
+                    <span className="edex-key-label">RET</span>
+                  </div>
                 );
               }
 
@@ -329,29 +364,15 @@ export default function Keyboard() {
                     event.preventDefault();
                     handleClick(keyDef);
                   }}
-                  className={`
-                    relative flex items-center justify-center
-                    rounded-[3px] transition-all duration-75
-                    font-mono select-none uppercase
-                    ${keyDef.isEnter ? 'rounded-br-none enter-key-top' : ''}
-                    ${highlighted
-                      ? 'key-active'
-                      : isSpace
-                      ? 'border border-[rgba(0,255,65,0.4)] text-muthur-primary opacity-45 hover:opacity-100'
-                      : keyDef.isEnter
-                      ? 'border border-[rgba(0,255,65,0.4)] text-muthur-primary opacity-55 hover:opacity-100'
-                      : 'border border-[rgba(0,255,65,0.14)] text-muthur-primary opacity-45 hover:opacity-100 hover:border-[rgba(0,255,65,0.4)]'
-                    }
-                  `}
+                  className={`edex-key ${keyDef.isModifier ? 'edex-key-mod' : ''} ${isSpace ? 'edex-key-space' : ''} ${keyDef.isEnter ? 'edex-key-enter enter-key-top' : ''} ${highlighted ? 'edex-key-active' : ''}`}
                   style={{
                     flex: `${keyDef.w / totalW}`,
-                    fontSize: keyDef.w > 1.5 ? '0.55vw' : '0.7vw',
                     ...(keyDef.isEnter ? { marginBottom: '-0.15vw', paddingBottom: '0.15vw', borderBottomRightRadius: 0 } : {}),
                   }}
                 >
-                  {label}
+                  <span className="edex-key-label">{isSpace ? 'SPACE' : label}</span>
                   {!keyDef.isModifier && keyDef.shift !== keyDef.lower && !isShifted && (
-                    <span className="absolute top-[1px] right-[3px] text-[0.4vw] opacity-30">
+                    <span className="edex-key-shift">
                       {keyDef.shift}
                     </span>
                   )}
@@ -361,6 +382,14 @@ export default function Keyboard() {
           </div>
         );
       })}
+      </div>
+
+      <div className="edex-keyboard-footer">
+        <span>{capsLock ? 'CAPS LOCKED' : 'CAPS FREE'}</span>
+        <span>{stickyShift || shiftHeld ? 'SHIFT ARM' : 'SHIFT CLEAR'}</span>
+        <span>{passwordMode ? 'PRIVACY VEIL' : 'LOCAL INPUT'}</span>
+        <span>{offlineStatus?.status?.toUpperCase() ?? 'PACK UNKNOWN'}</span>
+      </div>
     </div>
   );
 }

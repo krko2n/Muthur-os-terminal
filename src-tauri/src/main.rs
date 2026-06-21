@@ -112,6 +112,7 @@ fn offline_pack_dir() -> PathBuf {
     }
 
     std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("."))
         .join(".local")
@@ -229,6 +230,34 @@ fn collect_mbtiles(path: &Path, results: &mut Vec<serde_json::Value>) {
     }
 }
 
+fn has_file_extension(path: &Path, extensions: &[&str], depth: usize) -> bool {
+    if depth > 5 {
+        return false;
+    }
+
+    let Ok(entries) = std::fs::read_dir(path) else {
+        return false;
+    };
+
+    for entry in entries.flatten() {
+        let entry_path = entry.path();
+        if entry_path.is_dir() && has_file_extension(&entry_path, extensions, depth + 1) {
+            return true;
+        }
+
+        if entry_path
+            .extension()
+            .and_then(|extension| extension.to_str())
+            .map(|extension| extensions.iter().any(|allowed| extension.eq_ignore_ascii_case(allowed)))
+            .unwrap_or(false)
+        {
+            return true;
+        }
+    }
+
+    false
+}
+
 #[tauri::command]
 async fn get_offline_pack_status() -> Result<serde_json::Value, String> {
     let pack_dir = offline_pack_dir();
@@ -252,6 +281,18 @@ async fn get_offline_pack_status() -> Result<serde_json::Value, String> {
     if maps_dir.exists() {
         collect_mbtiles(&maps_dir, &mut maps);
     }
+    let wiki_dir = pack_dir.join("wiki");
+    let docs_dir = pack_dir.join("docs");
+    let wiki_available = manifest
+        .get("wiki")
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false)
+        || has_file_extension(&wiki_dir, &["zim", "jsonl", "json", "md", "txt"], 0);
+    let docs_available = manifest
+        .get("docs")
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false)
+        || has_file_extension(&docs_dir, &["md", "txt", "pdf"], 0);
 
     Ok(serde_json::json!({
         "exists": exists,
@@ -264,9 +305,9 @@ async fn get_offline_pack_status() -> Result<serde_json::Value, String> {
         "sizeBytes": if exists { path_size(&pack_dir) } else { 0 },
         "modules": {
             "ai": manifest.get("ai").and_then(|value| value.as_bool()).unwrap_or(false),
-            "wiki": manifest.get("wiki").and_then(|value| value.as_bool()).unwrap_or(false),
+            "wiki": wiki_available,
             "maps": manifest.get("maps").and_then(|value| value.as_bool()).unwrap_or(false),
-            "docs": manifest.get("docs").and_then(|value| value.as_bool()).unwrap_or(false)
+            "docs": docs_available
         },
         "aiModel": manifest.get("aiModel").and_then(|value| value.as_str()).unwrap_or("llama3.2"),
         "wikiPack": manifest.get("wikiPack").and_then(|value| value.as_str()).unwrap_or("wikipedia_en_simple_all"),
@@ -291,12 +332,18 @@ async fn ai_suggest_command(
 
 #[tauri::command]
 async fn ai_chat(state: State<'_, AppState>, message: String) -> Result<String, String> {
+    let offline_context = ai::build_offline_wiki_context(&message, 5);
     let response = state
         .ollama_client
-        .chat(&message)
+        .chat(&message, offline_context.as_deref())
         .await
         .map_err(|e| e.to_string())?;
     Ok(response)
+}
+
+#[tauri::command]
+async fn search_offline_wiki(query: String) -> Result<Vec<ai::OfflineWikiHit>, String> {
+    Ok(ai::search_offline_wiki(&query, 8))
 }
 
 #[tauri::command]
@@ -667,6 +714,7 @@ fn main() {
             list_directory,
             ai_suggest_command,
             ai_chat,
+            search_offline_wiki,
             get_current_dir,
             fetch_json,
             fetch_url,

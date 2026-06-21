@@ -172,18 +172,37 @@ install_ai() {
     fi
 }
 
+install_starter_wiki() {
+    mkdir -p "$PACK_DIR/wiki"
+    local target="$PACK_DIR/wiki/survival-field-manual.jsonl"
+    cat > "$target" <<'JSONL'
+{"title":"Water: locate, filter, disinfect","source":"MUTHUR survival-field-manual","text":"Treat unknown water as contaminated. Prefer flowing water over stagnant water. Filter sediment through clean cloth, sand, charcoal, or a purpose-built filter before disinfection. Boil clear water at a rolling boil for at least one minute, longer at high elevation. If boiling is impossible, use verified purification tablets or unscented household bleach only at safe emergency ratios. Store treated water in clean sealed containers and label the time."}
+{"title":"Shelter: heat, weather, visibility","source":"MUTHUR survival-field-manual","text":"Prioritize dry insulation from the ground, wind shielding, and a smaller warm air volume. In cold conditions, keep clothing dry, layer loose insulation, and protect head, hands, and feet. In heat, prioritize shade, airflow, and slow work cycles. Do not run flame or combustion heaters in closed shelters without ventilation because carbon monoxide can kill silently."}
+{"title":"Power: low-energy operating plan","source":"MUTHUR survival-field-manual","text":"Inventory power sources before use: wall, vehicle, battery bank, solar, hand crank, UPS. Run devices in scheduled windows instead of continuously. Keep one charged reserve for radio, light, and navigation. Disable radios, screens, and background services when idle. Label cables and keep a manual list of voltages and connectors."}
+{"title":"Radio: resilient communications","source":"MUTHUR survival-field-manual","text":"Keep a written frequency plan, call signs, local repeater notes, and listening schedule. Test receive before transmit. Use the lowest power that reaches the other station. For emergencies, write message traffic before sending: who, where, what happened, what is needed, and when. Keep an offline copy of local emergency channels where legally available."}
+{"title":"Medical: first response boundaries","source":"MUTHUR survival-field-manual","text":"Stabilize immediate threats first: danger to responder, severe bleeding, airway, breathing, circulation, temperature. Use direct pressure for major bleeding and call trained help as soon as possible. Keep wounds clean and covered. Do not give advanced medical treatment beyond your training. Maintain a paper list of allergies, medications, blood type if known, and emergency contacts."}
+{"title":"Food: ration and spoilage logic","source":"MUTHUR survival-field-manual","text":"Water matters sooner than food. Inventory food by calories, preparation water, shelf life, and cooking fuel. Eat perishable food first if safe. Discard food that smells wrong, has swollen containers, unknown contamination, or unsafe temperature history. Keep dry staples sealed against moisture and pests. Record ration plans visibly."}
+{"title":"Navigation: offline map discipline","source":"MUTHUR survival-field-manual","text":"Keep local paper maps or offline map tiles for home area, water points, clinics, fuel, rail, terrain, and safe routes. Mark hazards and blocked routes with date and source. Carry compass knowledge even if GPS works. When moving, leave a written route plan and return time. Avoid unnecessary travel during unstable conditions."}
+{"title":"Data: offline archive hygiene","source":"MUTHUR survival-field-manual","text":"Store critical knowledge in formats readable without cloud access: plain text, PDF, MBTiles, ZIM, CSV, and printed notes. Keep at least two offline copies on separate media. Test search and retrieval before an emergency. Document where AI models, wiki packs, maps, passwords, and recovery keys live."}
+JSONL
+    info "Starter wiki: $target"
+}
+
 install_wiki() {
     step "Offline wiki"
     local target="$PACK_DIR/wiki/$WIKI_PACK.zim"
     if [ -f "$target" ]; then
         info "Wiki pack already present: $target"
+        install_starter_wiki
         return 0
     fi
     if [ -z "$WIKI_URL" ]; then
         warn "Set MUTHUR_WIKI_ZIM_URL to download a ZIM archive."
         warn "Example: MUTHUR_WIKI_ZIM_URL=https://... scripts/muthur-offline-pack.sh"
+        install_starter_wiki
         return 0
     fi
+    install_starter_wiki
     download_file "$WIKI_URL" "$target" && info "Wiki pack: $target"
 }
 
@@ -218,6 +237,7 @@ Useful commands:
 - `kys`
 DOCS
     info "Docs: $PACK_DIR/docs/README.md"
+    install_starter_wiki
 }
 
 json_bool() {
@@ -280,6 +300,7 @@ fi
 if should_install_docs; then
     DOCS_ENABLED=1
     install_docs
+    [ -f "$PACK_DIR/wiki/survival-field-manual.jsonl" ] && WIKI_ENABLED=1
 fi
 
 write_manifest "$AI_ENABLED" "$WIKI_ENABLED" "$MAPS_ENABLED" "$DOCS_ENABLED"

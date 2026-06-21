@@ -46,9 +46,10 @@ const LOCAL_MANUAL: BrowserDocument = {
     { type: 'Heading', level: 2, text: 'Useful Commands' },
     { type: 'BulletList', items: ['make update - professional update flow', 'scripts/muthur-health-check.sh - installer health check', 'scripts/muthur-offline-pack.sh - voluntary AI/wiki/maps pack', 'kys - safe shutdown command'] },
     { type: 'Heading', level: 2, text: 'AI Helper' },
-    { type: 'Paragraph', text: 'In the AI panel, start a message with # to ask MUTHUR to suggest a terminal command before you run it.' },
+    { type: 'Paragraph', text: 'In the AI panel, start a message with # to ask MUTHUR to suggest a terminal command before you run it. Normal chat searches the offline wiki/docs cache first when local archive material is available.' },
+    { type: 'BulletList', items: ['wiki water purification - search local archive directly', 'survival radio - search the survival field manual', 'archive maps - search local docs and wiki notes'] },
     { type: 'Heading', level: 2, text: 'Offline Pack' },
-    { type: 'Paragraph', text: 'Offline AI, wiki, docs, and map packs are optional. Install and update ask before downloading large add-ons.' },
+    { type: 'Paragraph', text: 'Offline AI, wiki, docs, and map packs are optional. Install and update ask before downloading large add-ons. The pack also includes a local starter field manual so the archive is useful before a full wiki download.' },
   ],
 };
 

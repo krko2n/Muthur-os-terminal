@@ -7,9 +7,32 @@ interface Message {
   content: string;
 }
 
+interface OfflineWikiHit {
+  title: string;
+  source: string;
+  snippet: string;
+  score: number;
+}
+
+function formatOfflineHits(query: string, hits: OfflineWikiHit[]) {
+  if (!hits.length) {
+    return `OFFLINE ARCHIVE: no local hits for "${query}".\n\nInstall or update the voluntary wiki pack, or add text/JSONL files under the offline wiki folder.`;
+  }
+
+  return [
+    `OFFLINE ARCHIVE HITS FOR: ${query}`,
+    '',
+    ...hits.map((hit, index) => [
+      `[${index + 1}] ${hit.title}`,
+      `SOURCE: ${hit.source}`,
+      hit.snippet,
+    ].join('\n')),
+  ].join('\n\n');
+}
+
 export default function AIPanel() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'system', content: 'MUTHUR AI online.\n\nCommands:\n  # <goal> - suggest a terminal command before you run it\n  web <query> - search the internet\n  fetch <url> - get page content\n\nOffline pack:\n  install AI/wiki/maps voluntarily with scripts/muthur-offline-pack.sh' }
+    { role: 'system', content: 'MUTHUR survival AI online.\n\nNormal chat now searches the offline wiki/docs cache before answering.\n\nCommands:\n  # <goal> - suggest a terminal command before you run it\n  wiki <query> - search local offline archive\n  web <query> - remote search when a link exists\n  fetch <url> - get page content\n\nOffline pack:\n  install AI/wiki/maps voluntarily with scripts/muthur-offline-pack.sh' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -67,6 +90,13 @@ export default function AIPanel() {
             content: `FETCH FAILED: ${e}`
           }]);
         }
+      } else if (userMessage.startsWith('wiki ') || userMessage.startsWith('archive ') || userMessage.startsWith('survival ')) {
+        const query = userMessage.replace(/^(wiki|archive|survival)\s+/, '');
+        const hits = await invoke('search_offline_wiki', { query }) as OfflineWikiHit[];
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: formatOfflineHits(query, hits)
+        }]);
       } else {
         const response = await invoke('ai_chat', { message: userMessage }) as string;
         setMessages(prev => [...prev, { role: 'assistant', content: response }]);
@@ -93,7 +123,7 @@ export default function AIPanel() {
     <div className="flex flex-col min-h-0 flex-1">
       <div className="text-[1.3vh] tracking-widest opacity-60 mb-[0.5vh] flex items-center gap-[0.5vh]">
         <AIIcon size={14} color="rgba(0,255,65,0.6)" />
-        MUTHUR AI
+        MUTHUR SURVIVAL AI
       </div>
 
       <div
@@ -125,7 +155,7 @@ export default function AIPanel() {
 
       <div className="mt-[0.5vh] shrink-0">
         <div className="text-[0.9vh] opacity-30 mb-[0.3vh]">
-          # = cmd suggest | web/search = internet | fetch = URL
+          # = cmd | wiki = offline archive | web/fetch = link
         </div>
         <div className="flex gap-[0.5vh]">
           <input

@@ -373,6 +373,232 @@ body.muthur-cinematic .panel-reveal {
   border-color: var(--color-accent) !important;
 }
 
+/* eDEX-style virtual keyboard */
+.edex-keyboard-shell {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(3px, 0.28vw, 7px);
+  padding: clamp(5px, 0.44vw, 10px);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(var(--color-r), var(--color-g), var(--color-b), 0.055), transparent 26%),
+    linear-gradient(90deg, rgba(var(--color-r), var(--color-g), var(--color-b), 0.04), transparent 12%, transparent 88%, rgba(var(--color-r), var(--color-g), var(--color-b), 0.04)),
+    rgba(3, 7, 10, 0.5);
+  border-left: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.12);
+}
+
+.edex-keyboard-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(90deg, transparent, rgba(var(--color-r), var(--color-g), var(--color-b), 0.18), transparent),
+    repeating-linear-gradient(0deg, transparent 0 5px, rgba(var(--color-r), var(--color-g), var(--color-b), 0.06) 6px);
+  background-size: 42% 1px, 100% 7px;
+  background-position: -45% 30%, 0 0;
+  animation: edexKeyboardSweep 5.5s linear infinite;
+}
+
+.edex-keyboard-header,
+.edex-keyboard-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  color: rgba(var(--color-text-r), var(--color-text-g), var(--color-text-b), 0.72);
+  font-family: var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.edex-keyboard-header {
+  min-height: clamp(18px, 2.1vh, 26px);
+  padding: 0 clamp(3px, 0.3vw, 7px);
+  border-bottom: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.12);
+}
+
+.edex-keyboard-footer {
+  min-height: clamp(16px, 1.8vh, 22px);
+  padding: 0 clamp(3px, 0.3vw, 7px);
+  border-top: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.12);
+  font-size: clamp(7px, 0.58vw, 10px);
+  opacity: 0.66;
+}
+
+.edex-keyboard-title {
+  color: var(--color-accent);
+  font-size: clamp(9px, 0.78vw, 13px);
+  white-space: nowrap;
+}
+
+.edex-status-chip {
+  min-width: 0;
+  border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.14);
+  padding: 1px clamp(4px, 0.36vw, 7px);
+  font-size: clamp(7px, 0.56vw, 10px);
+  color: rgba(var(--color-text-r), var(--color-text-g), var(--color-text-b), 0.7);
+  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.035);
+  white-space: nowrap;
+}
+
+.edex-layout-select {
+  position: relative;
+  z-index: 2;
+  max-width: 10.5vh;
+  min-width: 8.2vh;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.22);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: clamp(8px, 0.66vw, 11px);
+  letter-spacing: 0.08em;
+  padding: 1px 4px;
+  outline: none;
+  opacity: 0.82;
+}
+
+.edex-keyboard-grid {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  gap: clamp(3px, 0.2vw, 5px);
+}
+
+.edex-keyboard-row {
+  display: flex;
+  align-items: stretch;
+  gap: clamp(2px, 0.16vw, 5px);
+  height: 18%;
+  min-height: 0;
+}
+
+.edex-key {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.66);
+  border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.18);
+  border-bottom-color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.34);
+  background:
+    linear-gradient(180deg, rgba(var(--color-r), var(--color-g), var(--color-b), 0.075), rgba(var(--color-r), var(--color-g), var(--color-b), 0.018)),
+    rgba(0, 0, 0, 0.18);
+  clip-path: polygon(0.42vw 0, 100% 0, calc(100% - 0.42vw) 100%, 0 100%);
+  transform: skewX(-8deg);
+  transition: transform 80ms ease, color 80ms ease, border-color 80ms ease, background 80ms ease, opacity 80ms ease;
+  box-shadow:
+    inset 0 1px 0 rgba(var(--color-r), var(--color-g), var(--color-b), 0.14),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.edex-key:hover {
+  color: var(--color-accent);
+  border-color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.48);
+  background:
+    linear-gradient(180deg, rgba(var(--color-r), var(--color-g), var(--color-b), 0.14), rgba(var(--color-r), var(--color-g), var(--color-b), 0.032)),
+    rgba(0, 0, 0, 0.16);
+}
+
+.edex-key::before {
+  content: '';
+  position: absolute;
+  inset: 2px 4px auto 4px;
+  height: 1px;
+  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.22);
+}
+
+.edex-key::after {
+  content: '';
+  position: absolute;
+  right: 4px;
+  bottom: 3px;
+  width: 0.7vw;
+  max-width: 10px;
+  min-width: 5px;
+  height: 1px;
+  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.18);
+}
+
+.edex-key-label,
+.edex-key-shift {
+  transform: skewX(8deg);
+}
+
+.edex-key-label {
+  display: block;
+  max-width: calc(100% - 8px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(9px, 0.68vw, 14px);
+  line-height: 1;
+  letter-spacing: 0.14em;
+}
+
+.edex-key-mod .edex-key-label {
+  font-size: clamp(8px, 0.55vw, 11px);
+  letter-spacing: 0.1em;
+}
+
+.edex-key-shift {
+  position: absolute;
+  top: 2px;
+  right: 0.45vw;
+  color: rgba(var(--color-text-r), var(--color-text-g), var(--color-text-b), 0.42);
+  font-size: clamp(6px, 0.45vw, 9px);
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+.edex-key-space .edex-key-label {
+  letter-spacing: 0.32em;
+  opacity: 0.58;
+}
+
+.edex-key-space::before {
+  inset: 48% 16% auto 16%;
+  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.28);
+}
+
+.edex-key-enter {
+  border-bottom-right-radius: 0;
+}
+
+.edex-key-enter-bottom {
+  border-top-color: transparent;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 0.42vw) 100%, 0.42vw 100%);
+}
+
+.edex-key-active {
+  color: var(--color-bg);
+  border-color: var(--color-accent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 96%, white 4%), var(--color-accent));
+  box-shadow:
+    0 0 14px rgba(var(--color-r), var(--color-g), var(--color-b), 0.52),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.edex-key-active .edex-key-shift {
+  color: rgba(0, 0, 0, 0.52);
+}
+
 /* Key blink on release (eDEX-UI style) */
 .key-blink {
   animation: blink 0.5s linear 1;
@@ -448,6 +674,11 @@ body.muthur-cinematic .panel-reveal {
 @keyframes keyboardExpand {
   from { width: 0; filter: brightness(170%); }
   to { width: 100%; filter: brightness(100%); }
+}
+
+@keyframes edexKeyboardSweep {
+  from { background-position: -45% 30%, 0 0; }
+  to { background-position: 145% 30%, 0 0; }
 }
 
 /* UI assembly animation */
