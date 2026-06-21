@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+3c9dd88 Add sound packs and prebuilt interface loadouts
+6cfce92 docs: auto-update version history [skip ci]
 46f5ffa Add eDEX keyboard and offline archive AI grounding
 4a863b0 docs: auto-update version history [skip ci]
 e947cd8 Improve workspace layout and web readability
@@ -50,5 +52,3 @@ cdbf013 fix(build): disable reqwest default-features to avoid TLS conflicts
 b3085d2 feat(phase2): loading screen, logo system, build fix, security hardening
 3a0b2fc perf(native): eliminate web artifacts, reduce input latency, optimize rendering
 eb9125c fix(keyboard): sticky shift on click, fill entire container space
-9c03d48 fix(keyboard,cursor,web): caps/shift logic, custom cursor fallback, reqwest TLS
-81e6b47 fix(ui): layout proportions, working web tab, AI personality, globe loading
