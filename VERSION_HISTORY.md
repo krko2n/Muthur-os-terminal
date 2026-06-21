@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+d400008 style: fix cargo fmt formatting in main.rs
+9b10054 docs: auto-update generated docs [skip ci]
 83dde0c style: fix cargo fmt formatting in ai.rs
 86b92b6 docs: auto-update generated docs [skip ci]
 5b16f71 fix: correct badge stats to count all tracked files, use neutral colors
@@ -50,5 +52,3 @@ e498331 docs: auto-update version history [skip ci]
 0abaafa feat(ui): eDEX-style boot, cursor trail, sound effects, keyboard + browser fixes
 e39fafd fix(build): resolve TS2304 and ico format errors, rename make upgrade to update
 7525ada docs(readme): complete rewrite for beginner accessibility
-bb867c9 fix(install): portable path resolution + strict error handling
-afe8450 feat(batch5): unified idempotent installer + professional quality pass
