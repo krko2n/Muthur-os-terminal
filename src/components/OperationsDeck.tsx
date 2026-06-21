@@ -1386,7 +1386,7 @@ function DeckTabButton({ active, onClick, label, icon, title }: { active: boolea
   return (
     <button
       onClick={onClick}
-      className={`h-[2.4vh] px-[0.45vh] flex items-center justify-center gap-[0.25vh] border text-[0.82vh] tracking-wider font-mono transition-all ${
+      className={`h-[2.7vh] px-[0.55vh] flex items-center justify-center gap-[0.3vh] border text-[0.92vh] tracking-wider font-mono transition-all ${
         active
           ? 'bg-muthur-primary text-muthur-bg border-muthur-primary'
           : 'text-muthur-secondary border-[rgba(0,255,65,0.16)] opacity-60 hover:opacity-100 hover:border-[rgba(0,255,65,0.35)]'
@@ -1401,7 +1401,7 @@ function DeckTabButton({ active, onClick, label, icon, title }: { active: boolea
 
 function ControlHeader({ icon, label }: { icon: ReactNode; label: string }) {
   return (
-    <div className="text-[1.02vh] tracking-widest opacity-60 mb-[0.65vh] mt-[0.35vh] flex items-center gap-[0.5vh] panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-[0.5vh]">
+    <div className="text-[1.12vh] tracking-widest opacity-75 mb-[0.75vh] mt-[0.45vh] flex items-center gap-[0.55vh] panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-[0.6vh]">
       {icon}
       {label}
     </div>
@@ -1439,7 +1439,7 @@ function Slider({ value, min, max, step, onChange }: { value: number; min: numbe
 function LabeledSlider(props: { label: string; value: number; min: number; max: number; step: number; onChange: (value: number) => void; suffix?: string }) {
   return (
     <div>
-      <div className="flex items-center justify-between text-[0.88vh] text-muthur-secondary opacity-60 mb-[0.2vh]">
+      <div className="flex items-center justify-between text-[0.98vh] text-muthur-secondary opacity-75 mb-[0.25vh]">
         <span>{props.label}</span>
         <span className="text-muthur-primary tabular-nums">{Math.round(props.value)}{props.suffix ?? '%'}</span>
       </div>
@@ -1473,12 +1473,12 @@ function SmallChoice({ active, title, body, onClick }: { active: boolean; title:
         onClick();
         playSound('switch', 0.08);
       }}
-      className={`min-h-[4.2vh] border px-[0.55vh] py-[0.45vh] text-left transition-all ${
+      className={`min-h-[4.6vh] border px-[0.65vh] py-[0.55vh] text-left transition-all ${
         active ? 'border-muthur-primary bg-[rgba(0,255,65,0.08)]' : 'border-[rgba(0,255,65,0.12)] hover:border-[rgba(0,255,65,0.3)]'
       }`}
     >
-      <div className="text-[0.86vh] tracking-wider text-muthur-primary truncate">{title}</div>
-      <div className="text-[0.7vh] leading-tight text-muthur-secondary opacity-45">{body}</div>
+      <div className="text-[0.98vh] tracking-wider text-muthur-primary truncate">{title}</div>
+      <div className="text-[0.82vh] leading-snug text-muthur-secondary opacity-65">{body}</div>
     </button>
   );
 }
@@ -1489,31 +1489,31 @@ function CommandButton({ title, body, onClick }: { title: string; body: string; 
 
 function StatusCard({ title, value, body }: { title: string; value: string; body: string }) {
   return (
-    <div className="border border-[rgba(0,255,65,0.12)] px-[0.65vh] py-[0.55vh] min-w-0">
-      <div className="text-[0.78vh] tracking-wider text-muthur-secondary opacity-40">{title}</div>
-      <div className="text-[0.9vh] tracking-wider text-muthur-primary truncate">{value}</div>
-      <div className="text-[0.7vh] text-muthur-secondary opacity-45 truncate">{body}</div>
+    <div className="border border-[rgba(0,255,65,0.12)] px-[0.75vh] py-[0.65vh] min-w-0">
+      <div className="text-[0.88vh] tracking-wider text-muthur-secondary opacity-55">{title}</div>
+      <div className="text-[1.02vh] tracking-wider text-muthur-primary truncate">{value}</div>
+      <div className="text-[0.82vh] text-muthur-secondary opacity-62 truncate">{body}</div>
     </div>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-[rgba(0,255,65,0.1)] px-[0.5vh] py-[0.35vh] min-w-0">
-      <div className="text-[0.68vh] tracking-wider text-muthur-secondary opacity-40">{label}</div>
-      <div className="text-[0.98vh] tracking-wider text-muthur-primary truncate">{value}</div>
+    <div className="border border-[rgba(0,255,65,0.1)] px-[0.6vh] py-[0.45vh] min-w-0">
+      <div className="text-[0.8vh] tracking-wider text-muthur-secondary opacity-55">{label}</div>
+      <div className="text-[1.08vh] tracking-wider text-muthur-primary truncate">{value}</div>
     </div>
   );
 }
 
 function TextField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
   return (
-    <label className="grid grid-cols-[8vh_1fr] items-center gap-[0.6vh] text-[0.86vh] text-muthur-secondary opacity-65">
+    <label className="grid grid-cols-[8vh_1fr] items-center gap-[0.6vh] text-[0.96vh] text-muthur-secondary opacity-75">
       <span>{label}</span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="min-w-0 bg-transparent border border-[rgba(0,255,65,0.18)] px-[0.55vh] py-[0.3vh] text-[0.9vh] text-muthur-primary focus:outline-none focus:border-muthur-primary"
+        className="min-w-0 bg-transparent border border-[rgba(0,255,65,0.18)] px-[0.55vh] py-[0.35vh] text-[1vh] text-muthur-primary focus:outline-none focus:border-muthur-primary"
       />
     </label>
   );

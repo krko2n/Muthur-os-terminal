@@ -248,7 +248,24 @@ function App() {
           />
 
           <div className={`flex-1 min-w-0 min-h-0 panel-reveal ${assembled ? 'visible' : ''}`} style={{ transitionDelay: '0s' }}>
-            <CenterPanel />
+            <CenterPanel
+              settings={settings}
+              deckSplit={deckSplit}
+              onDeckSplitChange={(next) => {
+                setDeckSplit(next);
+                setSettings(prev => ({
+                  ...prev,
+                  layoutPreset: 'custom',
+                  layout: { ...prev.layout, deckSplit: next },
+                }));
+              }}
+              onLayoutPresetChange={applyLayoutPreset}
+              onLayoutChange={updateLayout}
+              onSettingsChange={updateSettings}
+              onReplaceSettings={replaceSettings}
+              onOpenPalette={() => setCommandPaletteOpen(true)}
+              onOpenShutdown={() => setShutdownOpen(true)}
+            />
           </div>
 
           <div
@@ -270,7 +287,6 @@ function App() {
         {/* Bottom */}
         <div style={{ height: `${bottomHeight}vh`, transitionDelay: '0.6s' }} className={`shrink-0 overflow-hidden panel-reveal ${assembled ? 'visible' : ''}`}>
           <BottomPanel
-            settings={settings}
             deckSplit={deckSplit}
             onDeckSplitChange={(next) => {
               setDeckSplit(next);
@@ -280,12 +296,6 @@ function App() {
                 layout: { ...prev.layout, deckSplit: next },
               }));
             }}
-            onLayoutPresetChange={applyLayoutPreset}
-            onLayoutChange={updateLayout}
-            onSettingsChange={updateSettings}
-            onReplaceSettings={replaceSettings}
-            onOpenPalette={() => setCommandPaletteOpen(true)}
-            onOpenShutdown={() => setShutdownOpen(true)}
           />
         </div>
       </div>

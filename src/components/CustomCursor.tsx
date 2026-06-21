@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-const TRAIL_LENGTH = 12;
+const TRAIL_LENGTH = 14;
 
 export default function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -26,7 +26,7 @@ export default function CustomCursor() {
       const { x, y } = pos.current;
 
       if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${x - 10}px, ${y - 10}px, 0) scale(${scale})`;
+        cursorRef.current.style.transform = `translate3d(${x - 14}px, ${y - 14}px, 0) scale(${scale})`;
       }
 
       for (let i = TRAIL_LENGTH - 1; i > 0; i--) {
@@ -40,8 +40,8 @@ export default function CustomCursor() {
         const el = trailRef.current[i];
         if (el) {
           const tp = trailPositions.current[i];
-          const opacity = (1 - i / TRAIL_LENGTH) * 0.4;
-          const sz = 4 - (i / TRAIL_LENGTH) * 2;
+          const opacity = (1 - i / TRAIL_LENGTH) * 0.55;
+          const sz = 5 - (i / TRAIL_LENGTH) * 2.4;
           el.style.transform = `translate3d(${tp.x - sz / 2}px, ${tp.y - sz / 2}px, 0)`;
           el.style.opacity = String(opacity);
           el.style.width = `${sz}px`;

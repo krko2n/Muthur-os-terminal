@@ -1,30 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import OperationsDeck from './OperationsDeck';
+import FileExplorer from './FileExplorer';
 import Keyboard from './Keyboard';
-import { InterfaceSettings, LayoutPresetId } from '../theme';
 
 interface BottomPanelProps {
-  settings: InterfaceSettings;
   deckSplit: number;
   onDeckSplitChange: (value: number) => void;
-  onLayoutPresetChange: (id: LayoutPresetId) => void;
-  onLayoutChange: (patch: Partial<InterfaceSettings['layout']>) => void;
-  onSettingsChange: (patch: Partial<InterfaceSettings>) => void;
-  onReplaceSettings: (settings: InterfaceSettings) => void;
-  onOpenPalette: () => void;
-  onOpenShutdown: () => void;
 }
 
 export default function BottomPanel({
-  settings,
   deckSplit,
   onDeckSplitChange,
-  onLayoutPresetChange,
-  onLayoutChange,
-  onSettingsChange,
-  onReplaceSettings,
-  onOpenPalette,
-  onOpenShutdown,
 }: BottomPanelProps) {
   const [splitPct, setSplitPct] = useState(deckSplit);
   const dragging = useRef(false);
@@ -60,22 +45,9 @@ export default function BottomPanel({
 
   return (
     <div className="h-full flex">
-      {/* Native controls */}
+      {/* File manager */}
       <div style={{ width: `${splitPct}%` }} className="shrink-0 overflow-hidden">
-        <OperationsDeck
-          settings={settings}
-          deckSplit={splitPct}
-          onDeckSplitChange={(next) => {
-            setSplitPct(next);
-            onDeckSplitChange(next);
-          }}
-          onLayoutPresetChange={onLayoutPresetChange}
-          onLayoutChange={onLayoutChange}
-          onSettingsChange={onSettingsChange}
-          onReplaceSettings={onReplaceSettings}
-          onOpenPalette={onOpenPalette}
-          onOpenShutdown={onOpenShutdown}
-        />
+        <FileExplorer />
       </div>
 
       {/* Resize handle */}

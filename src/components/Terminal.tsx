@@ -6,18 +6,31 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import '@xterm/xterm/css/xterm.css';
 import NativeBrowserView from './NativeBrowserView';
+import OperationsDeck from './OperationsDeck';
 import { playSound } from '../audio';
-import { Bookmark, DEFAULT_BOOKMARKS } from '../theme';
+import { Bookmark, DEFAULT_BOOKMARKS, InterfaceSettings, LayoutPresetId } from '../theme';
 
 interface TerminalSession {
   id: string;
-  terminal: XTerm;
-  fitAddon: FitAddon;
+  terminal: XTerm | null;
+  fitAddon: FitAddon | null;
   name: string;
-  type: 'shell' | 'browser';
+  type: 'shell' | 'browser' | 'settings';
 }
 
-const DEFAULT_WEB_TARGET = 'https://lite.duckduckgo.com/lite/';
+const DEFAULT_WEB_TARGET = 'muthur://manual';
+
+interface TerminalProps {
+  settings: InterfaceSettings;
+  deckSplit: number;
+  onDeckSplitChange: (value: number) => void;
+  onLayoutPresetChange: (id: LayoutPresetId) => void;
+  onLayoutChange: (patch: Partial<InterfaceSettings['layout']>) => void;
+  onSettingsChange: (patch: Partial<InterfaceSettings>) => void;
+  onReplaceSettings: (settings: InterfaceSettings) => void;
+  onOpenPalette: () => void;
+  onOpenShutdown: () => void;
+}
 
 function cssVar(name: string, fallback: string) {
   if (typeof window === 'undefined') return fallback;
@@ -66,7 +79,17 @@ function getTerminalTheme() {
   };
 }
 
-export default function Terminal() {
+export default function Terminal({
+  settings,
+  deckSplit,
+  onDeckSplitChange,
+  onLayoutPresetChange,
+  onLayoutChange,
+  onSettingsChange,
+  onReplaceSettings,
+  onOpenPalette,
+  onOpenShutdown,
+}: TerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [sessions, setSessions] = useState<TerminalSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -77,7 +100,7 @@ export default function Terminal() {
     createNewSession('shell');
     return () => {
       sessions.forEach(session => {
-        session.terminal.dispose();
+        session.terminal?.dispose();
         if (session.type === 'shell') cleanupSession(session.id);
       });
     };
@@ -107,7 +130,7 @@ export default function Terminal() {
           session.terminal.options.fontFamily = fontFamily;
           session.terminal.options.fontSize = fontSize;
           session.terminal.options.cursorStyle = cursorStyle;
-          session.fitAddon.fit();
+          session.fitAddon?.fit();
         }
       });
     };
@@ -236,8 +259,9 @@ export default function Terminal() {
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
       const active = sessions.find(s => s.id === activeSessionId);
-      if (active?.type === 'shell' && active.terminal) {
-        requestAnimationFrame(() => active.terminal.focus());
+      const terminal = active?.type === 'shell' ? active.terminal : null;
+      if (terminal) {
+        requestAnimationFrame(() => terminal.focus());
       }
     };
     document.addEventListener('mouseup', refocus);
@@ -252,14 +276,34 @@ export default function Terminal() {
     }
   };
 
-  const createNewSession = async (type: 'shell' | 'browser') => {
+  const createNewSession = async (type: 'shell' | 'browser' | 'settings') => {
+    if (type === 'settings') {
+      const existing = sessions.find(session => session.type === 'settings');
+      if (existing) {
+        switchSession(existing.id);
+        return;
+      }
+      const id = `settings-${Date.now()}`;
+      const settingsSession: TerminalSession = {
+        id,
+        terminal: null,
+        fitAddon: null,
+        name: 'SETTINGS',
+        type: 'settings',
+      };
+      setSessions(prev => [...prev, settingsSession]);
+      setActiveSessionId(id);
+      playSound('scan', 0.08);
+      return;
+    }
+
     if (type === 'browser') {
       const id = `browser-${Date.now()}`;
       const sessionNum = sessions.length + 1;
       const fakeSession: TerminalSession = {
         id,
-        terminal: null as any,
-        fitAddon: null as any,
+        terminal: null,
+        fitAddon: null,
         name: `WEB-${sessionNum}`,
         type: 'browser',
       };
@@ -381,7 +425,7 @@ export default function Terminal() {
       const idx = shellSessions.indexOf(session);
       if (idx >= 0 && containers && containers[idx]) {
         (containers[idx] as HTMLElement).style.display = 'block';
-        session.terminal.focus();
+        session.terminal?.focus();
       }
     }
     setActiveSessionId(sessionId);
@@ -392,7 +436,7 @@ export default function Terminal() {
     if (!session) return;
 
     if (session.type === 'shell') {
-      session.terminal.dispose();
+      session.terminal?.dispose();
       await cleanupSession(sessionId);
     }
 
@@ -456,25 +500,25 @@ export default function Terminal() {
 
   const activeSession = sessions.find(s => s.id === activeSessionId);
   const isBrowser = activeSession?.type === 'browser';
+  const isSettings = activeSession?.type === 'settings';
 
   return (
     <div className="h-full flex flex-col">
-      {/* Tab bar - skewed parallelogram style (eDEX-UI signature) */}
-      <div className="flex items-center justify-evenly px-2 py-1 border-b border-[rgba(0,255,65,0.15)] shrink-0 gap-1">
+      <div className="flex items-center px-2 py-1.5 border-b border-[rgba(0,255,65,0.15)] shrink-0 gap-1 bg-[rgba(5,8,13,0.82)]">
         {sessions.map(session => (
           <div
             key={session.id}
-            className={`tab-skew flex items-center gap-2 px-4 py-1.5 text-xs font-mono tracking-wider transition-all duration-200 ${
+            className={`flex items-center gap-2 px-3 py-1.5 text-[11px] font-mono tracking-wider transition-all duration-200 border ${
               activeSessionId === session.id
-                ? 'tab-active'
-                : 'text-muthur-secondary opacity-50 hover:opacity-80 border border-[rgba(0,255,65,0.15)]'
+                ? 'bg-muthur-primary text-muthur-bg border-muthur-primary'
+                : 'text-muthur-secondary opacity-65 hover:opacity-100 border-[rgba(0,255,65,0.15)]'
             }`}
             onClick={() => switchSession(session.id)}
           >
-            <span className="tab-skew-content">{session.name}</span>
+            <span>{session.name}</span>
             <span
               onClick={(e) => { e.stopPropagation(); closeSession(session.id); }}
-              className="tab-skew-content text-[10px] opacity-40 hover:opacity-100 hover:text-[#ff006e] ml-1"
+              className="text-[10px] opacity-50 hover:opacity-100 hover:text-[#ff006e] ml-1"
             >
               x
             </span>
@@ -483,21 +527,41 @@ export default function Terminal() {
         <div className="flex gap-1 ml-auto">
           <button
             onClick={() => createNewSession('shell')}
-            className="tab-skew px-3 py-1 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
+            className="px-3 py-1.5 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
           >
-            <span className="tab-skew-content">+ SHELL</span>
+            + SHELL
           </button>
           <button
             onClick={() => createNewSession('browser')}
-            className="tab-skew px-3 py-1 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
+            className="px-3 py-1.5 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
           >
-            <span className="tab-skew-content">+ WEB</span>
+            + WEB
+          </button>
+          <button
+            onClick={() => createNewSession('settings')}
+            className="px-3 py-1.5 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
+          >
+            + SETTINGS
           </button>
         </div>
       </div>
 
       {/* Content */}
-      {isBrowser ? (
+      {isSettings ? (
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <OperationsDeck
+            settings={settings}
+            deckSplit={deckSplit}
+            onDeckSplitChange={onDeckSplitChange}
+            onLayoutPresetChange={onLayoutPresetChange}
+            onLayoutChange={onLayoutChange}
+            onSettingsChange={onSettingsChange}
+            onReplaceSettings={onReplaceSettings}
+            onOpenPalette={onOpenPalette}
+            onOpenShutdown={onOpenShutdown}
+          />
+        </div>
+      ) : isBrowser ? (
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           {/* URL bar - fixed height, always visible */}
           <div className="flex gap-2 px-3 py-2 border-b border-[rgba(0,255,65,0.15)] shrink-0 relative z-10 bg-[rgba(5,8,13,0.95)]">

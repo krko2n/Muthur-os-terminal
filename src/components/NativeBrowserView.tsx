@@ -34,6 +34,7 @@ interface NativeBrowserViewProps {
 }
 
 const SEARCH_HOME = 'https://lite.duckduckgo.com/lite/';
+const FALLBACK_SEARCH = 'https://lite.duckduckgo.com/lite/?q=';
 
 const LOCAL_MANUAL: BrowserDocument = {
   title: 'MUTHUR Offline Manual',
@@ -68,6 +69,15 @@ function getLoadingLabel(progress: number) {
 
 function formatError(value: string) {
   return value.replace(/^Error:\s*/i, '').replace(/^Request failed:\s*/i, '');
+}
+
+function getSearchUrl(value: string) {
+  try {
+    const parsed = new URL(value);
+    return `${FALLBACK_SEARCH}${encodeURIComponent(parsed.hostname || value)}`;
+  } catch {
+    return `${FALLBACK_SEARCH}${encodeURIComponent(value || 'MUTHUR OS terminal')}`;
+  }
 }
 
 export default function NativeBrowserView({ url, onNavigate }: NativeBrowserViewProps) {
@@ -175,23 +185,41 @@ export default function NativeBrowserView({ url, onNavigate }: NativeBrowserView
   if (error) {
     return (
       <div className="flex-1 p-5 font-mono flex items-center justify-center">
-        <div className="w-full max-w-[560px]">
-          <div className="text-muthur-accent text-sm tracking-[0.22em] mb-2">WEB REQUEST FAILED</div>
-          <div className="text-muthur-secondary opacity-70 text-xs leading-relaxed break-words">
+        <div className="w-full max-w-[640px] border border-[rgba(0,255,65,0.16)] bg-[rgba(0,255,65,0.025)] p-4">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="text-muthur-accent text-sm tracking-[0.18em]">WEB REQUEST FAILED</div>
+            <div className="text-[11px] text-muthur-secondary opacity-45">{getUrlHost(url)}</div>
+          </div>
+          <div className="text-muthur-secondary opacity-78 text-sm leading-relaxed break-words">
             {formatError(error)}
           </div>
-          <div className="flex gap-2 mt-4">
+          <div className="mt-3 text-xs text-muthur-secondary opacity-55 leading-relaxed">
+            The internal text browser could not fetch this page. You can retry, open the local manual, or search the target in the web tab.
+          </div>
+          <div className="flex flex-wrap gap-2 mt-4">
             <button
               onClick={() => fetchPage(url)}
-              className="px-3 py-1.5 text-[11px] tracking-widest border border-muthur-primary text-muthur-primary hover:bg-[rgba(0,255,65,0.08)] transition-colors"
+              className="px-3 py-1.5 text-xs tracking-widest border border-muthur-primary text-muthur-primary hover:bg-[rgba(0,255,65,0.08)] transition-colors"
             >
               RETRY
             </button>
             <button
               onClick={() => onNavigate(SEARCH_HOME)}
-              className="px-3 py-1.5 text-[11px] tracking-widest border border-[rgba(0,255,65,0.22)] text-muthur-secondary hover:border-[rgba(0,255,65,0.45)] transition-colors"
+              className="px-3 py-1.5 text-xs tracking-widest border border-[rgba(0,255,65,0.22)] text-muthur-secondary hover:border-[rgba(0,255,65,0.45)] transition-colors"
             >
-              SEARCH
+              SEARCH HOME
+            </button>
+            <button
+              onClick={() => onNavigate(getSearchUrl(url))}
+              className="px-3 py-1.5 text-xs tracking-widest border border-[rgba(0,255,65,0.22)] text-muthur-secondary hover:border-[rgba(0,255,65,0.45)] transition-colors"
+            >
+              SEARCH TARGET
+            </button>
+            <button
+              onClick={() => onNavigate('muthur://manual')}
+              className="px-3 py-1.5 text-xs tracking-widest border border-[rgba(0,255,65,0.22)] text-muthur-secondary hover:border-[rgba(0,255,65,0.45)] transition-colors"
+            >
+              LOCAL MANUAL
             </button>
           </div>
         </div>
@@ -216,14 +244,14 @@ export default function NativeBrowserView({ url, onNavigate }: NativeBrowserView
   }
 
   return (
-    <div ref={contentRef} className="flex-1 overflow-auto p-3 font-mono text-sm scrollbar-thin">
+    <div ref={contentRef} className="flex-1 overflow-auto p-4 font-mono text-[14px] leading-relaxed scrollbar-thin">
       <div className="sticky top-0 z-10 mb-3 pb-2 border-b border-[rgba(0,255,65,0.1)] bg-[rgba(5,8,13,0.94)] backdrop-blur-sm">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="text-[10px] tracking-widest text-muthur-secondary opacity-45">
               {getUrlHost(doc.url)}
             </div>
-            <div className="text-muthur-primary text-xs tracking-wider opacity-75 truncate">
+            <div className="text-muthur-primary text-sm tracking-wider opacity-85 truncate">
               {doc.title}
             </div>
           </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { FileSystemIcon } from './SystemIcons';
-import { playSound } from '../sounds';
+import { playSound } from '../audio';
 
 interface FileEntry {
   name: string;
@@ -162,16 +162,16 @@ export default function FileExplorer() {
       <div className="flex items-center justify-between px-[1vh] py-[0.4vh] border-b border-[rgba(0,255,65,0.15)] shrink-0">
         <span className="text-[1.3vh] tracking-widest opacity-60 flex items-center gap-[0.5vh]">
           <FileSystemIcon size={14} color="rgba(0,255,65,0.5)" />
-          CONTROL DECK
+          FILE MANAGER
         </span>
         <div className="flex items-center gap-[1vh]">
           <button
             onClick={() => setListView(prev => !prev)}
-            className="text-[1.0vh] text-muthur-secondary opacity-40 hover:opacity-100 border border-[rgba(0,255,65,0.15)] px-[0.5vh] py-[0.1vh]"
+            className="text-[1.05vh] text-muthur-secondary opacity-65 hover:opacity-100 border border-[rgba(0,255,65,0.15)] px-[0.55vh] py-[0.15vh]"
           >
             {listView ? 'GRID' : 'LIST'}
           </button>
-          <span className="text-[1.0vh] text-muthur-secondary opacity-40 truncate max-w-[15vh]">
+          <span className="text-[1.05vh] text-muthur-secondary opacity-60 truncate max-w-[15vh]">
             {currentPath}
           </span>
         </div>
@@ -201,7 +201,7 @@ export default function FileExplorer() {
               >
                 <div className="w-[2vh] h-[2vh] shrink-0"><FileIcon type={getIconType(entry)} /></div>
                 <span className="text-[1.2vh] flex-1 truncate">{entry.name}</span>
-                <span className="text-[1.0vh] opacity-40 tabular-nums w-[6vh] text-right">
+                <span className="text-[1.05vh] opacity-55 tabular-nums w-[6vh] text-right">
                   {entry.is_dir ? 'DIR' : entry.size > 1024*1024 ? `${(entry.size/1024/1024).toFixed(1)}M` : entry.size > 1024 ? `${(entry.size/1024).toFixed(0)}K` : `${entry.size}B`}
                 </span>
               </div>

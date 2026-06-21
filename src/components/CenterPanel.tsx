@@ -1,6 +1,19 @@
 import Terminal from './Terminal';
+import { InterfaceSettings, LayoutPresetId } from '../theme';
 
-export default function CenterPanel() {
+interface CenterPanelProps {
+  settings: InterfaceSettings;
+  deckSplit: number;
+  onDeckSplitChange: (value: number) => void;
+  onLayoutPresetChange: (id: LayoutPresetId) => void;
+  onLayoutChange: (patch: Partial<InterfaceSettings['layout']>) => void;
+  onSettingsChange: (patch: Partial<InterfaceSettings>) => void;
+  onReplaceSettings: (settings: InterfaceSettings) => void;
+  onOpenPalette: () => void;
+  onOpenShutdown: () => void;
+}
+
+export default function CenterPanel(props: CenterPanelProps) {
   return (
     <div className="h-full flex flex-col min-h-0 min-w-0 border-x border-[rgba(0,255,65,0.1)] relative"
       style={{
@@ -8,7 +21,7 @@ export default function CenterPanel() {
       }}
     >
       <div className="flex-1 overflow-hidden min-h-0">
-        <Terminal />
+        <Terminal {...props} />
       </div>
     </div>
   );
