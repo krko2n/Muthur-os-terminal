@@ -530,6 +530,49 @@ export default function Terminal({
   const activeSession = sessions.find(s => s.id === activeSessionId);
   const isBrowser = activeSession?.type === 'browser';
   const isSettings = activeSession?.type === 'settings';
+  const isGame = activeSession?.type === 'game';
+  const [gameFullscreen, setGameFullscreen] = useState(false);
+
+  const renderGameContent = (gameId?: GameId) => {
+    switch (gameId) {
+      case 'signal-lock':
+        return <SignalLock fullscreen />;
+      case 'sector-tactics':
+        return <SectorTactics fullscreen />;
+      case 'void-cards':
+        return <VoidCards fullscreen />;
+      default:
+        return null;
+    }
+  };
+
+  // Fullscreen game overlay
+  if (gameFullscreen && isGame) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-[rgba(2,4,8,0.98)] flex flex-col">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-[rgba(0,255,65,0.15)] bg-[rgba(5,8,13,0.95)]">
+          <span className="text-[12px] font-mono tracking-widest text-muthur-primary">{activeSession?.name}</span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setGameFullscreen(false)}
+              className="px-3 py-1 text-[10px] border border-[rgba(0,255,65,0.3)] text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors font-mono tracking-wider"
+            >
+              EXIT FULLSCREEN
+            </button>
+            <button
+              onClick={() => { setGameFullscreen(false); closeSession(activeSession!.id); }}
+              className="px-3 py-1 text-[10px] border border-[rgba(255,59,83,0.4)] text-muthur-accent hover:border-muthur-accent transition-colors font-mono tracking-wider"
+            >
+              CLOSE
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 min-h-0 overflow-hidden">
+          {renderGameContent(activeSession?.gameId)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -544,7 +587,7 @@ export default function Terminal({
             }`}
             onClick={() => switchSession(session.id)}
           >
-            <span>{session.name}</span>
+            <span>{session.type === 'game' ? `[G] ${session.name}` : session.name}</span>
             <span
               onClick={(e) => { e.stopPropagation(); closeSession(session.id); }}
               className="text-[10px] opacity-50 hover:opacity-100 hover:text-[#ff006e] ml-1"
@@ -576,7 +619,21 @@ export default function Terminal({
       </div>
 
       {/* Content */}
-      {isSettings ? (
+      {isGame ? (
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div className="flex items-center justify-end px-3 py-1 border-b border-[rgba(0,255,65,0.08)] shrink-0 bg-[rgba(5,8,13,0.9)]">
+            <button
+              onClick={() => setGameFullscreen(true)}
+              className="px-3 py-1 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors font-mono tracking-wider"
+            >
+              FULLSCREEN
+            </button>
+          </div>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            {renderGameContent(activeSession?.gameId)}
+          </div>
+        </div>
+      ) : isSettings ? (
         <div className="flex-1 min-h-0 overflow-hidden">
           <OperationsDeck
             settings={settings}

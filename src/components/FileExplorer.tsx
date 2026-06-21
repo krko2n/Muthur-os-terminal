@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { FileSystemIcon } from './SystemIcons';
 import { playSound } from '../audio';
+import { GameId, GAME_REGISTRY, VIRTUAL_GAMES_PATH } from './games';
 
 interface FileEntry {
   name: string;
@@ -17,6 +18,14 @@ function FileIcon({ type }: { type: string }) {
   switch (type) {
     case 'dir':
       return <svg {...props}><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>;
+    case 'dir-games':
+      return <svg {...props}><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/><circle cx="12" cy="14" r="3" strokeWidth="1"/><line x1="12" y1="11" x2="12" y2="17" strokeWidth="0.8"/><line x1="9" y1="14" x2="15" y2="14" strokeWidth="0.8"/></svg>;
+    case 'game-signal':
+      return <svg {...props}><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/><circle cx="12" cy="12" r="3"/></svg>;
+    case 'game-tactics':
+      return <svg {...props}><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>;
+    case 'game-cards':
+      return <svg {...props}><rect x="4" y="2" width="12" height="16" rx="2"/><rect x="8" y="6" width="12" height="16" rx="2"/><line x1="11" y1="10" x2="17" y2="10" strokeWidth="0.8"/><line x1="14" y1="7" x2="14" y2="13" strokeWidth="0.8"/></svg>;
     case 'ts':
       return <svg {...props}><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="15" textAnchor="middle" fontSize="7" fill="currentColor" stroke="none">TS</text></svg>;
     case 'js':
@@ -50,9 +59,18 @@ function FileIcon({ type }: { type: string }) {
 }
 
 function getIconType(entry: FileEntry): string {
-  if (entry.is_dir) return 'dir';
+  if (entry.is_dir) {
+    if (entry.name === 'games' && entry.path === VIRTUAL_GAMES_PATH) return 'dir-games';
+    return 'dir';
+  }
   const ext = entry.name.split('.').pop()?.toLowerCase() || '';
-  if (entry.name.includes('lock')) return 'lock';
+  if (ext === 'game') {
+    if (entry.name.startsWith('signal')) return 'game-signal';
+    if (entry.name.startsWith('sector')) return 'game-tactics';
+    if (entry.name.startsWith('void')) return 'game-cards';
+    return 'game-signal';
+  }
+  if (entry.name.includes('lock') && ext !== 'game') return 'lock';
   return ext;
 }
 
@@ -107,11 +125,51 @@ export default function FileExplorer() {
     }
   };
 
+  const getVirtualGamesEntries = (): FileEntry[] => {
+    return GAME_REGISTRY.map(game => ({
+      name: game.filename,
+      path: `${VIRTUAL_GAMES_PATH}/${game.filename}`,
+      is_dir: false,
+      size: 0,
+      modified: Date.now() / 1000,
+    }));
+  };
+
   const loadDirectory = async (path: string) => {
     setLoading(true);
+
+    // Handle virtual games directory
+    if (path === VIRTUAL_GAMES_PATH) {
+      setEntries(getVirtualGamesEntries());
+      setCurrentPath(path);
+      setDiskUsage(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       const result = await invoke('list_directory', { path }) as FileEntry[];
-      setEntries(result.sort((a, b) => {
+
+      // Inject virtual games folder into home directory or /usr/share/muthur
+      let enriched = [...result];
+      const normalizedPath = path.replace(/\\/g, '/');
+      const isHome = normalizedPath === '/home' || normalizedPath.match(/^\/home\/[^/]+$/) || normalizedPath.match(/^[A-Z]:\/Users\/[^/]+$/i);
+      const isMuthurShare = normalizedPath === '/usr/share/muthur';
+
+      if (isHome || isMuthurShare) {
+        const hasGamesAlready = enriched.some(e => e.name === 'games' && e.is_dir);
+        if (!hasGamesAlready) {
+          enriched.push({
+            name: 'games',
+            path: VIRTUAL_GAMES_PATH,
+            is_dir: true,
+            size: 0,
+            modified: Date.now() / 1000,
+          });
+        }
+      }
+
+      setEntries(enriched.sort((a, b) => {
         if (a.is_dir && !b.is_dir) return -1;
         if (!a.is_dir && b.is_dir) return 1;
         return a.name.localeCompare(b.name);
