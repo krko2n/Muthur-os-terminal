@@ -209,10 +209,6 @@ body.muthur-performance * {
   box-shadow: none !important;
 }
 
-body.muthur-cinematic .custom-cursor {
-  opacity: 0.55;
-}
-
 body.muthur-cinematic .panel-reveal {
   filter: saturate(1.1) contrast(1.08);
 }
@@ -223,49 +219,142 @@ body.muthur-cinematic .panel-reveal {
   overflow: hidden;
 }
 
-/* Custom cursor - terminal crosshair (GPU-composited) */
+/* ============================================================
+   Custom Cursor System - Sci-Fi Angular Design (GPU-composited)
+   Uses inline SVG data URIs with theme-aware accent color.
+   Base color: #00f0ff (cyan) with outer glow via SVG filter.
+   ============================================================ */
+
+/* --- SVG Cursor Data URIs --- */
+
+/* Normal Select: Angular chevron arrow with geometric dot detail */
+:root {
+  --cursor-normal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='0.8' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M6 2 L6 22 L11 17 L15 25 L18 23.5 L14 16 L20 16 Z'/%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%2300f0ff' stroke='none'/%3E%3Cpath d='M8 4 L8 6' stroke-width='1' opacity='0.6'/%3E%3C/g%3E%3C/svg%3E") 6 2, default;
+
+  /* Text/Precision: Thin I-beam with corner brackets */
+  --cursor-text: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='0.8' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M12 4 L16 4 L16 28 L12 28'/%3E%3Cpath d='M20 4 L16 4'/%3E%3Cpath d='M20 28 L16 28'/%3E%3Cpath d='M16 4 L16 28' stroke-width='1.5'/%3E%3Crect x='9' y='2' width='4' height='4' fill='none' stroke-width='1' opacity='0.5'/%3E%3Crect x='19' y='2' width='4' height='4' fill='none' stroke-width='1' opacity='0.5'/%3E%3Crect x='9' y='26' width='4' height='4' fill='none' stroke-width='1' opacity='0.5'/%3E%3Crect x='19' y='26' width='4' height='4' fill='none' stroke-width='1' opacity='0.5'/%3E%3C/g%3E%3C/svg%3E") 16 16, text;
+
+  /* Pointer/Link: Angular arrow with circle indicator */
+  --cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='0.8' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M6 2 L6 20 L10 16 L13 22 L16 20.5 L13 15 L18 15 Z'/%3E%3Ccircle cx='22' cy='22' r='5' stroke-width='1.5'/%3E%3Ccircle cx='22' cy='22' r='1.5' fill='%2300f0ff' stroke='none'/%3E%3Cpath d='M22 18 L22 19' stroke-width='1'/%3E%3Cpath d='M22 25 L22 26' stroke-width='1'/%3E%3Cpath d='M18 22 L19 22' stroke-width='1'/%3E%3Cpath d='M25 22 L26 22' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E") 6 2, pointer;
+
+  /* Busy/Loading: Rotating ring with angular segments */
+  --cursor-busy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='1' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Ccircle cx='16' cy='16' r='10' stroke-dasharray='8 4' opacity='0.7'/%3E%3Ccircle cx='16' cy='16' r='6' stroke-dasharray='4 6' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%2300f0ff' stroke='none'/%3E%3Cpath d='M16 4 L16 6' stroke-width='1'/%3E%3Cpath d='M16 26 L16 28' stroke-width='1'/%3E%3Cpath d='M4 16 L6 16' stroke-width='1'/%3E%3Cpath d='M26 16 L28 16' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E") 16 16, wait;
+
+  /* Resize Horizontal: Angular double arrows */
+  --cursor-resize-ew: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='0.8' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M4 16 L12 16'/%3E%3Cpath d='M20 16 L28 16'/%3E%3Cpath d='M4 16 L8 12 M4 16 L8 20'/%3E%3Cpath d='M28 16 L24 12 M28 16 L24 20'/%3E%3Crect x='13' y='12' width='6' height='8' stroke-width='1' opacity='0.5'/%3E%3C/g%3E%3C/svg%3E") 16 16, ew-resize;
+
+  /* Resize Vertical: Angular double arrows vertical */
+  --cursor-resize-ns: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='0.8' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M16 4 L16 12'/%3E%3Cpath d='M16 20 L16 28'/%3E%3Cpath d='M16 4 L12 8 M16 4 L20 8'/%3E%3Cpath d='M16 28 L12 24 M16 28 L20 24'/%3E%3Crect x='12' y='13' width='8' height='6' stroke-width='1' opacity='0.5'/%3E%3C/g%3E%3C/svg%3E") 16 16, ns-resize;
+
+  /* Resize Diagonal NW-SE */
+  --cursor-resize-nwse: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='0.8' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M6 6 L14 14'/%3E%3Cpath d='M18 18 L26 26'/%3E%3Cpath d='M6 6 L6 11 M6 6 L11 6'/%3E%3Cpath d='M26 26 L26 21 M26 26 L21 26'/%3E%3Crect x='13' y='13' width='6' height='6' stroke-width='1' opacity='0.5' transform='rotate(45 16 16)'/%3E%3C/g%3E%3C/svg%3E") 16 16, nwse-resize;
+
+  /* Crosshair/Precision: Thin crosshair with corner brackets */
+  --cursor-crosshair: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='0.8' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M16 4 L16 13'/%3E%3Cpath d='M16 19 L16 28'/%3E%3Cpath d='M4 16 L13 16'/%3E%3Cpath d='M19 16 L28 16'/%3E%3Ccircle cx='16' cy='16' r='1.5' fill='%2300f0ff' stroke='none'/%3E%3Cpath d='M6 6 L6 9 M6 6 L9 6' stroke-width='1' opacity='0.6'/%3E%3Cpath d='M26 6 L26 9 M26 6 L23 6' stroke-width='1' opacity='0.6'/%3E%3Cpath d='M6 26 L6 23 M6 26 L9 26' stroke-width='1' opacity='0.6'/%3E%3Cpath d='M26 26 L26 23 M26 26 L23 26' stroke-width='1' opacity='0.6'/%3E%3C/g%3E%3C/svg%3E") 16 16, crosshair;
+}
+
+/* --- Animated Cursor Element (follows mouse via JS) --- */
 .custom-cursor {
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.95);
-  border-radius: 2px;
+  width: 32px;
+  height: 32px;
   pointer-events: none;
   z-index: 99999;
-  opacity: 0.9;
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.65),
-    0 0 10px rgba(var(--color-r), var(--color-g), var(--color-b), 0.35);
+  opacity: 0.95;
+  transition: opacity 0.15s ease;
 }
 
-.custom-cursor::before {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.35);
+/* Default state: Angular chevron arrow */
+.custom-cursor--default {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='1' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M6 2 L6 22 L11 17 L15 25 L18 23.5 L14 16 L20 16 Z' fill='rgba(0,240,255,0.08)'/%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%2300f0ff' stroke='none'/%3E%3Cpath d='M8 4 L8 6' stroke-width='1' opacity='0.6'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 32px 32px;
+  background-repeat: no-repeat;
 }
 
-.custom-cursor::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 6px;
-  height: 6px;
-  background: var(--color-accent);
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-  box-shadow: 0 0 8px var(--color-accent);
+/* Pointer/Link state: Arrow with circle indicator */
+.custom-cursor--pointer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='1' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M6 2 L6 20 L10 16 L13 22 L16 20.5 L13 15 L18 15 Z' fill='rgba(0,240,255,0.08)'/%3E%3Ccircle cx='22' cy='22' r='5' stroke-width='1.5'/%3E%3Ccircle cx='22' cy='22' r='1.5' fill='%2300f0ff' stroke='none'/%3E%3Cpath d='M22 18 L22 19' stroke-width='1'/%3E%3Cpath d='M22 25 L22 26' stroke-width='1'/%3E%3Cpath d='M18 22 L19 22' stroke-width='1'/%3E%3Cpath d='M25 22 L26 22' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 32px 32px;
+  background-repeat: no-repeat;
 }
 
+/* Text/I-beam state: Thin I-beam with corner brackets */
+.custom-cursor--text {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='1' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Cpath d='M12 4 L16 4 L16 28 L12 28'/%3E%3Cpath d='M20 4 L16 4'/%3E%3Cpath d='M20 28 L16 28'/%3E%3Cpath d='M16 4 L16 28' stroke-width='1.5'/%3E%3Crect x='9' y='2' width='4' height='4' fill='none' stroke-width='1' opacity='0.5'/%3E%3Crect x='19' y='2' width='4' height='4' fill='none' stroke-width='1' opacity='0.5'/%3E%3Crect x='9' y='26' width='4' height='4' fill='none' stroke-width='1' opacity='0.5'/%3E%3Crect x='19' y='26' width='4' height='4' fill='none' stroke-width='1' opacity='0.5'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 32px 32px;
+  background-repeat: no-repeat;
+}
+
+/* Busy/Loading state: Rotating ring */
+.custom-cursor--busy {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='1' result='blur'/%3E%3CfeMerge%3E%3CfeMergeNode in='blur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23glow)' fill='none' stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='square'%3E%3Ccircle cx='16' cy='16' r='10' stroke-dasharray='8 4' opacity='0.7'/%3E%3Ccircle cx='16' cy='16' r='6' stroke-dasharray='4 6' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%2300f0ff' stroke='none'/%3E%3Cpath d='M16 4 L16 6' stroke-width='1'/%3E%3Cpath d='M16 26 L16 28' stroke-width='1'/%3E%3Cpath d='M4 16 L6 16' stroke-width='1'/%3E%3Cpath d='M26 16 L28 16' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 32px 32px;
+  background-repeat: no-repeat;
+  animation: cursor-spin 2s linear infinite;
+}
+
+@keyframes cursor-spin {
+  from { rotate: 0deg; }
+  to { rotate: 360deg; }
+}
+
+/* --- Cursor Trail --- */
 .cursor-trail {
-  width: 5px;
-  height: 5px;
+  width: 3px;
+  height: 3px;
   background: var(--color-accent);
-  border-radius: 1px;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
   pointer-events: none;
   z-index: 99998;
   opacity: 0;
-  box-shadow: 0 0 6px rgba(var(--color-r), var(--color-g), var(--color-b), 0.45);
+  box-shadow: 0 0 4px rgba(var(--color-r), var(--color-g), var(--color-b), 0.5);
+}
+
+/* --- CSS cursor fallbacks for elements (used when hovering outside JS-tracked cursor) --- */
+/* These apply the SVG cursors via CSS for native cursor rendering on specific element types */
+
+a, button, [role="button"], .clickable,
+select, summary, label[for] {
+  cursor: var(--cursor-pointer) !important;
+}
+
+input, textarea, [contenteditable="true"] {
+  cursor: var(--cursor-text) !important;
+}
+
+[class*="resize"], [class*="drag"],
+.react-resizable-handle {
+  cursor: var(--cursor-resize-ew) !important;
+}
+
+.loading, .busy, [aria-busy="true"] {
+  cursor: var(--cursor-busy) !important;
+}
+
+/* --- Performance Mode: hide animated cursor --- */
+body.muthur-performance .custom-cursor,
+body.muthur-performance .cursor-trail {
+  display: none !important;
+}
+
+/* When performance mode is active, show CSS cursors instead */
+body.muthur-performance * {
+  cursor: var(--cursor-normal) !important;
+}
+
+body.muthur-performance a,
+body.muthur-performance button,
+body.muthur-performance [role="button"] {
+  cursor: var(--cursor-pointer) !important;
+}
+
+body.muthur-performance input,
+body.muthur-performance textarea {
+  cursor: var(--cursor-text) !important;
+}
+
+/* --- Cinematic Mode: dim the cursor slightly --- */
+body.muthur-cinematic .custom-cursor {
+  opacity: 0.6;
 }
 
 /* Scanline - GPU-composited layer */
@@ -464,7 +553,7 @@ body.muthur-cinematic .panel-reveal {
   opacity: 0.9;
   -webkit-appearance: none;
   appearance: none;
-  cursor: pointer;
+  cursor: none;
 }
 
 .edex-layout-select option {
