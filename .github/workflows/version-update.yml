@@ -28,15 +28,18 @@ jobs:
         echo "" >> VERSION_HISTORY.md
         git log --oneline --no-merges -50 >> VERSION_HISTORY.md
 
-    - name: Commit version history
+    - name: Update README counters
+      run: node scripts/update-readme-stats.cjs
+
+    - name: Commit generated docs
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
 
         if [ -f VERSION_HISTORY.md ]; then
-          git add -f VERSION_HISTORY.md
+          git add -f VERSION_HISTORY.md README.md
           if ! git diff --staged --quiet; then
-            git commit -m "docs: auto-update version history [skip ci]"
+            git commit -m "docs: auto-update generated docs [skip ci]"
             git push || echo "Push failed (likely branch protection) - skipping"
           fi
         fi

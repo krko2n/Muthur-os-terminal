@@ -15,7 +15,8 @@
     "dev": "vite",
     "build": "tsc && node -r ./scripts/vite-no-cmd-netuse.cjs ./node_modules/vite/bin/vite.js build --configLoader native",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "update:readme-stats": "node scripts/update-readme-stats.cjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",

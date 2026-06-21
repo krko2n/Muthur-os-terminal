@@ -466,7 +466,9 @@ MIT -- see [LICENSE](LICENSE).
 
 ---
 
-![Lines of Code](https://tokei.rs/b1/github/krko2n/Muthur-os-terminal?category=lines&style=flat-square&color=00ff41&labelColor=0d1117)
-![Files](https://tokei.rs/b1/github/krko2n/Muthur-os-terminal?category=files&style=flat-square&color=00d4ff&labelColor=0d1117)
+<!-- MUTHUR-STATS:START -->
+![Source Lines](https://img.shields.io/badge/source%20lines-23%2C928-00ff41?style=flat-square&labelColor=0d1117)
+![Project Files](https://img.shields.io/badge/project%20files-115-00d4ff?style=flat-square&labelColor=0d1117)
+<!-- MUTHUR-STATS:END -->
 
 </div>
