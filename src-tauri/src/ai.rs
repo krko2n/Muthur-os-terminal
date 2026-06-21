@@ -51,7 +51,10 @@ fn offline_pack_dir() -> PathBuf {
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("."));
 
-    home.join(".local").join("share").join("muthur").join("offline")
+    home.join(".local")
+        .join("share")
+        .join("muthur")
+        .join("offline")
 }
 
 fn query_terms(query: &str) -> Vec<String> {
@@ -113,7 +116,11 @@ fn infer_title(path: &Path, content: &str) -> String {
         .map(|line| line.trim().trim_start_matches('#').trim())
         .find(|line| line.len() >= 4 && line.len() <= 90)
         .map(|line| line.to_string())
-        .or_else(|| path.file_stem().and_then(|name| name.to_str()).map(|name| name.to_string()))
+        .or_else(|| {
+            path.file_stem()
+                .and_then(|name| name.to_str())
+                .map(|name| name.to_string())
+        })
         .unwrap_or_else(|| "offline note".to_string())
 }
 
@@ -136,7 +143,12 @@ fn collect_searchable_files(root: &Path, depth: usize, files: &mut Vec<PathBuf>)
         let searchable = path
             .extension()
             .and_then(|extension| extension.to_str())
-            .map(|extension| matches!(extension.to_lowercase().as_str(), "md" | "txt" | "jsonl" | "json"))
+            .map(|extension| {
+                matches!(
+                    extension.to_lowercase().as_str(),
+                    "md" | "txt" | "jsonl" | "json"
+                )
+            })
             .unwrap_or(false);
 
         if searchable
@@ -149,7 +161,13 @@ fn collect_searchable_files(root: &Path, depth: usize, files: &mut Vec<PathBuf>)
     }
 }
 
-fn push_hit(hits: &mut Vec<OfflineWikiHit>, title: String, source: String, content: &str, terms: &[String]) {
+fn push_hit(
+    hits: &mut Vec<OfflineWikiHit>,
+    title: String,
+    source: String,
+    content: &str,
+    terms: &[String],
+) {
     let score = text_score(&title, content, terms);
     if score == 0 {
         return;
@@ -243,7 +261,12 @@ fn collect_zim_files(root: &Path, depth: usize, files: &mut Vec<PathBuf>) {
     }
 }
 
-fn search_zim_with_kiwix(wiki_dir: &Path, query: &str, terms: &[String], hits: &mut Vec<OfflineWikiHit>) {
+fn search_zim_with_kiwix(
+    wiki_dir: &Path,
+    query: &str,
+    terms: &[String],
+    hits: &mut Vec<OfflineWikiHit>,
+) {
     let mut zim_files = Vec::new();
     collect_zim_files(wiki_dir, 0, &mut zim_files);
 
@@ -264,13 +287,7 @@ fn search_zim_with_kiwix(wiki_dir: &Path, query: &str, terms: &[String], hits: &
                 .unwrap_or(line)
                 .trim()
                 .to_string();
-            push_hit(
-                hits,
-                title,
-                zim.to_string_lossy().to_string(),
-                line,
-                terms,
-            );
+            push_hit(hits, title, zim.to_string_lossy().to_string(), line, terms);
         }
     }
 }
@@ -291,7 +308,9 @@ pub fn search_offline_wiki(query: &str, limit: usize) -> Vec<OfflineWikiHit> {
     let roots = [
         pack_dir.join("wiki"),
         pack_dir.join("docs"),
-        std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")).join("docs"),
+        std::env::current_dir()
+            .unwrap_or_else(|_| PathBuf::from("."))
+            .join("docs"),
     ];
 
     let mut hits = Vec::new();
@@ -443,7 +462,11 @@ impl OllamaClient {
         self.generate(&prompt).await
     }
 
-    pub async fn chat(&self, message: &str, offline_context: Option<&str>) -> anyhow::Result<String> {
+    pub async fn chat(
+        &self,
+        message: &str,
+        offline_context: Option<&str>,
+    ) -> anyhow::Result<String> {
         let archive_instruction = if offline_context.is_some() {
             "Use the OFFLINE ARCHIVE CONTEXT when it is relevant. Mention the local source title briefly when useful. Do not invent details beyond the archive."
         } else {
