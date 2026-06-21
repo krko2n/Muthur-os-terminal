@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+5b16f71 fix: correct badge stats to count all tracked files, use neutral colors
+77ddcac docs: auto-update generated docs [skip ci]
 5875a5e chore: remove 370+ build artifacts, reorganize project structure
 8273b0e docs: auto-update generated docs [skip ci]
 0d6ccf2 fix: correct README stats badges to reflect actual repo size
@@ -50,5 +52,3 @@ bb867c9 fix(install): portable path resolution + strict error handling
 afe8450 feat(batch5): unified idempotent installer + professional quality pass
 1ae4638 feat(batch4): kiosk mode, mother-ui autostart, compositor evaluation
 d415281 feat(batch3): globe data fix, file-open editor, kys shutdown command
-99d5b34 feat(batch2): structured browser engine + braille ASCII image renderer
-29abc0c feat(batch1): fix PTY output delay, search bar visibility, add header
