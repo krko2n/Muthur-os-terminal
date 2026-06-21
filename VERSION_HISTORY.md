@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+d5173fa feat: rewrite upgrade scripts to preserve user data across updates
+9b0808c docs: auto-update generated docs [skip ci]
 d400008 style: fix cargo fmt formatting in main.rs
 9b10054 docs: auto-update generated docs [skip ci]
 83dde0c style: fix cargo fmt formatting in ai.rs
@@ -50,5 +52,3 @@ e498331 docs: auto-update version history [skip ci]
 10dd078 fix(ci): remove VERSION_HISTORY.md from .gitignore
 45ddf2e fix(ci): cargo fmt + version-update workflow resilience
 0abaafa feat(ui): eDEX-style boot, cursor trail, sound effects, keyboard + browser fixes
-e39fafd fix(build): resolve TS2304 and ico format errors, rename make upgrade to update
-7525ada docs(readme): complete rewrite for beginner accessibility
