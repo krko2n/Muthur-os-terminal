@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+6ec93fe docs: make README counters self-updating
+1969007 docs: auto-update version history [skip ci]
 3c9dd88 Add sound packs and prebuilt interface loadouts
 6cfce92 docs: auto-update version history [skip ci]
 46f5ffa Add eDEX keyboard and offline archive AI grounding
@@ -50,5 +52,3 @@ a3dbd75 fix(ci): build frontend before cargo test
 e5b93ef feat(phase3): WebGL renderer, shell integration, per-session locks
 cdbf013 fix(build): disable reqwest default-features to avoid TLS conflicts
 b3085d2 feat(phase2): loading screen, logo system, build fix, security hardening
-3a0b2fc perf(native): eliminate web artifacts, reduce input latency, optimize rendering
-eb9125c fix(keyboard): sticky shift on click, fill entire container space
