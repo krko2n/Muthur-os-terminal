@@ -2,6 +2,10 @@
 
 Auto-generated from git log.
 
+811a226 feat: games as launchable fullscreen tabs from file explorer
+22d2b59 feat: full sci-fi cursor CSS system with SVG data URIs
+a35e8d7 feat: sci-fi cursor set with angular SVGs and cyan glow
+e34d06b docs: auto-update generated docs [skip ci]
 16fa011 feat: add PHANTOM and NEON theme presets
 ecd90b1 docs: auto-update generated docs [skip ci]
 7a7f088 feat: add game tutorials with controls overlay and help button
@@ -48,7 +52,3 @@ ad078a2 docs: auto-update version history [skip ci]
 90a4a79 docs: auto-update version history [skip ci]
 8f5c07e feat(keyboard): ISO L-shaped Enter key spanning two rows
 26340d6 docs: auto-update version history [skip ci]
-9844663 feat(ui): system monitors, list view, password mode, second font
-0379dc3 docs: auto-update version history [skip ci]
-b69b99b feat(ui): complete eDEX-UI feature parity batch
-1226c57 docs: auto-update version history [skip ci]
