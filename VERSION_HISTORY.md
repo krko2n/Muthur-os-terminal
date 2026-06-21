@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+ae0b9d4 Overhaul MUTHUR OS terminal
+fdd7e81 docs: auto-update version history [skip ci]
 6f44bc2 Add offline pack manager, map viewer, and game saves
 ccbbc61 Add sci-fi themes, offline packs, and arcade games
 95dadd5 docs: auto-update version history [skip ci]
@@ -50,5 +52,3 @@ eb9125c fix(keyboard): sticky shift on click, fill entire container space
 a6906cd feat(ui): eDEX-UI style layout with keyboard, grid filesystem, fixed globe
 f8caa96 fix(ui): major overhaul - terminal output, browser, network, layout, cursor
 7d15e3f fix(system): pass bool arg to Networks::refresh() for sysinfo 0.39
-b71cdbc feat(globe): real world map from TopoJSON, live conflict data from UCDP
-f4a807f fix(core): fix system stats, terminal, file explorer, globe data
