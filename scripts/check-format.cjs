@@ -72,6 +72,10 @@ for (const file of trackedFiles().filter(shouldCheck)) {
     failures.push(`${file}: contains merge conflict markers`);
   }
 
+  if (path.posix.extname(file).toLowerCase() === '.sh' && text.includes('\r\n')) {
+    failures.push(`${file}: shell scripts must use LF line endings`);
+  }
+
   if (/\s$/.test(text) && !text.endsWith('\n') && !text.endsWith('\r\n')) {
     failures.push(`${file}: file ends with trailing whitespace`);
   }
