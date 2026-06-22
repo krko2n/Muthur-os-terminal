@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+65af251 chore: verify readme counters and installer guards
+3734184 docs: auto-update generated docs [skip ci]
 63a8c3d fix: tighten format conflict marker check
 d8556ae docs: auto-update generated docs [skip ci]
 77c6c51 chore: harden production readiness gates
@@ -50,5 +52,3 @@ e947cd8 Improve workspace layout and web readability
 2656d73 docs: add live line count and file count badges to README
 feb4718 docs: auto-update version history [skip ci]
 ae0b9d4 Overhaul MUTHUR OS terminal
-fdd7e81 docs: auto-update version history [skip ci]
-6f44bc2 Add offline pack manager, map viewer, and game saves
