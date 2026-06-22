@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+04715a1 fix: preserve shell script executable modes
+fdfdd85 docs: auto-update generated docs [skip ci]
 df3dacb fix: keep installer scripts linux safe
 1bfd8eb docs: auto-update generated docs [skip ci]
 65af251 chore: verify readme counters and installer guards
@@ -50,5 +52,3 @@ ea52038 docs: auto-update generated docs [skip ci]
 6cfce92 docs: auto-update version history [skip ci]
 46f5ffa Add eDEX keyboard and offline archive AI grounding
 4a863b0 docs: auto-update version history [skip ci]
-e947cd8 Improve workspace layout and web readability
-2656d73 docs: add live line count and file count badges to README
