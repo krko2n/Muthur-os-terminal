@@ -6,6 +6,14 @@ const ROOT = path.resolve(__dirname, '..');
 const README = path.join(ROOT, 'README.md');
 const START = '<!-- MUTHUR-STATS:START -->';
 const END = '<!-- MUTHUR-STATS:END -->';
+const args = new Set(process.argv.slice(2));
+const CHECK_ONLY = args.has('--check');
+
+for (const arg of args) {
+  if (!['--check'].includes(arg)) {
+    throw new Error(`Unknown option: ${arg}`);
+  }
+}
 
 const TEXT_EXTENSIONS = new Set([
   '.cjs',
@@ -65,11 +73,13 @@ const EXCLUDED_DIRS = new Set([
 
 function trackedFiles() {
   try {
-    return execFileSync('git', ['ls-files', '-z'], { cwd: ROOT })
+    const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT })
       .toString('utf8')
       .split('\0')
       .filter(Boolean)
       .map((file) => file.replaceAll('\\', '/'));
+
+    return files.length > 0 ? files : scannedFiles();
   } catch {
     return scannedFiles();
   }
@@ -97,6 +107,7 @@ function scannedFiles(dir = ROOT, results = []) {
 
 function isCounted(file) {
   if (EXCLUDED.some((pattern) => pattern.test(file))) return false;
+  if (!fs.existsSync(path.join(ROOT, file))) return false;
   const base = path.posix.basename(file);
   const ext = path.posix.extname(file).toLowerCase();
   return TEXT_FILENAMES.has(base) || TEXT_EXTENSIONS.has(ext);
@@ -122,13 +133,13 @@ function badge(label, value, color) {
   return `https://img.shields.io/badge/${shieldSegment(label)}-${shieldSegment(value)}-${color}?style=flat-square&labelColor=161b22`;
 }
 
-const allFiles = trackedFiles();
-const totalFiles = allFiles.length;
-const lines = allFiles.reduce((sum, file) => sum + lineCount(file), 0);
+const countedFiles = trackedFiles().filter(isCounted).sort((a, b) => a.localeCompare(b));
+const totalFiles = countedFiles.length;
+const lines = countedFiles.reduce((sum, file) => sum + lineCount(file), 0);
 const generated = [
   START,
   `![Lines of Code](${badge('lines of code', formatNumber(lines), 'c9d1d9')})`,
-  `![Total Files](${badge('total files', formatNumber(totalFiles), 'c9d1d9')})`,
+  `![Project Files](${badge('project files', formatNumber(totalFiles), 'c9d1d9')})`,
   END,
 ].join('\n');
 
@@ -136,6 +147,16 @@ const readme = fs.readFileSync(README, 'utf8');
 const pattern = new RegExp(`${START}[\\s\\S]*?${END}`);
 if (!pattern.test(readme)) {
   throw new Error(`README.md is missing ${START}/${END} markers`);
+}
+
+const current = readme.match(pattern)[0];
+if (CHECK_ONLY) {
+  if (current !== generated) {
+    throw new Error(`README stats are stale. Run: npm run update:readme-stats`);
+  }
+
+  console.log(`README stats verified: ${formatNumber(lines)} lines, ${formatNumber(totalFiles)} files`);
+  process.exit(0);
 }
 
 const next = readme.replace(pattern, generated);
