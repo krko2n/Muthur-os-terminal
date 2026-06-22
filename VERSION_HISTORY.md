@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+77c6c51 chore: harden production readiness gates
+0577217 docs: auto-update generated docs [skip ci]
 d142896 docs: fix README stats counter
 029999c docs: auto-update generated docs [skip ci]
 d8d01e8 fix: move gameFullscreen state declaration to component top
@@ -50,5 +52,3 @@ fdd7e81 docs: auto-update version history [skip ci]
 6f44bc2 Add offline pack manager, map viewer, and game saves
 ccbbc61 Add sci-fi themes, offline packs, and arcade games
 95dadd5 docs: auto-update version history [skip ci]
-55f6619 Refactor MUTHUR session and control deck wording
-014125d docs: auto-update version history [skip ci]
