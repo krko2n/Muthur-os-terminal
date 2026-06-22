@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+d142896 docs: fix README stats counter
+029999c docs: auto-update generated docs [skip ci]
 d8d01e8 fix: move gameFullscreen state declaration to component top
 254f241 docs: auto-update generated docs [skip ci]
 4d94e76 fix: open files in internal terminal tab instead of external window
@@ -50,5 +52,3 @@ ccbbc61 Add sci-fi themes, offline packs, and arcade games
 95dadd5 docs: auto-update version history [skip ci]
 55f6619 Refactor MUTHUR session and control deck wording
 014125d docs: auto-update version history [skip ci]
-54b10a2 feat(keyboard): 13 international keyboard layouts with live switching
-bcdb7a7 docs: auto-update version history [skip ci]
