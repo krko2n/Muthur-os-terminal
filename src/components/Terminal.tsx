@@ -3,7 +3,7 @@ import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebglAddon } from '@xterm/addon-webgl';
 import { invoke } from '@tauri-apps/api/core';
-import { listen } from '@tauri-apps/api/event';
+import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import '@xterm/xterm/css/xterm.css';
 import NativeBrowserView from './NativeBrowserView';
 import OperationsDeck from './OperationsDeck';
@@ -18,6 +18,10 @@ interface TerminalSession {
   name: string;
   type: 'shell' | 'browser' | 'settings' | 'game';
   gameId?: GameId;
+  container?: HTMLDivElement;
+  resizeObserver?: ResizeObserver;
+  unlisteners?: UnlistenFn[];
+  inputDisposable?: { dispose: () => void };
 }
 
 const DEFAULT_WEB_TARGET = 'muthur://manual';
@@ -81,6 +85,10 @@ function getTerminalTheme() {
   };
 }
 
+function shellQuote(value: string) {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
 export default function Terminal({
   settings,
   deckSplit,
@@ -93,6 +101,7 @@ export default function Terminal({
   onOpenShutdown,
 }: TerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const sessionsRef = useRef<TerminalSession[]>([]);
   const [sessions, setSessions] = useState<TerminalSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [browserInput, setBrowserInput] = useState('');
@@ -100,12 +109,14 @@ export default function Terminal({
   const [gameFullscreen, setGameFullscreen] = useState(false);
 
   useEffect(() => {
+    sessionsRef.current = sessions;
+  }, [sessions]);
+
+  useEffect(() => {
     createNewSession('shell');
     return () => {
-      sessions.forEach(session => {
-        session.terminal?.dispose();
-        if (session.type === 'shell') cleanupSession(session.id);
-      });
+      sessionsRef.current.forEach(session => disposeSession(session));
+      sessionsRef.current = [];
     };
   }, []);
 
@@ -158,6 +169,8 @@ export default function Terminal({
     const handleOpenFile = async (e: Event) => {
       const filePath = (e as CustomEvent).detail;
       if (!filePath) return;
+      if (!containerRef.current) return;
+
       try {
         const editor = await invoke('detect_editor') as string;
         const sessionId = await invoke('create_terminal_session') as string;
@@ -180,19 +193,18 @@ export default function Terminal({
           terminal.loadAddon(webglAddon);
         } catch {}
 
-        await listen(`terminal-output-${sessionId}`, (ev: any) => {
+        const unlistenOutput = await listen(`terminal-output-${sessionId}`, (ev: any) => {
           terminal.write(ev.payload);
         });
 
-        await listen(`terminal-closed-${sessionId}`, () => {
+        const unlistenClosed = await listen(`terminal-closed-${sessionId}`, () => {
           terminal.write('\r\n\x1b[31m[Session ended]\x1b[0m\r\n');
         });
 
-        terminal.onData(async (data) => {
+        const inputDisposable = terminal.onData(async (data) => {
           await invoke('write_to_terminal', { sessionId, data });
         });
 
-        if (!containerRef.current) return;
         const terminalContainer = document.createElement('div');
         terminalContainer.className = 'terminal-container';
         terminalContainer.style.width = '100%';
@@ -212,13 +224,17 @@ export default function Terminal({
         resizeObserver.observe(terminalContainer);
 
         const fileName = filePath.split('/').pop() || 'file';
-        const sessionNum = sessions.length + 1;
+        const sessionNum = sessionsRef.current.length + 1;
         const newSession: TerminalSession = {
           id: sessionId,
           terminal,
           fitAddon,
-          name: `EDIT-${sessionNum}`,
+          name: `EDIT-${sessionNum}:${fileName}`,
           type: 'shell',
+          container: terminalContainer,
+          resizeObserver,
+          unlisteners: [unlistenOutput, unlistenClosed],
+          inputDisposable,
         };
 
         setSessions(prev => [...prev, newSession]);
@@ -232,7 +248,7 @@ export default function Terminal({
 
         // Send the editor command after a brief delay for shell initialization
         setTimeout(() => {
-          invoke('write_to_terminal', { sessionId, data: `${editor} "${filePath}"\n` });
+          invoke('write_to_terminal', { sessionId, data: `${editor} -- ${shellQuote(filePath)}\n` });
         }, 300);
       } catch (err) {
         console.error('Failed to open file in editor:', err);
@@ -240,7 +256,7 @@ export default function Terminal({
     };
     window.addEventListener('open-file', handleOpenFile);
     return () => window.removeEventListener('open-file', handleOpenFile);
-  }, [sessions]);
+  }, []);
 
   // Sync filesystem cd with active terminal
   useEffect(() => {
@@ -249,7 +265,7 @@ export default function Terminal({
       if (!path) return;
       const active = sessions.find(s => s.id === activeSessionId && s.type === 'shell');
       if (active) {
-        await invoke('write_to_terminal', { sessionId: active.id, data: `cd "${path}"\n` });
+        await invoke('write_to_terminal', { sessionId: active.id, data: `cd -- ${shellQuote(path)}\n` });
       }
     };
     window.addEventListener('fs-cd', handleFsCd);
@@ -382,7 +398,7 @@ export default function Terminal({
       });
 
       let lastStdout = 0;
-      await listen(`terminal-output-${sessionId}`, (e: any) => {
+      const unlistenOutput = await listen(`terminal-output-${sessionId}`, (e: any) => {
         terminal.write(e.payload);
         const now = Date.now();
         if (now - lastStdout > 50) {
@@ -391,11 +407,11 @@ export default function Terminal({
         }
       });
 
-      await listen(`terminal-closed-${sessionId}`, () => {
+      const unlistenClosed = await listen(`terminal-closed-${sessionId}`, () => {
         terminal.write('\r\n\x1b[31m[Session ended]\x1b[0m\r\n');
       });
 
-      terminal.onData(async (data) => {
+      const inputDisposable = terminal.onData(async (data) => {
         await invoke('write_to_terminal', { sessionId, data });
       });
 
@@ -425,10 +441,17 @@ export default function Terminal({
         fitAddon,
         name: `TERM-${sessionNum}`,
         type: 'shell',
+        container: terminalContainer,
+        resizeObserver,
+        unlisteners: [unlistenOutput, unlistenClosed],
+        inputDisposable,
       };
 
       setSessions(prev => [...prev, newSession]);
       setActiveSessionId(sessionId);
+      sessionsRef.current.forEach(session => {
+        if (session.container) session.container.style.display = 'none';
+      });
       terminalContainer.style.display = 'block';
       terminal.focus();
     } catch (error) {
@@ -442,22 +465,36 @@ export default function Terminal({
     } catch {}
   };
 
-  const switchSession = (sessionId: string) => {
-    playSound('folder', 0.1);
-    const containers = containerRef.current?.querySelectorAll('.terminal-container');
-    containers?.forEach(container => {
-      (container as HTMLElement).style.display = 'none';
+  const disposeSession = (session: TerminalSession, closeBackend = true) => {
+    session.unlisteners?.forEach(unlisten => {
+      try {
+        unlisten();
+      } catch {}
+    });
+    session.inputDisposable?.dispose();
+    session.resizeObserver?.disconnect();
+    session.terminal?.dispose();
+    session.container?.remove();
+    if (closeBackend && session.type === 'shell') {
+      void cleanupSession(session.id);
+    }
+  };
+
+  const showSessionContainer = (sessionId: string, sourceSessions = sessions) => {
+    sourceSessions.forEach(session => {
+      if (session.container) session.container.style.display = 'none';
     });
 
-    const session = sessions.find(s => s.id === sessionId);
-    if (session?.type === 'shell') {
-      const shellSessions = sessions.filter(s => s.type === 'shell');
-      const idx = shellSessions.indexOf(session);
-      if (idx >= 0 && containers && containers[idx]) {
-        (containers[idx] as HTMLElement).style.display = 'block';
-        session.terminal?.focus();
-      }
+    const session = sourceSessions.find(s => s.id === sessionId);
+    if (session?.type === 'shell' && session.container) {
+      session.container.style.display = 'block';
+      session.terminal?.focus();
     }
+  };
+
+  const switchSession = (sessionId: string) => {
+    playSound('folder', 0.1);
+    showSessionContainer(sessionId);
     setActiveSessionId(sessionId);
   };
 
@@ -466,15 +503,15 @@ export default function Terminal({
     if (!session) return;
 
     if (session.type === 'shell') {
-      session.terminal?.dispose();
-      await cleanupSession(sessionId);
+      disposeSession(session);
     }
 
     const newSessions = sessions.filter(s => s.id !== sessionId);
     setSessions(newSessions);
 
     if (activeSessionId === sessionId && newSessions.length > 0) {
-      switchSession(newSessions[0].id);
+      showSessionContainer(newSessions[0].id, newSessions);
+      setActiveSessionId(newSessions[0].id);
     } else if (newSessions.length === 0) {
       createNewSession('shell');
     }

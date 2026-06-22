@@ -29,7 +29,6 @@ impl From<String> for SessionId {
 
 pub struct Session {
     master: Box<dyn portable_pty::MasterPty + Send>,
-    #[allow(dead_code)]
     child: Box<dyn portable_pty::Child + Send>,
 }
 
@@ -137,7 +136,8 @@ impl PtyManager {
 
     pub fn close_session(&mut self, session_id: SessionId) -> anyhow::Result<()> {
         self.writers.remove(&session_id);
-        if self.sessions.remove(&session_id).is_some() {
+        if let Some(mut session) = self.sessions.remove(&session_id) {
+            let _ = session.child.kill();
             Ok(())
         } else {
             Err(anyhow::anyhow!("Session not found"))

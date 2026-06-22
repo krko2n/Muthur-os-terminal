@@ -493,6 +493,24 @@ impl OllamaClient {
         self.generate(&prompt).await
     }
 
+    pub fn model_name(&self) -> &str {
+        &self.model
+    }
+
+    pub fn base_url(&self) -> &str {
+        &self.base_url
+    }
+
+    pub async fn is_available(&self) -> bool {
+        self.client
+            .get(&self.base_url)
+            .timeout(std::time::Duration::from_secs(2))
+            .send()
+            .await
+            .map(|response| response.status().is_success() || response.status().is_redirection())
+            .unwrap_or(false)
+    }
+
     async fn generate(&self, prompt: &str) -> anyhow::Result<String> {
         let request = OllamaRequest {
             model: self.model.clone(),

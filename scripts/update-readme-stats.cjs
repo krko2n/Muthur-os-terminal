@@ -73,7 +73,7 @@ const EXCLUDED_DIRS = new Set([
 
 function trackedFiles() {
   try {
-    const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT })
+    const files = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: ROOT })
       .toString('utf8')
       .split('\0')
       .filter(Boolean)

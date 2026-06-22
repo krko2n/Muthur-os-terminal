@@ -157,6 +157,21 @@ jobs:
           npm install --legacy-peer-deps
         fi
 
+    - name: Check version consistency
+      run: npm run version:check
+
+    - name: Run frontend lint
+      run: npm run lint
+
+    - name: Check format hygiene
+      run: npm run format:check
+
+    - name: Run project tests
+      run: npm run test
+
+    - name: Verify README counters
+      run: npm run check:readme-stats
+
     - name: Build frontend (required for Tauri context macro)
       run: npm run build
 
@@ -173,7 +188,7 @@ jobs:
       run: cargo fmt -- --check
 
     - name: Check TypeScript
-      run: npm run build
+      run: npm run lint
 
   summary:
     name: CI Summary

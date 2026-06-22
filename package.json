@@ -1,7 +1,7 @@
 {
   "name": "muthur-os-terminal",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.1",
   "type": "module",
   "author": "MUTHUR Development",
   "description": "MUTHUR OS Terminal - A cinematic terminal emulator with AI integration",
@@ -13,6 +13,10 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
+    "lint": "tsc --noEmit",
+    "format:check": "node scripts/check-format.cjs",
+    "test": "node scripts/smoke-test.cjs",
+    "version:check": "node scripts/version-check.cjs",
     "build": "tsc && node -r ./scripts/vite-no-cmd-netuse.cjs ./node_modules/vite/bin/vite.js build --configLoader native",
     "preview": "vite preview",
     "tauri": "tauri",

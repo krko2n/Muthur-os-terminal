@@ -11,6 +11,7 @@ mod system;
 use ai::OllamaClient;
 use pty::{PtyManager, SessionId};
 use std::io::Write;
+use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use system::SystemMonitor;
@@ -22,6 +23,136 @@ pub struct AppState {
     pty_manager: Arc<Mutex<PtyManager>>,
     system_monitor: Arc<Mutex<SystemMonitor>>,
     ollama_client: Arc<OllamaClient>,
+}
+
+fn allow_private_fetch_targets() -> bool {
+    env_flag("MUTHUR_ALLOW_PRIVATE_FETCH")
+}
+
+fn is_private_or_local_host(host: &str) -> bool {
+    let host = host.trim_matches(['[', ']']).to_ascii_lowercase();
+    if host == "localhost" || host.ends_with(".localhost") {
+        return true;
+    }
+
+    let Ok(ip) = host.parse::<IpAddr>() else {
+        return false;
+    };
+
+    match ip {
+        IpAddr::V4(addr) => {
+            addr.is_private()
+                || addr.is_loopback()
+                || addr.is_link_local()
+                || addr.is_unspecified()
+                || addr.is_broadcast()
+        }
+        IpAddr::V6(addr) => {
+            let first_segment = addr.segments()[0];
+            let unique_local = (first_segment & 0xfe00) == 0xfc00;
+            let link_local = (first_segment & 0xffc0) == 0xfe80;
+            addr.is_loopback() || addr.is_unspecified() || unique_local || link_local
+        }
+    }
+}
+
+fn validate_fetch_url(raw_url: &str) -> Result<reqwest::Url, String> {
+    let trimmed = raw_url.trim();
+    let parsed =
+        reqwest::Url::parse(trimmed).map_err(|_| "URL must be absolute and valid".to_string())?;
+
+    match parsed.scheme() {
+        "http" | "https" => {}
+        scheme => {
+            return Err(format!(
+                "Blocked URL scheme '{}'. Only http:// and https:// are allowed.",
+                scheme
+            ));
+        }
+    }
+
+    let host = parsed
+        .host_str()
+        .ok_or_else(|| "URL must include a host".to_string())?;
+
+    if !allow_private_fetch_targets() && is_private_or_local_host(host) {
+        return Err(
+            "Blocked local/private network target. Set MUTHUR_ALLOW_PRIVATE_FETCH=1 to allow it."
+                .to_string(),
+        );
+    }
+
+    Ok(parsed)
+}
+
+fn guarded_redirect_policy() -> reqwest::redirect::Policy {
+    reqwest::redirect::Policy::custom(|attempt| {
+        if attempt.previous().len() > 10 {
+            attempt.error("too many redirects")
+        } else if let Err(reason) = validate_fetch_url(attempt.url().as_str()) {
+            attempt.error(format!("blocked redirect target: {}", reason))
+        } else {
+            attempt.follow()
+        }
+    })
+}
+
+fn env_flag(name: &str) -> bool {
+    std::env::var(name)
+        .map(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes" | "on"
+            )
+        })
+        .unwrap_or(false)
+}
+
+fn allowed_filesystem_roots() -> Vec<PathBuf> {
+    let mut roots = Vec::new();
+
+    if let Ok(home) = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")) {
+        roots.push(PathBuf::from(home));
+    }
+
+    if let Ok(current) = std::env::current_dir() {
+        roots.push(current);
+    }
+
+    roots.push(offline_pack_dir());
+    roots.push(PathBuf::from("/usr/share/muthur"));
+
+    roots
+        .into_iter()
+        .filter_map(|root| root.canonicalize().ok())
+        .collect()
+}
+
+fn validate_user_filesystem_path(raw_path: &str, require_dir: bool) -> Result<PathBuf, String> {
+    let path = PathBuf::from(raw_path);
+    let canonical = path
+        .canonicalize()
+        .map_err(|e| format!("Cannot access '{}': {}", raw_path, e))?;
+
+    if require_dir && !canonical.is_dir() {
+        return Err(format!("Not a directory: {}", canonical.to_string_lossy()));
+    }
+
+    if !env_flag("MUTHUR_ALLOW_FULL_FS") {
+        let allowed = allowed_filesystem_roots();
+        if !allowed.iter().any(|root| canonical.starts_with(root)) {
+            return Err(format!(
+                "Filesystem access is limited to your home, app, and offline-pack folders. Set MUTHUR_ALLOW_FULL_FS=1 to browse: {}",
+                canonical.to_string_lossy()
+            ));
+        }
+    }
+
+    Ok(canonical)
+}
+
+fn is_hidden_file_name(name: &std::ffi::OsStr) -> bool {
+    name.to_string_lossy().starts_with('.')
 }
 
 #[tauri::command]
@@ -86,10 +217,16 @@ async fn get_system_stats(state: State<'_, AppState>) -> Result<serde_json::Valu
 #[tauri::command]
 async fn list_directory(path: String) -> Result<Vec<serde_json::Value>, String> {
     use std::fs;
+    let path = validate_user_filesystem_path(&path, true)?;
     let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
+    let show_hidden = env_flag("MUTHUR_SHOW_HIDDEN_FILES");
 
     let mut results = Vec::new();
     for entry in entries.flatten() {
+        if !show_hidden && is_hidden_file_name(&entry.file_name()) {
+            continue;
+        }
+
         let metadata = entry.metadata().map_err(|e| e.to_string())?;
         results.push(serde_json::json!({
             "name": entry.file_name().to_string_lossy(),
@@ -351,6 +488,17 @@ async fn search_offline_wiki(query: String) -> Result<Vec<ai::OfflineWikiHit>, S
 }
 
 #[tauri::command]
+async fn get_ai_status(state: State<'_, AppState>) -> Result<serde_json::Value, String> {
+    let online = state.ollama_client.is_available().await;
+    Ok(serde_json::json!({
+        "model": state.ollama_client.model_name(),
+        "baseUrl": state.ollama_client.base_url(),
+        "online": online,
+        "offlineArchive": ai::build_offline_wiki_context("survival power radio water", 1).is_some()
+    }))
+}
+
+#[tauri::command]
 async fn get_current_dir() -> Result<String, String> {
     std::env::current_dir()
         .map_err(|e| e.to_string())?
@@ -361,14 +509,16 @@ async fn get_current_dir() -> Result<String, String> {
 
 #[tauri::command]
 async fn fetch_json(url: String) -> Result<String, String> {
+    let url = validate_fetch_url(&url)?;
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0")
         .timeout(std::time::Duration::from_secs(15))
+        .redirect(guarded_redirect_policy())
         .build()
         .map_err(|e| e.to_string())?;
 
     let response = client
-        .get(&url)
+        .get(url)
         .send()
         .await
         .map_err(|e| format!("Request failed: {}", e))?;
@@ -382,14 +532,16 @@ async fn fetch_json(url: String) -> Result<String, String> {
 
 #[tauri::command]
 async fn fetch_url(url: String) -> Result<String, String> {
+    let url = validate_fetch_url(&url)?;
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0")
         .timeout(std::time::Duration::from_secs(10))
+        .redirect(guarded_redirect_policy())
         .build()
         .map_err(|e| e.to_string())?;
 
     let response = client
-        .get(&url)
+        .get(url)
         .send()
         .await
         .map_err(|e| format!("Request failed: {}", e))?;
@@ -410,15 +562,16 @@ async fn fetch_url(url: String) -> Result<String, String> {
 
 #[tauri::command]
 async fn fetch_url_structured(url: String) -> Result<serde_json::Value, String> {
+    let url = validate_fetch_url(&url)?;
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0")
         .timeout(std::time::Duration::from_secs(15))
-        .redirect(reqwest::redirect::Policy::limited(10))
+        .redirect(guarded_redirect_policy())
         .build()
         .map_err(|e| e.to_string())?;
 
     let response = client
-        .get(&url)
+        .get(url)
         .send()
         .await
         .map_err(|e| format!("Request failed: {}", e))?;
@@ -440,12 +593,14 @@ async fn fetch_url_structured(url: String) -> Result<serde_json::Value, String> 
 
 #[tauri::command]
 async fn render_image_ascii(url: String) -> Result<String, String> {
-    ascii_image::fetch_and_convert(&url).await
+    let url = validate_fetch_url(&url)?;
+    ascii_image::fetch_and_convert(url.as_str()).await
 }
 
 #[tauri::command]
 async fn render_image_color_ascii(url: String) -> Result<serde_json::Value, String> {
-    let result = ascii_image::fetch_and_convert_color(&url).await?;
+    let url = validate_fetch_url(&url)?;
+    let result = ascii_image::fetch_and_convert_color(url.as_str()).await?;
     serde_json::to_value(result).map_err(|e| e.to_string())
 }
 
@@ -552,6 +707,8 @@ async fn get_network_connections() -> Result<Vec<serde_json::Value>, String> {
 
 #[tauri::command]
 async fn open_file_external(path: String) -> Result<(), String> {
+    let path = validate_user_filesystem_path(&path, false)?;
+    let path = path.to_string_lossy().to_string();
     let editor = detect_editor().await;
     let terminals = [
         "konsole",
@@ -592,7 +749,8 @@ async fn open_file_external(path: String) -> Result<(), String> {
             .spawn(),
         _ => std::process::Command::new(terminal_cmd)
             .arg("-e")
-            .arg(format!("{} \"{}\"", editor, path))
+            .arg(&editor)
+            .arg(&path)
             .spawn(),
     };
 
@@ -725,6 +883,7 @@ fn main() {
             ai_suggest_command,
             ai_chat,
             search_offline_wiki,
+            get_ai_status,
             get_current_dir,
             fetch_json,
             fetch_url,
@@ -738,4 +897,37 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::validate_fetch_url;
+
+    #[test]
+    fn fetch_url_policy_allows_public_http_urls() {
+        assert!(validate_fetch_url("https://example.com/path").is_ok());
+        assert!(validate_fetch_url("http://example.com").is_ok());
+    }
+
+    #[test]
+    fn fetch_url_policy_rejects_unsafe_schemes() {
+        assert!(validate_fetch_url("file:///etc/passwd").is_err());
+        assert!(validate_fetch_url("javascript:alert(1)").is_err());
+        assert!(validate_fetch_url("data:text/plain,hello").is_err());
+        assert!(validate_fetch_url("ftp://example.com/file").is_err());
+    }
+
+    #[test]
+    fn fetch_url_policy_blocks_local_targets_by_default() {
+        let previous = std::env::var_os("MUTHUR_ALLOW_PRIVATE_FETCH");
+        std::env::remove_var("MUTHUR_ALLOW_PRIVATE_FETCH");
+
+        assert!(validate_fetch_url("http://localhost:11434").is_err());
+        assert!(validate_fetch_url("http://127.0.0.1:8000").is_err());
+        assert!(validate_fetch_url("http://192.168.1.1").is_err());
+
+        if let Some(value) = previous {
+            std::env::set_var("MUTHUR_ALLOW_PRIVATE_FETCH", value);
+        }
+    }
 }

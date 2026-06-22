@@ -14,6 +14,13 @@ interface OfflineWikiHit {
   score: number;
 }
 
+interface AIStatus {
+  model: string;
+  baseUrl: string;
+  online: boolean;
+  offlineArchive: boolean;
+}
+
 function formatOfflineHits(query: string, hits: OfflineWikiHit[]) {
   if (!hits.length) {
     return `OFFLINE ARCHIVE: no local hits for "${query}".\n\nInstall or update the voluntary wiki pack, or add text/JSONL files under the offline wiki folder.`;
@@ -36,6 +43,7 @@ export default function AIPanel() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<AIStatus | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,6 +51,25 @@ export default function AIPanel() {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const refreshStatus = async () => {
+      try {
+        const result = await invoke('get_ai_status') as AIStatus;
+        if (!cancelled) setStatus(result);
+      } catch {
+        if (!cancelled) setStatus(null);
+      }
+    };
+
+    refreshStatus();
+    const timer = window.setInterval(refreshStatus, 30000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -56,7 +83,10 @@ export default function AIPanel() {
       if (userMessage.startsWith('#')) {
         const context = userMessage.substring(1).trim();
         const response = await invoke('ai_suggest_command', { context }) as string;
-        setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: `COMMAND SUGGESTION - REVIEW BEFORE RUNNING:\n${response}`
+        }]);
       } else if (userMessage.startsWith('web ') || userMessage.startsWith('search ')) {
         // Internet search via backend
         const query = userMessage.replace(/^(web|search)\s+/, '');
@@ -124,6 +154,11 @@ export default function AIPanel() {
       <div className="text-[1.3vh] tracking-widest opacity-60 mb-[0.5vh] flex items-center gap-[0.5vh]">
         <AIIcon size={14} color="rgba(0,255,65,0.6)" />
         MUTHUR SURVIVAL AI
+      </div>
+      <div className="text-[0.95vh] text-muthur-secondary opacity-45 mb-[0.6vh] flex flex-wrap gap-x-[0.9vh] gap-y-[0.2vh]">
+        <span>MODEL {status?.model || 'UNKNOWN'}</span>
+        <span>{status?.online ? 'OLLAMA ONLINE' : 'OLLAMA OFFLINE'}</span>
+        <span>{status?.offlineArchive ? 'ARCHIVE READY' : 'ARCHIVE BASIC'}</span>
       </div>
 
       <div

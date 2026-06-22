@@ -8,6 +8,10 @@
 # Usage:
 #   ./install.sh          Full install/upgrade (interactive)
 #   ./install.sh --quiet  Suppress non-essential prompts
+#   ./install.sh --dry-run  Show detected actions, then exit before changes
+#   ./install.sh --no-deps  Skip system/Rust/Node dependency installation
+#   ./install.sh --no-ollama  Skip optional Ollama/offline-AI steps
+#   ./install.sh --prefix ~/.local  Install user binaries under a custom prefix
 #
 # Supports: Arch Linux, Ubuntu/Debian, Fedora
 #
@@ -24,14 +28,79 @@ SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || ec
 # ─── Configuration ──────────────────────────────────────────────────────────
 
 VERSION="0.1.1"
-INSTALL_DIR="/usr/local/bin"
+PREFIX="${MUTHUR_PREFIX:-/usr/local}"
+INSTALL_DIR=""
 SYSTEM_BIN="/usr/bin"
 CONFIG_DIR="$HOME/.config/muthur"
 DATA_DIR="$HOME/.config/xKOR_3RR0R"
 SESSION_DIR="/usr/share/wayland-sessions"
 DESKTOP_DIR="$HOME/.local/share/applications"
 
-QUIET="${1:-}"
+QUIET=""
+DRY_RUN="false"
+SKIP_DEPS="false"
+SKIP_OLLAMA="false"
+
+usage() {
+    cat <<EOF
+Usage: ./install.sh [options]
+
+Options:
+  --quiet              Suppress non-essential prompts
+  --dry-run            Print detected install plan and exit before changes
+  --no-deps            Skip system, Rust, and Node dependency installation
+  --no-ollama          Skip optional Ollama/offline-AI steps
+  --prefix <path>      Install user binaries under <path>/bin (default: /usr/local)
+  --help, -h           Show this help
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --quiet)
+            QUIET="--quiet"
+            ;;
+        --dry-run)
+            DRY_RUN="true"
+            ;;
+        --no-deps)
+            SKIP_DEPS="true"
+            ;;
+        --no-ollama)
+            SKIP_OLLAMA="true"
+            ;;
+        --prefix)
+            [ "${2:-}" ] || { echo "Missing value for --prefix" >&2; exit 2; }
+            PREFIX="$2"
+            shift
+            ;;
+        --prefix=*)
+            PREFIX="${1#--prefix=}"
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            usage >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
+
+case "$PREFIX" in
+    "~") PREFIX="$HOME" ;;
+    "~/"*) PREFIX="$HOME/${PREFIX#"~/"}" ;;
+esac
+
+INSTALL_DIR="$PREFIX/bin"
+SYSTEM_ASSETS="true"
+case "$PREFIX" in
+    /usr/local) SYSTEM_ASSETS="true" ;;
+    *) SYSTEM_ASSETS="false" ;;
+esac
 
 # ─── Colors ─────────────────────────────────────────────────────────────────
 
@@ -50,6 +119,27 @@ warn()    { echo -e "${YELLOW}[!!]${NC} $*"; }
 err()     { echo -e "${RED}[ERR]${NC} $*"; }
 step()    { echo -e "${BLUE}[>>]${NC} $*"; }
 dimtext() { echo -e "${DIM}$*${NC}"; }
+
+needs_sudo_for_install_dir() {
+    case "$INSTALL_DIR" in
+        "$HOME"/*) return 1 ;;
+        *) return 0 ;;
+    esac
+}
+
+install_binary_file() {
+    local source="$1"
+    local target="$2"
+    if needs_sudo_for_install_dir; then
+        sudo mkdir -p "$(dirname "$target")"
+        sudo install -Dm755 "$source" "$target"
+        sudo chmod 755 "$target"
+    else
+        mkdir -p "$(dirname "$target")"
+        install -Dm755 "$source" "$target"
+        chmod 755 "$target"
+    fi
+}
 
 # ─── Pre-flight Checks ─────────────────────────────────────────────────────
 
@@ -92,6 +182,7 @@ preflight() {
     echo -e " ${BOLD}Version:${NC}  $VERSION"
     echo -e " ${BOLD}Binary:${NC}   $INSTALL_DIR/muthur"
     echo -e " ${BOLD}Config:${NC}   $CONFIG_DIR"
+    echo -e " ${BOLD}Options:${NC}  dry-run=$DRY_RUN no-deps=$SKIP_DEPS no-ollama=$SKIP_OLLAMA system-assets=$SYSTEM_ASSETS"
     echo ""
 
     # Advisory checks (non-fatal)
@@ -250,9 +341,17 @@ offer_offline_pack() {
     case "$answer" in
         y|Y)
             if [ "$pack_state" = "stale" ]; then
-                bash "$SCRIPT_DIR/scripts/muthur-offline-pack.sh" --auto || warn "Offline pack update did not finish cleanly"
+                if [ "$SKIP_OLLAMA" = "true" ]; then
+                    MUTHUR_OFFLINE_AI=0 bash "$SCRIPT_DIR/scripts/muthur-offline-pack.sh" --auto || warn "Offline pack update did not finish cleanly"
+                else
+                    bash "$SCRIPT_DIR/scripts/muthur-offline-pack.sh" --auto || warn "Offline pack update did not finish cleanly"
+                fi
             else
-                bash "$SCRIPT_DIR/scripts/muthur-offline-pack.sh" --install || warn "Offline pack step did not finish cleanly"
+                if [ "$SKIP_OLLAMA" = "true" ]; then
+                    MUTHUR_OFFLINE_AI=0 bash "$SCRIPT_DIR/scripts/muthur-offline-pack.sh" --install || warn "Offline pack step did not finish cleanly"
+                else
+                    bash "$SCRIPT_DIR/scripts/muthur-offline-pack.sh" --install || warn "Offline pack step did not finish cleanly"
+                fi
             fi
             ;;
         *)
@@ -301,35 +400,39 @@ install_assets() {
         exit 1
     fi
 
-    sudo install -Dm755 "$binary" "$INSTALL_DIR/muthur"
-    # Symlink to standard system path
-    sudo ln -sf "$INSTALL_DIR/muthur" "$SYSTEM_BIN/muthur-os-terminal"
+    install_binary_file "$binary" "$INSTALL_DIR/muthur"
+    # Symlink to standard system path only for the default system install.
+    if [ "$SYSTEM_ASSETS" = "true" ]; then
+        sudo ln -sf "$INSTALL_DIR/muthur" "$SYSTEM_BIN/muthur-os-terminal"
+    else
+        dimtext "  System symlink skipped for custom prefix"
+    fi
     info "Binary: $INSTALL_DIR/muthur"
 
     # ── CLI Utilities ──
     if [ -f "$SCRIPT_DIR/packaging/bin/kys" ]; then
-        sudo install -Dm755 "$SCRIPT_DIR/packaging/bin/kys" "$INSTALL_DIR/kys"
-        sudo chmod 755 "$INSTALL_DIR/kys"
+        install_binary_file "$SCRIPT_DIR/packaging/bin/kys" "$INSTALL_DIR/kys"
         info "Command: $INSTALL_DIR/kys"
     fi
 
     if [ -f "$SCRIPT_DIR/packaging/bin/mother-ui" ]; then
-        sudo install -Dm755 "$SCRIPT_DIR/packaging/bin/mother-ui" "$INSTALL_DIR/mother-ui"
-        sudo chmod 755 "$INSTALL_DIR/mother-ui"
+        install_binary_file "$SCRIPT_DIR/packaging/bin/mother-ui" "$INSTALL_DIR/mother-ui"
         info "Command: $INSTALL_DIR/mother-ui"
     fi
 
     # ── Session Infrastructure ──
-    if [ -f "$SCRIPT_DIR/packaging/muthur-session" ]; then
+    if [ "$SYSTEM_ASSETS" = "true" ] && [ -f "$SCRIPT_DIR/packaging/muthur-session" ]; then
         sudo install -Dm755 "$SCRIPT_DIR/packaging/muthur-session" "$SYSTEM_BIN/muthur-session"
         sudo chmod 755 "$SYSTEM_BIN/muthur-session"
         info "Session: $SYSTEM_BIN/muthur-session"
     fi
 
-    if [ -f "$SCRIPT_DIR/packaging/muthur-session.desktop" ]; then
+    if [ "$SYSTEM_ASSETS" = "true" ] && [ -f "$SCRIPT_DIR/packaging/muthur-session.desktop" ]; then
         sudo mkdir -p "$SESSION_DIR"
         sudo install -Dm644 "$SCRIPT_DIR/packaging/muthur-session.desktop" "$SESSION_DIR/muthur.desktop"
         info "Session entry: $SESSION_DIR/muthur.desktop"
+    elif [ "$SYSTEM_ASSETS" != "true" ]; then
+        dimtext "  Native session files skipped for custom prefix"
     fi
 
     # ── Desktop Entry ──
@@ -395,7 +498,9 @@ verify_installation() {
     fi
 
     # Symlink check
-    if [ -L "$SYSTEM_BIN/muthur-os-terminal" ]; then
+    if [ "$SYSTEM_ASSETS" != "true" ]; then
+        dimtext "  Symlink check skipped for custom prefix"
+    elif [ -L "$SYSTEM_BIN/muthur-os-terminal" ]; then
         info "Symlink OK: $SYSTEM_BIN/muthur-os-terminal"
     else
         warn "Symlink missing (non-fatal)"
@@ -470,14 +575,25 @@ trap 'handle_error' ERR
 # ─── Main ──────────────────────────────────────────────────────────────────
 
 main() {
-    exec > >(tee /tmp/muthur-install.log)
-    exec 2>&1
+    if [ "$DRY_RUN" != "true" ]; then
+        exec > >(tee /tmp/muthur-install.log)
+        exec 2>&1
+    fi
 
     preflight
-    install_deps
+    if [ "$DRY_RUN" = "true" ]; then
+        info "Dry run complete. No files were changed."
+        exit 0
+    fi
+
+    if [ "$SKIP_DEPS" = "true" ]; then
+        warn "Skipping system, Rust, and Node dependency installation (--no-deps)"
+    else
+        install_deps
+        install_rust
+        install_node
+    fi
     run_health_check
-    install_rust
-    install_node
     build_app
     install_assets
     offer_offline_pack

@@ -4,7 +4,7 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+| 0.1.x   | Supported |
 
 ## Reporting a Vulnerability
 
@@ -19,16 +19,15 @@ If you discover a security vulnerability in MUTHUR OS Terminal, please report it
 
 ### Installation Security
 
-**Never pipe remote scripts directly to shell**:
-```bash
-# BAD - Do not do this
-curl https://example.com/install.sh | sh
+The source installer can install system packages and toolchains. Review it before running:
 
-# GOOD - Always inspect before executing
-curl https://example.com/install.sh -o install.sh
-cat install.sh  # Review the script
-sh install.sh   # Run only if safe
+```bash
+./install.sh --dry-run
+./install.sh --no-deps
+./install.sh --prefix "$HOME/.local"
 ```
+
+The installer may call distro package managers and, unless dependencies already exist or `--no-deps` is used, may download Rust/Node tooling from their upstream installers. Optional Ollama/offline-AI setup can be skipped with `--no-ollama`.
 
 ### Privilege Management
 
@@ -61,9 +60,24 @@ AI model selection is configurable without rebuilding:
 ### Data Privacy
 
 - All terminal data remains local on your machine
-- AI requests are sent to local Ollama instance (localhost:11434)
+- AI chat requests are sent to the configured Ollama endpoint, which defaults to `http://localhost:11434`
 - No telemetry or data collection
-- No external network calls except to configured Ollama endpoint
+- The built-in web browser, AI `web`/`fetch` commands, globe feeds, installer, and optional offline-pack downloads make external network requests only when those features are used
+- Backend fetch commands allow only `http://` and `https://`; `file://`, `javascript:`, `data:`, `ftp://`, and similar schemes are rejected
+- Localhost and private IP fetch targets are blocked by default. Set `MUTHUR_ALLOW_PRIVATE_FETCH=1` only if you intentionally want internal network fetches
+
+### Filesystem Access
+
+The file manager is limited by default to user, app, and offline-pack folders. Hidden dotfiles are hidden by default.
+
+Overrides:
+
+```bash
+MUTHUR_ALLOW_FULL_FS=1 muthur
+MUTHUR_SHOW_HIDDEN_FILES=1 muthur
+```
+
+Use these only when you want broader local filesystem visibility.
 
 ### Configuration Files
 
@@ -75,10 +89,16 @@ These files never leave your machine.
 
 ### Dependencies
 
-We use the latest stable versions of all dependencies:
-- Tauri v2.0 (Rust security framework)
-- Regular dependency updates via Dependabot
-- Cargo audit for vulnerability scanning
+Dependencies are pinned through `package-lock.json` and `src-tauri/Cargo.lock`. Contributors should run the project checks before submitting changes:
+
+```bash
+npm run lint
+npm run format:check
+npm run test
+npm run version:check
+cargo fmt -- --check
+cargo clippy --all-targets --all-features -- -D warnings
+```
 
 ### Build Security
 
@@ -93,6 +113,8 @@ Production builds use:
 - Linux only (Arch, Ubuntu, Debian, Fedora tested)
 - Requires local Ollama installation for AI features
 - No sandboxing for terminal sessions (runs with user privileges)
+- Browser/search/globe features are not anonymous; requests go to the remote sites they access
+- Offline wiki/map/model packs can be large and are user-approved downloads
 
 ## Security Checklist for Contributors
 
@@ -101,7 +123,7 @@ Before submitting code:
 - [ ] Input validation on all external data
 - [ ] Use parameterized queries (if applicable)
 - [ ] Follow Rust safety guidelines
-- [ ] Run `cargo clippy` and `cargo audit`
+- [ ] Run `npm run lint`, `npm run test`, `cargo fmt`, `cargo clippy`, and vulnerability/audit tooling where available
 - [ ] No unsafe code without justification
 - [ ] Document security-relevant design decisions
 

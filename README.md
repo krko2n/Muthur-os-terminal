@@ -61,11 +61,11 @@ Think of it as a spiritual successor to [eDEX-UI](https://github.com/GitSquared/
 ## Features
 
 - **Terminal** -- Full Linux shell with tabs, 256 colors, GPU-accelerated rendering
-- **AI Assistant** -- Local AI powered by Ollama (no internet needed, fully private)
-- **System Monitor** -- Live CPU, RAM, and process tracking
-- **3D Globe** -- Rotating Earth with real-time conflict data visualization
-- **File Explorer** -- Browse and open files with a click
-- **Text Browser** -- Built-in web browser with ASCII image rendering
+- **AI Assistant** -- Local Ollama chat with offline archive grounding and explicit web/fetch tools
+- **System Monitor** -- Live CPU, storage, hardware, and process tracking
+- **3D Globe** -- Rotating Earth with optional remote data visualization
+- **File Explorer** -- Browse user/app/offline-pack files with safer default boundaries
+- **Text Browser** -- Built-in http/https browser with ASCII image rendering
 - **Kiosk Mode** -- Run MUTHUR as your entire desktop (replaces your DE)
 - **CRT Aesthetic** -- Scanlines, green phosphor glow, dot-grid background
 
@@ -134,6 +134,17 @@ That's it. This one command does everything:
 8. Installs extra tools: `mother-ui`, `kys`
 
 The script will ask for your sudo password when it needs to install system-wide files.
+
+Safer install modes:
+
+```bash
+./install.sh --dry-run
+./install.sh --no-deps
+./install.sh --no-ollama
+./install.sh --prefix "$HOME/.local"
+```
+
+`--dry-run` prints the detected plan and exits before changes. `--no-deps` skips distro, Rust, and Node dependency installation. `--no-ollama` keeps optional offline-AI setup out of the install/update flow. A custom `--prefix` installs user binaries under that prefix and skips system session files.
 
 ### Step 5: Launch
 
@@ -228,7 +239,7 @@ The top of the terminal shows your open tabs. You can have multiple shells open 
 
 ### Built-in Browser
 
-Click **+ net** to open a browser tab. Type a URL or search term and press Enter. The browser renders web pages as styled text with clickable links. Images are converted to ASCII art automatically.
+Click **+ net** to open a browser tab. Type a URL or search term and press Enter. The browser renders http/https pages as styled text with clickable links. Images are converted to ASCII art automatically. Unsafe schemes such as `file://`, `javascript:`, `data:`, and `ftp://` are rejected by the backend.
 
 ### File Explorer
 
@@ -243,7 +254,7 @@ What does the chmod command do?
 How do I find large files on my system?
 ```
 
-The AI runs locally on your machine using Ollama. Nothing is sent to the internet.
+Normal AI chat runs through your configured Ollama endpoint, which defaults to your local machine. The panel searches the offline archive first when local wiki/docs are available. Commands such as `web <query>` and `fetch <url>` intentionally use the network.
 
 ### 3D Globe
 
@@ -307,6 +318,18 @@ muthur
 ```
 
 See [`examples/config.toml.example`](examples/config.toml.example) for all options.
+
+### Security Overrides
+
+MUTHUR blocks unsafe web schemes, private network fetch targets, broad filesystem browsing, and hidden file browsing by default.
+
+```bash
+MUTHUR_ALLOW_PRIVATE_FETCH=1 muthur
+MUTHUR_ALLOW_FULL_FS=1 muthur
+MUTHUR_SHOW_HIDDEN_FILES=1 muthur
+```
+
+Use these only when you intentionally want broader local access.
 
 ---
 
@@ -467,8 +490,8 @@ MIT -- see [LICENSE](LICENSE).
 ---
 
 <!-- MUTHUR-STATS:START -->
-![Lines of Code](https://img.shields.io/badge/lines%20of%20code-25%2C069-c9d1d9?style=flat-square&labelColor=161b22)
-![Project Files](https://img.shields.io/badge/project%20files-118-c9d1d9?style=flat-square&labelColor=161b22)
+![Lines of Code](https://img.shields.io/badge/lines%20of%20code-26%2C023-c9d1d9?style=flat-square&labelColor=161b22)
+![Project Files](https://img.shields.io/badge/project%20files-124-c9d1d9?style=flat-square&labelColor=161b22)
 <!-- MUTHUR-STATS:END -->
 
 </div>
