@@ -68,7 +68,7 @@ for (const file of trackedFiles().filter(shouldCheck)) {
     continue;
   }
 
-  if (text.includes('<<<<<<< ') || text.includes('=======\n') || text.includes('>>>>>>> ')) {
+  if (/^<<<<<<< |^=======$|^>>>>>>> /m.test(text)) {
     failures.push(`${file}: contains merge conflict markers`);
   }
 
