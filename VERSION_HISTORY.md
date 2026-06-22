@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+df3dacb fix: keep installer scripts linux safe
+1bfd8eb docs: auto-update generated docs [skip ci]
 65af251 chore: verify readme counters and installer guards
 3734184 docs: auto-update generated docs [skip ci]
 63a8c3d fix: tighten format conflict marker check
@@ -50,5 +52,3 @@ ea52038 docs: auto-update generated docs [skip ci]
 4a863b0 docs: auto-update version history [skip ci]
 e947cd8 Improve workspace layout and web readability
 2656d73 docs: add live line count and file count badges to README
-feb4718 docs: auto-update version history [skip ci]
-ae0b9d4 Overhaul MUTHUR OS terminal
