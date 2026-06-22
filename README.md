@@ -142,9 +142,10 @@ Safer install modes:
 ./install.sh --no-deps
 ./install.sh --no-ollama
 ./install.sh --prefix "$HOME/.local"
+./install.sh --quiet
 ```
 
-`--dry-run` prints the detected plan and exits before changes. `--no-deps` skips distro, Rust, and Node dependency installation. `--no-ollama` keeps optional offline-AI setup out of the install/update flow. A custom `--prefix` installs user binaries under that prefix and skips system session files.
+`--dry-run` prints the detected plan and exits before changes. `--no-deps` skips distro, Rust, and Node dependency installation. `--no-ollama` keeps optional offline-AI setup out of the install/update flow. A custom `--prefix` installs user binaries under that prefix and skips system session files. `--quiet` reduces installer chatter for scripted runs.
 
 ### Step 5: Launch
 
@@ -490,8 +491,8 @@ MIT -- see [LICENSE](LICENSE).
 ---
 
 <!-- MUTHUR-STATS:START -->
-![Lines of Code](https://img.shields.io/badge/lines%20of%20code-25%2C683-c9d1d9?style=flat-square&labelColor=161b22)
-![Project Files](https://img.shields.io/badge/project%20files-122-c9d1d9?style=flat-square&labelColor=161b22)
+![Lines of Code](https://img.shields.io/badge/lines%20of%20code-26%2C103-c9d1d9?style=flat-square&labelColor=161b22)
+![Project Files](https://img.shields.io/badge/project%20files-125-c9d1d9?style=flat-square&labelColor=161b22)
 <!-- MUTHUR-STATS:END -->
 
 </div>

@@ -15,6 +15,7 @@
     "dev": "vite",
     "lint": "tsc --noEmit",
     "format:check": "node scripts/check-format.cjs",
+    "installer:check": "node scripts/check-installer.cjs",
     "test": "node scripts/smoke-test.cjs",
     "version:check": "node scripts/version-check.cjs",
     "build": "tsc && node -r ./scripts/vite-no-cmd-netuse.cjs ./node_modules/vite/bin/vite.js build --configLoader native",

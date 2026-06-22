@@ -166,6 +166,19 @@ jobs:
     - name: Check format hygiene
       run: npm run format:check
 
+    - name: Check installer safety guards
+      run: npm run installer:check
+
+    - name: Check installer shell syntax
+      run: |
+        bash -n install.sh
+        bash -n scripts/install.sh
+        bash -n scripts/muthur-offline-pack.sh
+        bash -n scripts/uninstall.sh
+
+    - name: Exercise installer dry run
+      run: ./install.sh --dry-run --prefix "$HOME/.local" --no-deps --no-ollama
+
     - name: Run project tests
       run: npm run test
 
