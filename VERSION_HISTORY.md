@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+63a8c3d fix: tighten format conflict marker check
+d8556ae docs: auto-update generated docs [skip ci]
 77c6c51 chore: harden production readiness gates
 0577217 docs: auto-update generated docs [skip ci]
 d142896 docs: fix README stats counter
@@ -50,5 +52,3 @@ feb4718 docs: auto-update version history [skip ci]
 ae0b9d4 Overhaul MUTHUR OS terminal
 fdd7e81 docs: auto-update version history [skip ci]
 6f44bc2 Add offline pack manager, map viewer, and game saves
-ccbbc61 Add sci-fi themes, offline packs, and arcade games
-95dadd5 docs: auto-update version history [skip ci]
