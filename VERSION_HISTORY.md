@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+4860c37 fix: resolve SCRIPT_DIR to project root, not scripts/
+bb4d1dd docs: auto-update generated docs [skip ci]
 2132c3c fix: use absolute path to src-tauri in build step
 e3b1f17 docs: auto-update generated docs [skip ci]
 d5d082b fix: build without bundling to avoid linuxdeploy dependency
@@ -50,5 +52,3 @@ ecd90b1 docs: auto-update generated docs [skip ci]
 7a7f088 feat: add game tutorials with controls overlay and help button
 0bb636a docs: auto-update generated docs [skip ci]
 9b60cd4 feat: colored ASCII image rendering with half-block pixel art
-b55dfb7 docs: auto-update generated docs [skip ci]
-61da524 fix: dark language selector, brighter key glow, audio unlock, browser UA
