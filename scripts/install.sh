@@ -429,7 +429,10 @@ build_app() {
     info "Dependencies installed"
 
     step "[2/2] Compiling application (frontend + backend)..."
-    npm run tauri build
+    npm run build
+    cd src-tauri
+    cargo build --release
+    cd ..
     info "Build complete"
 }
 
