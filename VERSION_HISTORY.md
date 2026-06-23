@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+29d1b13 feat: warn on risky ai commands
+25af33c docs: auto-update generated docs [skip ci]
 a383e1a feat: add ai stop control
 32e4df5 docs: auto-update generated docs [skip ci]
 109bba9 feat: improve offline pack manager
@@ -50,5 +52,3 @@ d400008 style: fix cargo fmt formatting in main.rs
 8273b0e docs: auto-update generated docs [skip ci]
 0d6ccf2 fix: correct README stats badges to reflect actual repo size
 daca464 docs: auto-update generated docs [skip ci]
-3447f1c feat: enhanced AI, audio system, theme loadouts, and operations deck
-ea52038 docs: auto-update generated docs [skip ci]
