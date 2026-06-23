@@ -308,11 +308,28 @@ install_node() {
         info "Node.js $(node --version)"
     else
         step "Installing Node.js via nvm..."
+
+        # nvm refuses to run when PREFIX/NPM_CONFIG_PREFIX are set.
+        # Our own PREFIX variable (install path) and any inherited npm prefix
+        # must be cleared before nvm can operate.
+        local _saved_prefix="${PREFIX:-}"
+        unset PREFIX NPM_CONFIG_PREFIX npm_config_prefix
+
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+        if ! command -v nvm &>/dev/null; then
+            err "nvm failed to load. Check ~/.nvm/nvm.sh exists."
+            PREFIX="$_saved_prefix"
+            return 1
+        fi
+
         nvm install 24
         nvm use 24
+
+        # Restore installer PREFIX
+        PREFIX="$_saved_prefix"
         info "Node.js installed"
     fi
 }

@@ -120,9 +120,19 @@ install_node() {
     else
         echo ""
         echo -e "${YELLOW}Installing Node.js...${NC}"
+
+        # nvm refuses to run when PREFIX/NPM_CONFIG_PREFIX are set
+        unset PREFIX NPM_CONFIG_PREFIX npm_config_prefix
+
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash > /dev/null 2>&1
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+        if ! command -v nvm &>/dev/null; then
+            echo -e "${RED}[FAIL]${NC} nvm failed to load. Check ~/.nvm/nvm.sh"
+            exit 1
+        fi
+
         nvm install 24 --silent
         nvm use 24 --silent
         echo -e "${GREEN}[OK]${NC} Node.js installed"

@@ -401,6 +401,16 @@ sudo dnf install gcc gcc-c++ make gtk3-devel webkit2gtk4.1-devel librsvg2-devel 
 
 Then re-run `./install.sh`.
 
+### nvm fails with "PREFIX environment variable" error
+
+nvm refuses to load when `PREFIX` or `NPM_CONFIG_PREFIX` are set in your environment. The installer clears these automatically, but if you hit this running nvm manually:
+
+```bash
+unset PREFIX NPM_CONFIG_PREFIX npm_config_prefix
+```
+
+Then re-run the installer or source nvm again.
+
 ---
 
 ## Uninstalling
