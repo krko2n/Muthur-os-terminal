@@ -475,13 +475,18 @@ if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
     exec muthur-bin "$@"
 fi
 
-if command -v cage &>/dev/null; then
-    exec cage -d -- muthur-bin "$@"
+if ! command -v cage &>/dev/null; then
+    echo "No display server. Install: sudo pacman -S cage seatd" >&2
+    exit 1
 fi
 
-echo "No display server available. Install cage and polkit:" >&2
-echo "  sudo pacman -S cage polkit" >&2
-exit 1
+# seatd-launch spawns a private seat manager for this session
+if command -v seatd-launch &>/dev/null; then
+    exec seatd-launch -- cage -d -- muthur-bin "$@"
+fi
+
+# Fallback if seatd-launch is missing but seatd service is running
+exec cage -d -- muthur-bin "$@"
 WRAPPER
     install_binary_file /tmp/muthur-launcher "$wrapper"
     rm -f /tmp/muthur-launcher
