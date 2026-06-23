@@ -2,6 +2,9 @@
 
 Auto-generated from git log.
 
+cce2abf feat: install display server by default, offer autostart toggle
+32388b1 docs: update README for make update and GTK troubleshooting
+db8f3e4 docs: auto-update generated docs [skip ci]
 6403368 fix: make update auto-stash local changes instead of blocking
 e4ddf28 docs: auto-update generated docs [skip ci]
 803a418 feat: offer display server setup when none is detected
@@ -49,6 +52,3 @@ d8d01e8 fix: move gameFullscreen state declaration to component top
 9c4045f docs: auto-update generated docs [skip ci]
 dffd7ef feat: virtual games folder in file explorer with tab launch
 cd1f68d docs: auto-update generated docs [skip ci]
-811a226 feat: games as launchable fullscreen tabs from file explorer
-22d2b59 feat: full sci-fi cursor CSS system with SVG data URIs
-a35e8d7 feat: sci-fi cursor set with angular SVGs and cyan glow
