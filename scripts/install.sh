@@ -271,7 +271,7 @@ install_deps() {
             maybe_sudo pacman -Sy --noconfirm --needed \
                 base-devel curl wget file openssl xdg-utils \
                 gtk3 libappindicator-gtk3 librsvg webkit2gtk-4.1 \
-                cage greetd
+                cage greetd seatd
             ;;
         debian)
             maybe_sudo apt-get update -qq
@@ -279,14 +279,14 @@ install_deps() {
                 build-essential curl wget file xdg-utils \
                 libssl-dev libgtk-3-dev libayatana-appindicator3-dev \
                 librsvg2-dev libwebkit2gtk-4.1-dev \
-                cage greetd
+                cage greetd seatd
             ;;
         fedora)
             maybe_sudo dnf install -y -q \
                 gcc gcc-c++ make curl wget file xdg-utils \
                 openssl-devel gtk3-devel libappindicator-gtk3-devel \
                 librsvg2-devel webkit2gtk4.1-devel \
-                cage greetd
+                cage greetd seatd
             ;;
     esac
 
@@ -476,10 +476,15 @@ if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
 fi
 
 if command -v cage &>/dev/null; then
+    # Ensure seat manager is running (required for GPU access)
+    if command -v seatd &>/dev/null && ! pgrep -x seatd >/dev/null 2>&1; then
+        sudo systemctl start seatd 2>/dev/null || sudo seatd -g seat &
+        sleep 0.3
+    fi
     exec cage -d -- muthur-bin "$@"
 fi
 
-echo "No display server available. Install cage: sudo pacman -S cage" >&2
+echo "No display server available. Install cage: sudo pacman -S cage seatd" >&2
 exit 1
 WRAPPER
     install_binary_file /tmp/muthur-launcher "$wrapper"
@@ -611,7 +616,11 @@ offer_display_setup() {
     [ "$QUIET" = "--quiet" ] && return 0
 
     # Enable greetd so the display server is ready on boot
+    maybe_sudo systemctl enable seatd 2>/dev/null || true
+    maybe_sudo systemctl start seatd 2>/dev/null || true
     maybe_sudo systemctl enable greetd 2>/dev/null || true
+    # Add user to seat group so cage can claim GPU
+    maybe_sudo usermod -aG seat "$USER" 2>/dev/null || true
 
     echo ""
     echo -e "${BOLD}MUTHUR session ready.${NC}"

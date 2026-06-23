@@ -140,9 +140,13 @@ if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
     exec muthur-bin "$@"
 fi
 if command -v cage &>/dev/null; then
+    if command -v seatd &>/dev/null && ! pgrep -x seatd >/dev/null 2>&1; then
+        sudo systemctl start seatd 2>/dev/null || sudo seatd -g seat &
+        sleep 0.3
+    fi
     exec cage -d -- muthur-bin "$@"
 fi
-echo "No display server available. Install cage: sudo pacman -S cage" >&2
+echo "No display server available. Install cage: sudo pacman -S cage seatd" >&2
 exit 1
 WRAPPER
 sudo install -Dm755 /tmp/muthur-launcher /usr/local/bin/muthur
