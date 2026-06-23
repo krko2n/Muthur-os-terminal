@@ -62,6 +62,13 @@ interface OfflinePackRuntimeStatus {
   maps: OfflineMapEntry[];
 }
 
+const OFFLINE_MODULES: Array<{ id: keyof OfflinePackSettings & keyof OfflinePackRuntimeStatus['modules']; label: string; body: string }> = [
+  { id: 'ai', label: 'AI MODEL', body: 'local Ollama model' },
+  { id: 'wiki', label: 'WIKI ZIM', body: 'offline knowledge archive' },
+  { id: 'maps', label: 'MAPS', body: 'MBTiles map bundles' },
+  { id: 'docs', label: 'DOCS', body: 'local manual starter pack' },
+];
+
 interface GameResult {
   game: GameMode;
   score: number;
@@ -290,6 +297,10 @@ function formatStamp(value?: string | number) {
   const date = typeof value === 'number' ? new Date(value * 1000) : new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
   return date.toLocaleString(undefined, { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }).toUpperCase();
+}
+
+function shellQuote(value: string) {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 
 function loadGameMemory(): GameMemory {
@@ -759,11 +770,46 @@ function OfflineTab({ settings, onSettingsChange }: { settings: InterfaceSetting
   const [packStatus, setPackStatus] = useState<OfflinePackRuntimeStatus | null>(null);
   const [packError, setPackError] = useState('');
   const [loadingPack, setLoadingPack] = useState(false);
-  const selected = [
-    offline.ai ? `MUTHUR_AI_MODEL=${offline.aiModel}` : '',
-    offline.wiki ? `MUTHUR_WIKI_PACK=${offline.wikiPack}` : '',
-    offline.maps ? `MUTHUR_MAP_REGION=${offline.mapRegion}` : '',
-  ].filter(Boolean).join(' ');
+  const selectedModules = OFFLINE_MODULES.filter(module => Boolean(offline[module.id]));
+  const readySelected = selectedModules.filter(module => Boolean(packStatus?.modules?.[module.id])).length;
+  const readiness = selectedModules.length ? Math.round((readySelected / selectedModules.length) * 100) : 0;
+  const packPath = packStatus?.path || '~/.local/share/muthur/offline';
+  const packAction = packStatus?.status === 'current'
+    ? readySelected === selectedModules.length ? 'PACK CURRENT' : 'INSTALL SELECTED MODULES'
+    : packStatus?.status === 'stale'
+    ? 'UPDATE AVAILABLE'
+    : packStatus?.status === 'missing'
+    ? 'INSTALL AVAILABLE'
+    : loadingPack
+    ? 'SCANNING'
+    : 'STATUS UNKNOWN';
+
+  const buildOfflineCommand = (action: '--status' | '--install' | '--update') => {
+    if (action === '--status') return 'scripts/muthur-offline-pack.sh --status';
+    return [
+      `MUTHUR_OFFLINE_AI=${offline.ai ? '1' : '0'}`,
+      `MUTHUR_OFFLINE_WIKI=${offline.wiki ? '1' : '0'}`,
+      `MUTHUR_OFFLINE_MAPS=${offline.maps ? '1' : '0'}`,
+      `MUTHUR_OFFLINE_DOCS=${offline.docs ? '1' : '0'}`,
+      `MUTHUR_AI_MODEL=${shellQuote(offline.aiModel)}`,
+      `MUTHUR_WIKI_PACK=${shellQuote(offline.wikiPack)}`,
+      `MUTHUR_MAP_REGION=${shellQuote(offline.mapRegion)}`,
+      `scripts/muthur-offline-pack.sh ${action}`,
+    ].join(' ');
+  };
+
+  const queueOfflineCommand = (action: '--status' | '--install' | '--update') => {
+    const command = buildOfflineCommand(action);
+    window.dispatchEvent(new CustomEvent('terminal-command', { detail: { command } }));
+    playSound('granted', 0.08);
+  };
+
+  const openPackFolder = () => {
+    if (!packStatus?.path) return;
+    window.dispatchEvent(new CustomEvent('cwd-change', { detail: packStatus.path }));
+    window.dispatchEvent(new CustomEvent('fs-cd', { detail: packStatus.path }));
+    playSound('folder', 0.08);
+  };
 
   const refreshPack = () => {
     setLoadingPack(true);
@@ -789,16 +835,34 @@ function OfflineTab({ settings, onSettingsChange }: { settings: InterfaceSetting
       <section className="min-w-0">
         <ControlHeader icon={<StorageIcon size={13} />} label="VOLUNTARY OFFLINE PACK" />
         <div className="grid grid-cols-2 gap-[0.6vh]">
-          <ToggleBox title="AI MODEL" body="download local Ollama model" active={offline.ai} onClick={() => update({ ai: !offline.ai, enabled: true })} />
-          <ToggleBox title="WIKI ZIM" body="offline wiki/knowledge archive" active={offline.wiki} onClick={() => update({ wiki: !offline.wiki, enabled: true })} />
-          <ToggleBox title="MAPS" body="offline world or region map data" active={offline.maps} onClick={() => update({ maps: !offline.maps, enabled: true })} />
-          <ToggleBox title="DOCS" body="local manual and command help" active={offline.docs} onClick={() => update({ docs: !offline.docs, enabled: true })} />
+          {OFFLINE_MODULES.map((module) => (
+            <ToggleBox
+              key={module.id}
+              title={module.label}
+              body={module.body}
+              active={offline[module.id]}
+              onClick={() => update({ [module.id]: !offline[module.id], enabled: true })}
+            />
+          ))}
         </div>
 
         <div className="mt-[1vh] space-y-[0.65vh]">
           <TextField label="AI MODEL" value={offline.aiModel} onChange={(aiModel) => update({ aiModel, enabled: true })} />
           <TextField label="WIKI PACK" value={offline.wikiPack} onChange={(wikiPack) => update({ wikiPack, enabled: true })} />
           <TextField label="MAP REGION" value={offline.mapRegion} onChange={(mapRegion) => update({ mapRegion, enabled: true })} />
+        </div>
+
+        <div className="mt-[1vh] border border-[rgba(0,255,65,0.12)] p-[0.75vh]">
+          <div className="flex items-center justify-between text-[0.9vh] tracking-wider text-muthur-secondary opacity-70 mb-[0.45vh]">
+            <span>READINESS</span>
+            <span className="text-muthur-primary tabular-nums">{readiness}%</span>
+          </div>
+          <div className="h-[0.75vh] bg-[rgba(0,255,65,0.08)] overflow-hidden">
+            <div className="h-full bg-muthur-primary transition-all" style={{ width: `${readiness}%` }} />
+          </div>
+          <div className="mt-[0.55vh] text-[0.78vh] text-muthur-secondary opacity-55 leading-snug">
+            Selected modules are only downloaded when you run the queued command and accept the script prompts.
+          </div>
         </div>
       </section>
 
@@ -808,33 +872,52 @@ function OfflineTab({ settings, onSettingsChange }: { settings: InterfaceSetting
           <div className="grid grid-cols-3 gap-[0.5vh]">
             <Metric label="STATUS" value={packStatus?.status?.toUpperCase() ?? (loadingPack ? 'SCANNING' : 'UNKNOWN')} />
             <Metric label="SIZE" value={formatBytes(packStatus?.sizeBytes ?? 0)} />
-            <Metric label="VERSION" value={packStatus?.version || 'NONE'} />
+            <Metric label="ACTION" value={packAction} />
           </div>
           <div className="mt-[0.7vh] grid grid-cols-4 gap-[0.45vh]">
-            {(['ai', 'wiki', 'maps', 'docs'] as const).map((module) => (
+            {OFFLINE_MODULES.map((module) => (
               <div
-                key={module}
+                key={module.id}
                 className={`border px-[0.45vh] py-[0.35vh] text-center text-[0.75vh] tracking-wider ${
-                  packStatus?.modules?.[module] ? 'border-muthur-primary text-muthur-primary' : 'border-[rgba(0,255,65,0.1)] text-muthur-secondary opacity-45'
+                  packStatus?.modules?.[module.id] && offline[module.id]
+                    ? 'border-muthur-primary text-muthur-primary bg-[rgba(0,255,65,0.08)]'
+                    : packStatus?.modules?.[module.id]
+                    ? 'border-[rgba(0,255,65,0.3)] text-muthur-secondary opacity-75'
+                    : offline[module.id]
+                    ? 'border-muthur-accent text-muthur-accent bg-[rgba(255,59,83,0.08)]'
+                    : 'border-[rgba(0,255,65,0.1)] text-muthur-secondary opacity-45'
                 }`}
               >
-                {module.toUpperCase()}
+                {module.id.toUpperCase()}
               </div>
             ))}
           </div>
-          <div className="mt-[0.7vh] grid grid-cols-2 gap-[0.5vh]">
-            <StatusCard title="CURRENT" value={packStatus?.currentVersion ?? 'UNKNOWN'} body="bundled pack format" />
+          <div className="mt-[0.7vh] grid grid-cols-3 gap-[0.5vh]">
+            <StatusCard title="INSTALLED" value={packStatus?.version || 'NONE'} body="manifest version" />
+            <StatusCard title="CURRENT" value={packStatus?.currentVersion ?? 'UNKNOWN'} body="app pack format" />
             <StatusCard title="UPDATED" value={formatStamp(packStatus?.updatedAt)} body="manifest timestamp" />
           </div>
           <pre className="mt-[0.8vh] flex-1 min-h-0 overflow-auto bg-[rgba(0,255,65,0.035)] border border-[rgba(0,255,65,0.1)] p-[0.65vh] text-[0.78vh] text-muthur-primary whitespace-pre-wrap">
-{`${selected || '# choose modules on the left'}
-scripts/muthur-offline-pack.sh --status
-scripts/muthur-offline-pack.sh --install
-scripts/muthur-offline-pack.sh --update`}
+{`# Commands are queued into the shell for review, not auto-executed.
+${buildOfflineCommand('--status')}
+${buildOfflineCommand(packStatus?.status === 'stale' ? '--update' : '--install')}`}
           </pre>
           {packError && <div className="mt-[0.5vh] text-[0.75vh] text-muthur-accent truncate">{packError}</div>}
-          <div className="grid grid-cols-[1fr_auto] gap-[0.5vh] mt-[0.6vh]">
-            <div className="text-[0.72vh] text-muthur-secondary opacity-45 truncate">{packStatus?.path ?? '~/.local/share/muthur/offline'}</div>
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-[0.5vh] mt-[0.6vh]">
+            <button
+              onClick={openPackFolder}
+              disabled={!packStatus?.path}
+              className="text-left text-[0.72vh] text-muthur-secondary opacity-60 truncate border border-[rgba(0,255,65,0.1)] px-[0.45vh] disabled:opacity-25"
+              title={packPath}
+            >
+              {packPath}
+            </button>
+            <button onClick={() => queueOfflineCommand('--status')} className="px-[0.7vh] border border-[rgba(0,255,65,0.24)] text-muthur-secondary text-[0.75vh] tracking-wider">
+              STATUS
+            </button>
+            <button onClick={() => queueOfflineCommand(packStatus?.status === 'stale' ? '--update' : '--install')} className="px-[0.7vh] border border-muthur-primary text-muthur-primary text-[0.75vh] tracking-wider">
+              QUEUE
+            </button>
             <button onClick={refreshPack} className="px-[0.7vh] border border-muthur-primary text-muthur-primary text-[0.75vh] tracking-wider">
               {loadingPack ? 'SCAN' : 'REFRESH'}
             </button>

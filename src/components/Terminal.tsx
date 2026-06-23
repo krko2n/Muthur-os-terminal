@@ -498,6 +498,24 @@ export default function Terminal({
     setActiveSessionId(sessionId);
   };
 
+  useEffect(() => {
+    const handleTerminalCommand = (event: Event) => {
+      const detail = (event as CustomEvent).detail;
+      const command = typeof detail === 'string' ? detail : detail?.command;
+      if (typeof command !== 'string' || !command.trim()) return;
+
+      const activeShell = sessions.find(session => session.id === activeSessionId && session.type === 'shell');
+      const targetShell = activeShell ?? sessions.find(session => session.type === 'shell');
+      if (!targetShell) return;
+
+      switchSession(targetShell.id);
+      void writeToTerminal(targetShell.id, command);
+    };
+
+    window.addEventListener('terminal-command', handleTerminalCommand);
+    return () => window.removeEventListener('terminal-command', handleTerminalCommand);
+  }, [sessions, activeSessionId]);
+
   const closeSession = async (sessionId: string) => {
     const session = sessions.find(s => s.id === sessionId);
     if (!session) return;

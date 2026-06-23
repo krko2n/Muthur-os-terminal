@@ -257,6 +257,10 @@ How do I find large files on my system?
 
 Normal AI chat runs through your configured Ollama endpoint, which defaults to your local machine. The panel searches the offline archive first when local wiki/docs are available. Commands such as `web <query>` and `fetch <url>` intentionally use the network.
 
+### Offline Pack Manager
+
+Open **+ SETTINGS**, then **F4 OFFLINE**, to inspect the optional offline AI/wiki/maps/docs pack. The panel shows installed modules, pack version, size, map metadata, and readiness for the modules you selected. Install/update commands are queued into a shell for review; downloads still require you to run the command and accept the script prompts.
+
 ### 3D Globe
 
 The top-right shows a rotating globe with real-time conflict/event data. Click the mode buttons (CONFLICTS, CYBER, FLIGHTS) to switch views. Click REFRESH to reload data.
@@ -491,7 +495,7 @@ MIT -- see [LICENSE](LICENSE).
 ---
 
 <!-- MUTHUR-STATS:START -->
-![Lines of Code](https://img.shields.io/badge/lines%20of%20code-25%2C839-c9d1d9?style=flat-square&labelColor=161b22)
+![Lines of Code](https://img.shields.io/badge/lines%20of%20code-25%2C944-c9d1d9?style=flat-square&labelColor=161b22)
 ![Project Files](https://img.shields.io/badge/project%20files-123-c9d1d9?style=flat-square&labelColor=161b22)
 <!-- MUTHUR-STATS:END -->
 
