@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+c523ff0 fix: disable system seatd and clean socket for seatd-launch to work
+575ca8f docs: auto-update generated docs [skip ci]
 d48dd6e fix: use seatd-launch to run cage without system seatd service
 f30383d docs: auto-update generated docs [skip ci]
 c203532 fix: add polkit so cage works immediately without seatd setup
@@ -50,5 +52,3 @@ ad8afea docs: auto-update generated docs [skip ci]
 fdfdd85 docs: auto-update generated docs [skip ci]
 df3dacb fix: keep installer scripts linux safe
 1bfd8eb docs: auto-update generated docs [skip ci]
-65af251 chore: verify readme counters and installer guards
-3734184 docs: auto-update generated docs [skip ci]
