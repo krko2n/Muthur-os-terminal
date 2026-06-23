@@ -480,13 +480,13 @@ if ! command -v cage &>/dev/null; then
     exit 1
 fi
 
-# seatd-launch spawns a private seat manager for this session
-if command -v seatd-launch &>/dev/null; then
-    exec seatd-launch -- cage -d -- muthur-bin "$@"
+# Remove stale system seatd socket so seatd-launch can create its own
+if [ -S /run/seatd.sock ]; then
+    sudo rm -f /run/seatd.sock 2>/dev/null || true
 fi
 
-# Fallback if seatd-launch is missing but seatd service is running
-exec cage -d -- muthur-bin "$@"
+# seatd-launch spawns a private seat manager for this session -- no service needed
+exec seatd-launch -- cage -d -- muthur-bin "$@"
 WRAPPER
     install_binary_file /tmp/muthur-launcher "$wrapper"
     rm -f /tmp/muthur-launcher
@@ -616,12 +616,11 @@ offer_display_setup() {
     # Skip in quiet mode
     [ "$QUIET" = "--quiet" ] && return 0
 
-    # Enable greetd so the display server is ready on boot
-    maybe_sudo systemctl enable seatd 2>/dev/null || true
-    maybe_sudo systemctl start seatd 2>/dev/null || true
+    # Disable system seatd -- the launcher uses seatd-launch per session instead
+    maybe_sudo systemctl disable seatd 2>/dev/null || true
+    maybe_sudo systemctl stop seatd 2>/dev/null || true
+    maybe_sudo rm -f /run/seatd.sock 2>/dev/null || true
     maybe_sudo systemctl enable greetd 2>/dev/null || true
-    # Add user to seat group so cage can claim GPU
-    maybe_sudo usermod -aG seat "$USER" 2>/dev/null || true
 
     echo ""
     echo -e "${BOLD}MUTHUR session ready.${NC}"

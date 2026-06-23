@@ -178,10 +178,10 @@ if ! command -v cage &>/dev/null; then
     echo "No display server. Install: sudo pacman -S cage seatd" >&2
     exit 1
 fi
-if command -v seatd-launch &>/dev/null; then
-    exec seatd-launch -- cage -d -- muthur-bin "$@"
+if [ -S /run/seatd.sock ]; then
+    sudo rm -f /run/seatd.sock 2>/dev/null || true
 fi
-exec cage -d -- muthur-bin "$@"
+exec seatd-launch -- cage -d -- muthur-bin "$@"
 WRAPPER
 
 if [ "$EUID" -eq 0 ]; then
@@ -194,6 +194,17 @@ else
     sudo ln -sf /usr/local/bin/muthur-bin /usr/bin/muthur-os-terminal >> "$BUILD_LOG" 2>&1 || true
 fi
 rm -f /tmp/muthur-launcher
+
+# Ensure system seatd is not blocking seatd-launch
+if [ "$EUID" -eq 0 ]; then
+    systemctl disable seatd >> "$BUILD_LOG" 2>&1 || true
+    systemctl stop seatd >> "$BUILD_LOG" 2>&1 || true
+    rm -f /run/seatd.sock 2>/dev/null || true
+else
+    sudo systemctl disable seatd >> "$BUILD_LOG" 2>&1 || true
+    sudo systemctl stop seatd >> "$BUILD_LOG" 2>&1 || true
+    sudo rm -f /run/seatd.sock 2>/dev/null || true
+fi
 
 rewind_progress
 draw_progress 98 "Verifying installation..."
