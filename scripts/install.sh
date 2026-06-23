@@ -270,20 +270,23 @@ install_deps() {
         arch)
             maybe_sudo pacman -Sy --noconfirm --needed \
                 base-devel curl wget file openssl xdg-utils \
-                gtk3 libappindicator-gtk3 librsvg webkit2gtk-4.1
+                gtk3 libappindicator-gtk3 librsvg webkit2gtk-4.1 \
+                cage greetd
             ;;
         debian)
             maybe_sudo apt-get update -qq
             maybe_sudo apt-get install -y -qq \
                 build-essential curl wget file xdg-utils \
                 libssl-dev libgtk-3-dev libayatana-appindicator3-dev \
-                librsvg2-dev libwebkit2gtk-4.1-dev
+                librsvg2-dev libwebkit2gtk-4.1-dev \
+                cage greetd
             ;;
         fedora)
             maybe_sudo dnf install -y -q \
                 gcc gcc-c++ make curl wget file xdg-utils \
                 openssl-devel gtk3-devel libappindicator-gtk3-devel \
-                librsvg2-devel webkit2gtk4.1-devel
+                librsvg2-devel webkit2gtk4.1-devel \
+                cage greetd
             ;;
     esac
 
@@ -579,73 +582,38 @@ verify_installation() {
     fi
 }
 
-# ─── Display Server Setup ──────────────────────────────────────────────────
+# ─── Autostart Setup ──────────────────────────────────────────────────────
 
 offer_display_setup() {
-    # Skip in quiet mode or if already in a graphical session
+    # Skip in quiet mode
     [ "$QUIET" = "--quiet" ] && return 0
-    [ -n "${DISPLAY:-}" ] && return 0
-    [ -n "${WAYLAND_DISPLAY:-}" ] && return 0
 
-    # Check if any display server is available
-    if command -v cage &>/dev/null || command -v Xorg &>/dev/null || command -v sway &>/dev/null; then
-        return 0
-    fi
+    # Enable greetd so the display server is ready on boot
+    maybe_sudo systemctl enable greetd 2>/dev/null || true
 
     echo ""
-    echo -e "${BOLD}No display server detected.${NC}"
-    echo "  MUTHUR needs a graphical environment to run."
+    echo -e "${BOLD}MUTHUR session ready.${NC}"
+    echo "  Display server (cage + greetd) is installed."
     echo ""
-    echo "  Options:"
-    echo "    1) Install cage + greetd (minimal, boots directly into MUTHUR)"
-    echo "    2) Install Xorg (standard, run with 'startx muthur')"
-    echo "    3) Skip (I will set up display server myself)"
+    echo "  Autostart options:"
+    echo "    1) Enable  - MUTHUR launches fullscreen on boot (replaces login screen)"
+    echo "    2) Disable - Launch manually with 'muthur' after login"
     echo ""
 
     local choice=""
-    read -r -p "  Select [1/2/3]: " choice || choice="3"
+    read -r -p "  Select [1/2]: " choice || choice="2"
 
     case "$choice" in
         1)
-            step "Installing cage + greetd..."
-            case $OS in
-                arch)
-                    maybe_sudo pacman -Sy --noconfirm --needed cage greetd
-                    ;;
-                debian)
-                    maybe_sudo apt-get install -y -qq cage greetd
-                    ;;
-                fedora)
-                    maybe_sudo dnf install -y -q cage greetd
-                    ;;
-            esac
-            maybe_sudo systemctl enable greetd 2>/dev/null || true
-            info "cage + greetd installed"
-            echo ""
-            echo "  Run 'muthur-ui enable' to boot directly into MUTHUR."
-            echo "  Then reboot."
-            ;;
-        2)
-            step "Installing Xorg..."
-            case $OS in
-                arch)
-                    maybe_sudo pacman -Sy --noconfirm --needed xorg-server xorg-xinit
-                    ;;
-                debian)
-                    maybe_sudo apt-get install -y -qq xorg xinit
-                    ;;
-                fedora)
-                    maybe_sudo dnf install -y -q xorg-x11-server-Xorg xorg-x11-xinit
-                    ;;
-            esac
-            info "Xorg installed"
-            echo ""
-            echo "  Launch with: startx muthur"
-            echo "  Or add 'exec muthur' to ~/.xinitrc and run 'startx'."
+            if [ -x "$INSTALL_DIR/muthur-ui" ]; then
+                "$INSTALL_DIR/muthur-ui" enable 2>/dev/null || true
+            fi
+            info "Autostart ENABLED. MUTHUR will launch on next boot."
+            echo "  Disable later with: muthur-ui disable"
             ;;
         *)
-            dimtext "  Display server setup skipped."
-            dimtext "  Install a graphical environment before running 'muthur'."
+            info "Autostart disabled. Launch manually with: muthur"
+            echo "  Enable later with: muthur-ui enable"
             ;;
     esac
 }
