@@ -32,8 +32,8 @@ if [ -z "$SESSION_HOST" ]; then
 fi
 
 # Check if MUTHUR binary exists
-if [ ! -x "/usr/bin/muthur-os-terminal" ]; then
-    echo "ERROR: muthur-os-terminal not found"
+if [ ! -x "/usr/local/bin/muthur-bin" ] && [ ! -x "/usr/bin/muthur-os-terminal" ]; then
+    echo "ERROR: muthur-bin not found"
     notify-send -u critical "MUTHUR Session Error" "MUTHUR binary not found" 2>/dev/null
     exit 1
 fi
@@ -42,4 +42,5 @@ fi
 sleep 0.5
 
 echo "[$(date)] Handing display to MUTHUR"
-exec "$SESSION_HOST" -d -- /usr/bin/muthur-os-terminal --fullscreen-force --session-mode
+MUTHUR_BIN="$(command -v muthur-bin 2>/dev/null || echo /usr/local/bin/muthur-bin)"
+exec "$SESSION_HOST" -d -- "$MUTHUR_BIN" --fullscreen-force --session-mode

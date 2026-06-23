@@ -462,10 +462,32 @@ install_assets() {
         exit 1
     fi
 
-    install_binary_file "$binary" "$INSTALL_DIR/muthur"
+    install_binary_file "$binary" "$INSTALL_DIR/muthur-bin"
+
+    # Create launcher wrapper that auto-starts cage when no display is available
+    local wrapper="$INSTALL_DIR/muthur"
+    cat > /tmp/muthur-launcher << 'WRAPPER'
+#!/bin/bash
+# MUTHUR OS Terminal launcher
+# Starts cage automatically if no display server is running.
+
+if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
+    exec muthur-bin "$@"
+fi
+
+if command -v cage &>/dev/null; then
+    exec cage -d -- muthur-bin "$@"
+fi
+
+echo "No display server available. Install cage: sudo pacman -S cage" >&2
+exit 1
+WRAPPER
+    install_binary_file /tmp/muthur-launcher "$wrapper"
+    rm -f /tmp/muthur-launcher
+
     # Symlink to standard system path only for the default system install.
     if [ "$SYSTEM_ASSETS" = "true" ]; then
-        maybe_sudo ln -sf "$INSTALL_DIR/muthur" "$SYSTEM_BIN/muthur-os-terminal"
+        maybe_sudo ln -sf "$INSTALL_DIR/muthur-bin" "$SYSTEM_BIN/muthur-os-terminal"
     else
         dimtext "  System symlink skipped for custom prefix"
     fi

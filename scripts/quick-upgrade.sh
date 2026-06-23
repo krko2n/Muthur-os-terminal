@@ -29,7 +29,7 @@ npm run build --silent 2>&1 | grep -v "vite" || true
 # Install
 BINARY="src-tauri/target/release/muthur-os-terminal"
 if [ -f "$BINARY" ]; then
-    sudo install -Dm755 "$BINARY" /usr/local/bin/muthur
+    sudo install -Dm755 "$BINARY" /usr/local/bin/muthur-bin
     VERSION=$(grep '^version' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2)
     echo "[OK] Upgraded to v$VERSION"
     echo "     Settings, scores, and saves preserved."

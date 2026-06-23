@@ -168,17 +168,17 @@ BINARY="src-tauri/target/release/muthur-os-terminal"
 rewind_progress
 draw_progress 94 "Installing binary..."
 if [ "$EUID" -eq 0 ]; then
-    install -Dm755 "$BINARY" /usr/local/bin/muthur >> "$BUILD_LOG" 2>&1
-    ln -sf /usr/local/bin/muthur /usr/bin/muthur-os-terminal >> "$BUILD_LOG" 2>&1 || true
+    install -Dm755 "$BINARY" /usr/local/bin/muthur-bin >> "$BUILD_LOG" 2>&1
+    ln -sf /usr/local/bin/muthur-bin /usr/bin/muthur-os-terminal >> "$BUILD_LOG" 2>&1 || true
 else
-    sudo install -Dm755 "$BINARY" /usr/local/bin/muthur >> "$BUILD_LOG" 2>&1
-    sudo ln -sf /usr/local/bin/muthur /usr/bin/muthur-os-terminal >> "$BUILD_LOG" 2>&1 || true
+    sudo install -Dm755 "$BINARY" /usr/local/bin/muthur-bin >> "$BUILD_LOG" 2>&1
+    sudo ln -sf /usr/local/bin/muthur-bin /usr/bin/muthur-os-terminal >> "$BUILD_LOG" 2>&1 || true
 fi
 
 rewind_progress
 draw_progress 98 "Verifying installation..."
-[ -x "/usr/local/bin/muthur" ] || fail "Verification failed: /usr/local/bin/muthur is not executable."
-SIZE=$(du -h /usr/local/bin/muthur | cut -f1)
+[ -x "/usr/local/bin/muthur-bin" ] || fail "Verification failed: /usr/local/bin/muthur-bin is not executable."
+SIZE=$(du -h /usr/local/bin/muthur-bin | cut -f1)
 
 # Restore stashed changes if any
 if [ "$STASHED" = "true" ]; then

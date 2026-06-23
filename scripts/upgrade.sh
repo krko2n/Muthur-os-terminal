@@ -130,8 +130,8 @@ printf "  ${DIM}[6/6]${RESET} Installing binary...\n"
 BINARY="src-tauri/target/release/muthur-os-terminal"
 [ -f "$BINARY" ] || { printf "  ${RED}[FAIL]${RESET} Binary not found\n"; exit 1; }
 
-sudo install -Dm755 "$BINARY" /usr/local/bin/muthur
-sudo ln -sf /usr/local/bin/muthur /usr/bin/muthur-os-terminal 2>/dev/null || true
+sudo install -Dm755 "$BINARY" /usr/local/bin/muthur-bin
+sudo ln -sf /usr/local/bin/muthur-bin /usr/bin/muthur-os-terminal 2>/dev/null || true
 
 # --- Restore user data ---
 if [ -d "$BACKUP_DIR/config" ]; then
