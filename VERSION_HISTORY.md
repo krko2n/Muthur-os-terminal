@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+e850ead refactor: rename mother-ui to muthur-ui
+ea96bb1 docs: auto-update generated docs [skip ci]
 4860c37 fix: resolve SCRIPT_DIR to project root, not scripts/
 bb4d1dd docs: auto-update generated docs [skip ci]
 2132c3c fix: use absolute path to src-tauri in build step
@@ -50,5 +52,3 @@ e34d06b docs: auto-update generated docs [skip ci]
 16fa011 feat: add PHANTOM and NEON theme presets
 ecd90b1 docs: auto-update generated docs [skip ci]
 7a7f088 feat: add game tutorials with controls overlay and help button
-0bb636a docs: auto-update generated docs [skip ci]
-9b60cd4 feat: colored ASCII image rendering with half-block pixel art
