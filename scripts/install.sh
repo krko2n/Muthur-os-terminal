@@ -430,9 +430,9 @@ build_app() {
 
     step "[2/2] Compiling application (frontend + backend)..."
     npm run build
-    cd src-tauri
+    cd "$SCRIPT_DIR/../src-tauri"
     cargo build --release
-    cd ..
+    cd "$SCRIPT_DIR"
     info "Build complete"
 }
 
