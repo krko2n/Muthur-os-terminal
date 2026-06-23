@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+9deda43 fix: install cage launcher wrapper in update scripts
+1d7de67 docs: auto-update generated docs [skip ci]
 5481fdb feat: auto-launch cage when no display server is running
 3a988f6 docs: auto-update generated docs [skip ci]
 cce2abf feat: install display server by default, offer autostart toggle
@@ -50,5 +52,3 @@ d142896 docs: fix README stats counter
 029999c docs: auto-update generated docs [skip ci]
 d8d01e8 fix: move gameFullscreen state declaration to component top
 254f241 docs: auto-update generated docs [skip ci]
-4d94e76 fix: open files in internal terminal tab instead of external window
-9c4045f docs: auto-update generated docs [skip ci]
