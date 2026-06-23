@@ -77,21 +77,21 @@ install_all_deps() {
     case $OS in
         arch)
             maybe_sudo pacman -Sy --noconfirm \
-                base-devel curl wget file openssl gtk3 \
+                base-devel curl wget file openssl xdg-utils gtk3 \
                 libappindicator-gtk3 librsvg webkit2gtk-4.1 \
                 github-cli git
             ;;
         debian)
             maybe_sudo apt update -qq
             maybe_sudo apt install -y -qq \
-                build-essential curl wget file libssl-dev \
+                build-essential curl wget file xdg-utils libssl-dev \
                 libgtk-3-dev libayatana-appindicator3-dev \
                 librsvg2-dev libwebkit2gtk-4.1-dev \
                 git gh
             ;;
         fedora)
             maybe_sudo dnf install -y -q \
-                gcc gcc-c++ make curl wget file openssl-devel \
+                gcc gcc-c++ make curl wget file xdg-utils openssl-devel \
                 gtk3-devel libappindicator-gtk3-devel \
                 librsvg2-devel webkit2gtk4.1-devel \
                 gh git
