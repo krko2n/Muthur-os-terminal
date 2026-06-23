@@ -147,6 +147,8 @@ Safer install modes:
 
 `--dry-run` prints the detected plan and exits before changes. `--no-deps` skips distro, Rust, and Node dependency installation. `--no-ollama` keeps optional offline-AI setup out of the install/update flow. A custom `--prefix` installs user binaries under that prefix and skips system session files. `--quiet` reduces installer chatter for scripted runs.
 
+**Root execution:** The installer blocks running as root on normal installed systems to prevent file-ownership issues. It is automatically allowed in disposable environments (Arch ISO, Docker/Podman containers, VMs detected via `systemd-detect-virt`, and CI runners). To force root execution elsewhere, set `MUTHUR_ALLOW_ROOT=1`.
+
 ### Step 5: Launch
 
 ```bash

@@ -16,10 +16,42 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Check if running as root
+# Check if running as root -- allow in disposable environments
+is_disposable_env() {
+    [ "${MUTHUR_ALLOW_ROOT:-}" = "1" ] && return 0
+    [ "${CI:-}" = "true" ] && return 0
+    [ -n "${GITHUB_ACTIONS:-}" ] && return 0
+    [ -n "${GITLAB_CI:-}" ] && return 0
+    [ -f /.dockerenv ] && return 0
+    [ -f /run/.containerenv ] && return 0
+    grep -qsw 'container' /proc/1/environ 2>/dev/null && return 0
+    [ -d /run/archiso ] && return 0
+    [ -f /etc/calamares ] && return 0
+    findmnt -n -o FSTYPE / 2>/dev/null | grep -qs 'tmpfs\|squashfs\|overlay' && return 0
+    if command -v systemd-detect-virt &>/dev/null; then
+        local vtype
+        vtype="$(systemd-detect-virt 2>/dev/null || true)"
+        [ "$vtype" != "none" ] && [ -n "$vtype" ] && return 0
+    fi
+    return 1
+}
+
+maybe_sudo() {
+    if [ "$EUID" -eq 0 ]; then
+        "$@"
+    else
+        sudo "$@"
+    fi
+}
+
 if [ "$EUID" -eq 0 ]; then
-    echo -e "${RED}Error: Do not run as root${NC}"
-    exit 1
+    if is_disposable_env; then
+        echo -e "${YELLOW}[!!]${NC} Running as root in a disposable environment."
+    else
+        echo -e "${RED}Error: Do not run as root on an installed system${NC}"
+        echo "Override: set MUTHUR_ALLOW_ROOT=1 if you know what you are doing."
+        exit 1
+    fi
 fi
 
 # Detect OS
@@ -44,21 +76,21 @@ install_all_deps() {
 
     case $OS in
         arch)
-            sudo pacman -Sy --noconfirm \
+            maybe_sudo pacman -Sy --noconfirm \
                 base-devel curl wget file openssl gtk3 \
                 libappindicator-gtk3 librsvg webkit2gtk-4.1 \
                 github-cli git
             ;;
         debian)
-            sudo apt update -qq
-            sudo apt install -y -qq \
+            maybe_sudo apt update -qq
+            maybe_sudo apt install -y -qq \
                 build-essential curl wget file libssl-dev \
                 libgtk-3-dev libayatana-appindicator3-dev \
                 librsvg2-dev libwebkit2gtk-4.1-dev \
                 git gh
             ;;
         fedora)
-            sudo dnf install -y -q \
+            maybe_sudo dnf install -y -q \
                 gcc gcc-c++ make curl wget file openssl-devel \
                 gtk3-devel libappindicator-gtk3-devel \
                 librsvg2-devel webkit2gtk4.1-devel \
@@ -172,8 +204,8 @@ install_binary() {
     echo -e "${YELLOW}Installing...${NC}"
 
     if [ -f "src-tauri/target/release/muthur-os-terminal" ]; then
-        sudo cp src-tauri/target/release/muthur-os-terminal /usr/local/bin/muthur
-        sudo chmod +x /usr/local/bin/muthur
+        maybe_sudo cp src-tauri/target/release/muthur-os-terminal /usr/local/bin/muthur
+        maybe_sudo chmod +x /usr/local/bin/muthur
         echo -e "${GREEN}[OK]${NC} Installed to /usr/local/bin/muthur"
     else
         echo -e "${RED}[FAIL]${NC} Binary not found"

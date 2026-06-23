@@ -120,6 +120,38 @@ err()     { echo -e "${RED}[ERR]${NC} $*"; }
 step()    { echo -e "${BLUE}[>>]${NC} $*"; }
 dimtext() { echo -e "${DIM}$*${NC}"; }
 
+is_disposable_env() {
+    # Explicit override
+    [ "${MUTHUR_ALLOW_ROOT:-}" = "1" ] && return 0
+    # CI environments
+    [ "${CI:-}" = "true" ] && return 0
+    [ -n "${GITHUB_ACTIONS:-}" ] && return 0
+    [ -n "${GITLAB_CI:-}" ] && return 0
+    # Container (Docker, Podman, LXC, systemd-nspawn)
+    [ -f /.dockerenv ] && return 0
+    [ -f /run/.containerenv ] && return 0
+    grep -qsw 'container' /proc/1/environ 2>/dev/null && return 0
+    # Live ISO (no persistent root password, archiso marker, or tmpfs root)
+    [ -d /run/archiso ] && return 0
+    [ -f /etc/calamares ] && return 0
+    findmnt -n -o FSTYPE / 2>/dev/null | grep -qs 'tmpfs\|squashfs\|overlay' && return 0
+    # Virtual machine (optional, less strict)
+    if command -v systemd-detect-virt &>/dev/null; then
+        local vtype
+        vtype="$(systemd-detect-virt 2>/dev/null || true)"
+        [ "$vtype" != "none" ] && [ -n "$vtype" ] && return 0
+    fi
+    return 1
+}
+
+maybe_sudo() {
+    if [ "$EUID" -eq 0 ]; then
+        "$@"
+    else
+        sudo "$@"
+    fi
+}
+
 needs_sudo_for_install_dir() {
     case "$INSTALL_DIR" in
         "$HOME"/*) return 1 ;;
@@ -131,9 +163,9 @@ install_binary_file() {
     local source="$1"
     local target="$2"
     if needs_sudo_for_install_dir; then
-        sudo mkdir -p "$(dirname "$target")"
-        sudo install -Dm755 "$source" "$target"
-        sudo chmod 755 "$target"
+        maybe_sudo mkdir -p "$(dirname "$target")"
+        maybe_sudo install -Dm755 "$source" "$target"
+        maybe_sudo chmod 755 "$target"
     else
         mkdir -p "$(dirname "$target")"
         install -Dm755 "$source" "$target"
@@ -157,10 +189,17 @@ preflight() {
         exit 1
     fi
 
-    # Root check
+    # Root check -- allow in disposable environments, block on installed systems
     if [ "$EUID" -eq 0 ]; then
-        err "Do not run as root/sudo. The script elevates when needed."
-        exit 1
+        if is_disposable_env; then
+            warn "Running as root in a disposable environment."
+            warn "Config will be written to /root -- acceptable for ISO/container/CI use."
+        else
+            err "Do not run as root/sudo on an installed system."
+            err "The script elevates with sudo when needed."
+            err "Override: set MUTHUR_ALLOW_ROOT=1 if you know what you are doing."
+            exit 1
+        fi
     fi
 
     # Detect existing installation
@@ -229,19 +268,19 @@ install_deps() {
 
     case $OS in
         arch)
-            sudo pacman -Sy --noconfirm --needed \
+            maybe_sudo pacman -Sy --noconfirm --needed \
                 base-devel curl wget file openssl \
                 gtk3 libappindicator-gtk3 librsvg webkit2gtk-4.1
             ;;
         debian)
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq \
+            maybe_sudo apt-get update -qq
+            maybe_sudo apt-get install -y -qq \
                 build-essential curl wget file \
                 libssl-dev libgtk-3-dev libayatana-appindicator3-dev \
                 librsvg2-dev libwebkit2gtk-4.1-dev
             ;;
         fedora)
-            sudo dnf install -y -q \
+            maybe_sudo dnf install -y -q \
                 gcc gcc-c++ make curl wget file \
                 openssl-devel gtk3-devel libappindicator-gtk3-devel \
                 librsvg2-devel webkit2gtk4.1-devel
@@ -403,7 +442,7 @@ install_assets() {
     install_binary_file "$binary" "$INSTALL_DIR/muthur"
     # Symlink to standard system path only for the default system install.
     if [ "$SYSTEM_ASSETS" = "true" ]; then
-        sudo ln -sf "$INSTALL_DIR/muthur" "$SYSTEM_BIN/muthur-os-terminal"
+        maybe_sudo ln -sf "$INSTALL_DIR/muthur" "$SYSTEM_BIN/muthur-os-terminal"
     else
         dimtext "  System symlink skipped for custom prefix"
     fi
@@ -422,14 +461,14 @@ install_assets() {
 
     # ── Session Infrastructure ──
     if [ "$SYSTEM_ASSETS" = "true" ] && [ -f "$SCRIPT_DIR/packaging/muthur-session" ]; then
-        sudo install -Dm755 "$SCRIPT_DIR/packaging/muthur-session" "$SYSTEM_BIN/muthur-session"
-        sudo chmod 755 "$SYSTEM_BIN/muthur-session"
+        maybe_sudo install -Dm755 "$SCRIPT_DIR/packaging/muthur-session" "$SYSTEM_BIN/muthur-session"
+        maybe_sudo chmod 755 "$SYSTEM_BIN/muthur-session"
         info "Session: $SYSTEM_BIN/muthur-session"
     fi
 
     if [ "$SYSTEM_ASSETS" = "true" ] && [ -f "$SCRIPT_DIR/packaging/muthur-session.desktop" ]; then
-        sudo mkdir -p "$SESSION_DIR"
-        sudo install -Dm644 "$SCRIPT_DIR/packaging/muthur-session.desktop" "$SESSION_DIR/muthur.desktop"
+        maybe_sudo mkdir -p "$SESSION_DIR"
+        maybe_sudo install -Dm644 "$SCRIPT_DIR/packaging/muthur-session.desktop" "$SESSION_DIR/muthur.desktop"
         info "Session entry: $SESSION_DIR/muthur.desktop"
     elif [ "$SYSTEM_ASSETS" != "true" ]; then
         dimtext "  Native session files skipped for custom prefix"
