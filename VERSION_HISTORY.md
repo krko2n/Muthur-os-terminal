@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+a383e1a feat: add ai stop control
+32e4df5 docs: auto-update generated docs [skip ci]
 109bba9 feat: improve offline pack manager
 ad8afea docs: auto-update generated docs [skip ci]
 14d7c83 fix: harden backend fetch targets
@@ -50,5 +52,3 @@ d400008 style: fix cargo fmt formatting in main.rs
 daca464 docs: auto-update generated docs [skip ci]
 3447f1c feat: enhanced AI, audio system, theme loadouts, and operations deck
 ea52038 docs: auto-update generated docs [skip ci]
-6ec93fe docs: make README counters self-updating
-1969007 docs: auto-update version history [skip ci]
