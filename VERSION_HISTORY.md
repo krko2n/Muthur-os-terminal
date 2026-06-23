@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+5481fdb feat: auto-launch cage when no display server is running
+3a988f6 docs: auto-update generated docs [skip ci]
 cce2abf feat: install display server by default, offer autostart toggle
 32388b1 docs: update README for make update and GTK troubleshooting
 db8f3e4 docs: auto-update generated docs [skip ci]
@@ -50,5 +52,3 @@ d8d01e8 fix: move gameFullscreen state declaration to component top
 254f241 docs: auto-update generated docs [skip ci]
 4d94e76 fix: open files in internal terminal tab instead of external window
 9c4045f docs: auto-update generated docs [skip ci]
-dffd7ef feat: virtual games folder in file explorer with tab launch
-cd1f68d docs: auto-update generated docs [skip ci]
