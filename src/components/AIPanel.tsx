@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { AIIcon } from './SystemIcons';
 
 interface Message {
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'warning';
   content: string;
 }
 
@@ -20,6 +20,42 @@ interface AIStatus {
   online: boolean;
   offlineArchive: boolean;
 }
+
+interface CommandRiskRule {
+  pattern: RegExp;
+  reason: string;
+}
+
+const COMMAND_RISK_RULES: CommandRiskRule[] = [
+  {
+    pattern: /\brm\s+-(?=[^\n;&|]*r)(?=[^\n;&|]*f)[^\n;&|]*/i,
+    reason: 'forced recursive deletion',
+  },
+  {
+    pattern: /\b(?:mkfs|wipefs|fdisk|parted|sgdisk|gdisk|cryptsetup\s+luksFormat)\b/i,
+    reason: 'disk partitioning, formatting, or wipe operation',
+  },
+  {
+    pattern: /\bdd\s+[^;\n]*(?:of=\/dev\/|if=\/dev\/)/i,
+    reason: 'raw block-device copy',
+  },
+  {
+    pattern: /\b(?:curl|wget)\b[^\n|;&]*(?:\||\s+-O\s+-|\s+-qO\s+-)[^\n]*(?:sh|bash|zsh|fish)\b/i,
+    reason: 'remote script piped into a shell',
+  },
+  {
+    pattern: /\b(?:chmod|chown)\s+-R\b[^\n;&|]*(?:\s\/|\s~|\s\$HOME)\b/i,
+    reason: 'recursive permission or ownership change over a broad path',
+  },
+  {
+    pattern: /\b(?:shutdown|reboot|poweroff|systemctl\s+(?:reboot|poweroff|halt))\b/i,
+    reason: 'system power or session control',
+  },
+  {
+    pattern: /:\s*\(\s*\)\s*\{\s*:\s*\|\s*:\s*&\s*\}\s*;/,
+    reason: 'fork-bomb pattern',
+  },
+];
 
 function formatOfflineHits(query: string, hits: OfflineWikiHit[]) {
   if (!hits.length) {
@@ -47,6 +83,40 @@ function createAIRequestId() {
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error);
+}
+
+function detectCommandRisks(command: string) {
+  const reasons = new Set<string>();
+  for (const rule of COMMAND_RISK_RULES) {
+    if (rule.pattern.test(command)) {
+      reasons.add(rule.reason);
+    }
+  }
+  return Array.from(reasons);
+}
+
+function commandSuggestionMessages(response: string): Message[] {
+  const suggestion: Message = {
+    role: 'assistant',
+    content: `COMMAND SUGGESTION - REVIEW BEFORE RUNNING:\n${response}`,
+  };
+  const risks = detectCommandRisks(response);
+  if (!risks.length) {
+    return [suggestion];
+  }
+
+  return [
+    {
+      role: 'warning',
+      content: [
+        'COMMAND RISK WARNING',
+        ...risks.map(risk => `- ${risk}`),
+        '',
+        'Terminal commands run with your user privileges. Read every path and flag, prefer dry-run modes, and back up anything important before execution.',
+      ].join('\n'),
+    },
+    suggestion,
+  ];
 }
 
 export default function AIPanel() {
@@ -98,10 +168,7 @@ export default function AIPanel() {
       if (userMessage.startsWith('#')) {
         const context = userMessage.substring(1).trim();
         const response = await invoke('ai_suggest_command', { context }) as string;
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: `COMMAND SUGGESTION - REVIEW BEFORE RUNNING:\n${response}`
-        }]);
+        setMessages(prev => [...prev, ...commandSuggestionMessages(response)]);
       } else if (userMessage.startsWith('web ') || userMessage.startsWith('search ')) {
         // Internet search via backend
         const query = userMessage.replace(/^(web|search)\s+/, '');
@@ -216,6 +283,8 @@ export default function AIPanel() {
             className={`text-[1.3vh] leading-relaxed ${
               msg.role === 'user'
                 ? 'text-muthur-primary'
+                : msg.role === 'warning'
+                ? 'text-muthur-warning border border-[rgba(255,170,0,0.32)] bg-[rgba(255,170,0,0.055)] px-[0.65vh] py-[0.45vh]'
                 : msg.role === 'system'
                 ? 'text-muthur-secondary opacity-60'
                 : 'text-muthur-secondary'
