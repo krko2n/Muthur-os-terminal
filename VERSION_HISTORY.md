@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+d5d082b fix: build without bundling to avoid linuxdeploy dependency
+55c8b5d docs: auto-update generated docs [skip ci]
 dfe3514 fix: add xdg-utils to installer dependencies for AppImage bundling
 75d9a64 ci: remove duplicate lint step in test job
 c10e4ae docs: auto-update generated docs [skip ci]
@@ -50,5 +52,3 @@ b55dfb7 docs: auto-update generated docs [skip ci]
 61da524 fix: dark language selector, brighter key glow, audio unlock, browser UA
 96eb474 docs: auto-update generated docs [skip ci]
 d5173fa feat: rewrite upgrade scripts to preserve user data across updates
-9b0808c docs: auto-update generated docs [skip ci]
-d400008 style: fix cargo fmt formatting in main.rs
