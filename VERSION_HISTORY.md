@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+a5941e7 fix: add seatd for cage GPU access on VMs and headless systems
+3b24894 docs: auto-update generated docs [skip ci]
 9deda43 fix: install cage launcher wrapper in update scripts
 1d7de67 docs: auto-update generated docs [skip ci]
 5481fdb feat: auto-launch cage when no display server is running
@@ -50,5 +52,3 @@ d8556ae docs: auto-update generated docs [skip ci]
 0577217 docs: auto-update generated docs [skip ci]
 d142896 docs: fix README stats counter
 029999c docs: auto-update generated docs [skip ci]
-d8d01e8 fix: move gameFullscreen state declaration to component top
-254f241 docs: auto-update generated docs [skip ci]
