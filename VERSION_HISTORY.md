@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+109bba9 feat: improve offline pack manager
+ad8afea docs: auto-update generated docs [skip ci]
 14d7c83 fix: harden backend fetch targets
 2677589 docs: auto-update generated docs [skip ci]
 04715a1 fix: preserve shell script executable modes
@@ -50,5 +52,3 @@ daca464 docs: auto-update generated docs [skip ci]
 ea52038 docs: auto-update generated docs [skip ci]
 6ec93fe docs: make README counters self-updating
 1969007 docs: auto-update version history [skip ci]
-3c9dd88 Add sound packs and prebuilt interface loadouts
-6cfce92 docs: auto-update version history [skip ci]
