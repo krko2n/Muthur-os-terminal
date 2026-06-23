@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+9546bba fix: use seatd-launch for reliable cage startup without re-login
+a0d335c docs: auto-update generated docs [skip ci]
 a5941e7 fix: add seatd for cage GPU access on VMs and headless systems
 3b24894 docs: auto-update generated docs [skip ci]
 9deda43 fix: install cage launcher wrapper in update scripts
@@ -50,5 +52,3 @@ df3dacb fix: keep installer scripts linux safe
 d8556ae docs: auto-update generated docs [skip ci]
 77c6c51 chore: harden production readiness gates
 0577217 docs: auto-update generated docs [skip ci]
-d142896 docs: fix README stats counter
-029999c docs: auto-update generated docs [skip ci]
