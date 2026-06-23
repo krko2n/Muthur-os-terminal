@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+14d7c83 fix: harden backend fetch targets
+2677589 docs: auto-update generated docs [skip ci]
 04715a1 fix: preserve shell script executable modes
 fdfdd85 docs: auto-update generated docs [skip ci]
 df3dacb fix: keep installer scripts linux safe
@@ -50,5 +52,3 @@ ea52038 docs: auto-update generated docs [skip ci]
 1969007 docs: auto-update version history [skip ci]
 3c9dd88 Add sound packs and prebuilt interface loadouts
 6cfce92 docs: auto-update version history [skip ci]
-46f5ffa Add eDEX keyboard and offline archive AI grounding
-4a863b0 docs: auto-update version history [skip ci]
