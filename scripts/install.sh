@@ -579,6 +579,77 @@ verify_installation() {
     fi
 }
 
+# ─── Display Server Setup ──────────────────────────────────────────────────
+
+offer_display_setup() {
+    # Skip in quiet mode or if already in a graphical session
+    [ "$QUIET" = "--quiet" ] && return 0
+    [ -n "${DISPLAY:-}" ] && return 0
+    [ -n "${WAYLAND_DISPLAY:-}" ] && return 0
+
+    # Check if any display server is available
+    if command -v cage &>/dev/null || command -v Xorg &>/dev/null || command -v sway &>/dev/null; then
+        return 0
+    fi
+
+    echo ""
+    echo -e "${BOLD}No display server detected.${NC}"
+    echo "  MUTHUR needs a graphical environment to run."
+    echo ""
+    echo "  Options:"
+    echo "    1) Install cage + greetd (minimal, boots directly into MUTHUR)"
+    echo "    2) Install Xorg (standard, run with 'startx muthur')"
+    echo "    3) Skip (I will set up display server myself)"
+    echo ""
+
+    local choice=""
+    read -r -p "  Select [1/2/3]: " choice || choice="3"
+
+    case "$choice" in
+        1)
+            step "Installing cage + greetd..."
+            case $OS in
+                arch)
+                    maybe_sudo pacman -Sy --noconfirm --needed cage greetd
+                    ;;
+                debian)
+                    maybe_sudo apt-get install -y -qq cage greetd
+                    ;;
+                fedora)
+                    maybe_sudo dnf install -y -q cage greetd
+                    ;;
+            esac
+            maybe_sudo systemctl enable greetd 2>/dev/null || true
+            info "cage + greetd installed"
+            echo ""
+            echo "  Run 'muthur-ui enable' to boot directly into MUTHUR."
+            echo "  Then reboot."
+            ;;
+        2)
+            step "Installing Xorg..."
+            case $OS in
+                arch)
+                    maybe_sudo pacman -Sy --noconfirm --needed xorg-server xorg-xinit
+                    ;;
+                debian)
+                    maybe_sudo apt-get install -y -qq xorg xinit
+                    ;;
+                fedora)
+                    maybe_sudo dnf install -y -q xorg-x11-server-Xorg xorg-x11-xinit
+                    ;;
+            esac
+            info "Xorg installed"
+            echo ""
+            echo "  Launch with: startx muthur"
+            echo "  Or add 'exec muthur' to ~/.xinitrc and run 'startx'."
+            ;;
+        *)
+            dimtext "  Display server setup skipped."
+            dimtext "  Install a graphical environment before running 'muthur'."
+            ;;
+    esac
+}
+
 # ─── Summary ───────────────────────────────────────────────────────────────
 
 print_summary() {
@@ -657,6 +728,7 @@ main() {
     install_assets
     offer_offline_pack
     verify_installation
+    offer_display_setup
     print_summary
 }
 
