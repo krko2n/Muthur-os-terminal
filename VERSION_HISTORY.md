@@ -2,6 +2,9 @@
 
 Auto-generated from git log.
 
+dfe3514 fix: add xdg-utils to installer dependencies for AppImage bundling
+75d9a64 ci: remove duplicate lint step in test job
+c10e4ae docs: auto-update generated docs [skip ci]
 c762880 fix: unset PREFIX before nvm to prevent "not compatible" error
 b9f5267 docs: auto-update generated docs [skip ci]
 02a2753 fix: allow installer to run as root in disposable environments
@@ -49,6 +52,3 @@ b55dfb7 docs: auto-update generated docs [skip ci]
 d5173fa feat: rewrite upgrade scripts to preserve user data across updates
 9b0808c docs: auto-update generated docs [skip ci]
 d400008 style: fix cargo fmt formatting in main.rs
-9b10054 docs: auto-update generated docs [skip ci]
-83dde0c style: fix cargo fmt formatting in ai.rs
-86b92b6 docs: auto-update generated docs [skip ci]
