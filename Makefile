@@ -25,8 +25,8 @@ install-interactive:
 	@./scripts/install.sh
 
 update:
-	@chmod +x scripts/upgrade.sh
-	@./scripts/upgrade.sh
+	@chmod +x scripts/muthur-update.sh
+	@./scripts/muthur-update.sh
 
 quick-upgrade:
 	@chmod +x scripts/quick-upgrade.sh

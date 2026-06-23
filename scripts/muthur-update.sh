@@ -83,24 +83,23 @@ run_step() {
 }
 
 ensure_clean_tree() {
-    if [ "${MUTHUR_FORCE_UPDATE:-}" = "1" ]; then
+    if [ -z "$(git status --porcelain)" ]; then
         return 0
     fi
 
-    if [ -n "$(git status --porcelain)" ]; then
-        printf "\n\n  ${RED}${BOLD}Local changes detected.${RESET}\n"
-        printf "  ${DIM}Update stopped so your work is not overwritten.${RESET}\n"
-        printf "  Commit/stash changes, or run ${BOLD}MUTHUR_FORCE_UPDATE=1 make update${RESET}.\n\n"
-        exit 1
-    fi
+    # Auto-stash local changes and continue (like professional app updates)
+    git stash --quiet --include-untracked 2>/dev/null || true
+    STASHED="true"
 }
 
 load_toolchains() {
-    [ -f "$HOME/.bashrc" ] && source "$HOME/.bashrc" 2>/dev/null || true
     [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env" || true
+    unset PREFIX NPM_CONFIG_PREFIX npm_config_prefix
     export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" || true
 }
+
+STASHED=""
 
 printf "%b" "$HIDE"
 rm -f "$BUILD_LOG"
@@ -113,7 +112,12 @@ load_toolchains
 ensure_clean_tree
 
 run_step 8 "Fetching latest source..." git fetch origin --quiet
-run_step 14 "Fast-forwarding local branch..." git pull --ff-only origin main --quiet
+
+rewind_progress
+draw_progress 14 "Syncing to latest version..."
+if ! git pull --ff-only origin main --quiet >> "$BUILD_LOG" 2>&1; then
+    git reset --hard origin/main --quiet >> "$BUILD_LOG" 2>&1
+fi
 
 NEW_VERSION=$(grep '^version' src-tauri/Cargo.toml | head -1 | cut -d'"' -f2 2>/dev/null || echo "unknown")
 
@@ -163,13 +167,23 @@ BINARY="src-tauri/target/release/muthur-os-terminal"
 
 rewind_progress
 draw_progress 94 "Installing binary..."
-sudo install -Dm755 "$BINARY" /usr/local/bin/muthur >> "$BUILD_LOG" 2>&1
-sudo ln -sf /usr/local/bin/muthur /usr/bin/muthur-os-terminal >> "$BUILD_LOG" 2>&1 || true
+if [ "$EUID" -eq 0 ]; then
+    install -Dm755 "$BINARY" /usr/local/bin/muthur >> "$BUILD_LOG" 2>&1
+    ln -sf /usr/local/bin/muthur /usr/bin/muthur-os-terminal >> "$BUILD_LOG" 2>&1 || true
+else
+    sudo install -Dm755 "$BINARY" /usr/local/bin/muthur >> "$BUILD_LOG" 2>&1
+    sudo ln -sf /usr/local/bin/muthur /usr/bin/muthur-os-terminal >> "$BUILD_LOG" 2>&1 || true
+fi
 
 rewind_progress
 draw_progress 98 "Verifying installation..."
 [ -x "/usr/local/bin/muthur" ] || fail "Verification failed: /usr/local/bin/muthur is not executable."
 SIZE=$(du -h /usr/local/bin/muthur | cut -f1)
+
+# Restore stashed changes if any
+if [ "$STASHED" = "true" ]; then
+    git stash pop --quiet 2>/dev/null || true
+fi
 sleep 0.2
 
 rewind_progress
