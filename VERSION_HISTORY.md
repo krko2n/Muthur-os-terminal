@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+803a418 feat: offer display server setup when none is detected
+84f3093 docs: auto-update generated docs [skip ci]
 e850ead refactor: rename mother-ui to muthur-ui
 ea96bb1 docs: auto-update generated docs [skip ci]
 4860c37 fix: resolve SCRIPT_DIR to project root, not scripts/
@@ -50,5 +52,3 @@ cd1f68d docs: auto-update generated docs [skip ci]
 a35e8d7 feat: sci-fi cursor set with angular SVGs and cyan glow
 e34d06b docs: auto-update generated docs [skip ci]
 16fa011 feat: add PHANTOM and NEON theme presets
-ecd90b1 docs: auto-update generated docs [skip ci]
-7a7f088 feat: add game tutorials with controls overlay and help button
