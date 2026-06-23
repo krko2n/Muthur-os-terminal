@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+02a2753 fix: allow installer to run as root in disposable environments
+e240567 docs: auto-update generated docs [skip ci]
 5c68601 feat: game launcher buttons below orbital display
 29771f5 docs: auto-update generated docs [skip ci]
 29d1b13 feat: warn on risky ai commands
@@ -50,5 +52,3 @@ d400008 style: fix cargo fmt formatting in main.rs
 86b92b6 docs: auto-update generated docs [skip ci]
 5b16f71 fix: correct badge stats to count all tracked files, use neutral colors
 77ddcac docs: auto-update generated docs [skip ci]
-5875a5e chore: remove 370+ build artifacts, reorganize project structure
-8273b0e docs: auto-update generated docs [skip ci]
