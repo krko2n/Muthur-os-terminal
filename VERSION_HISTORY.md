@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+2132c3c fix: use absolute path to src-tauri in build step
+e3b1f17 docs: auto-update generated docs [skip ci]
 d5d082b fix: build without bundling to avoid linuxdeploy dependency
 55c8b5d docs: auto-update generated docs [skip ci]
 dfe3514 fix: add xdg-utils to installer dependencies for AppImage bundling
@@ -50,5 +52,3 @@ ecd90b1 docs: auto-update generated docs [skip ci]
 9b60cd4 feat: colored ASCII image rendering with half-block pixel art
 b55dfb7 docs: auto-update generated docs [skip ci]
 61da524 fix: dark language selector, brighter key glow, audio unlock, browser UA
-96eb474 docs: auto-update generated docs [skip ci]
-d5173fa feat: rewrite upgrade scripts to preserve user data across updates
