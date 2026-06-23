@@ -475,17 +475,25 @@ if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
     exec muthur-bin "$@"
 fi
 
-if command -v cage &>/dev/null; then
-    # Ensure seat manager is running (required for GPU access)
-    if command -v seatd &>/dev/null && ! pgrep -x seatd >/dev/null 2>&1; then
-        sudo systemctl start seatd 2>/dev/null || sudo seatd -g seat &
-        sleep 0.3
-    fi
+if ! command -v cage &>/dev/null; then
+    echo "No display server available. Install cage: sudo pacman -S cage seatd" >&2
+    exit 1
+fi
+
+# If seatd is running and user has seat access, use cage directly
+if [ -S /run/seatd.sock ] && id -nG 2>/dev/null | grep -qw seat; then
     exec cage -d -- muthur-bin "$@"
 fi
 
-echo "No display server available. Install cage: sudo pacman -S cage seatd" >&2
-exit 1
+# Otherwise use seatd-launch to handle seat allocation inline
+if command -v seatd-launch &>/dev/null; then
+    exec seatd-launch -- cage -d -- muthur-bin "$@"
+fi
+
+# Fallback: start seatd, add to group, try cage
+sudo systemctl start seatd 2>/dev/null || true
+sudo usermod -aG seat "$(whoami)" 2>/dev/null || true
+exec sg seat -c "cage -d -- muthur-bin $*"
 WRAPPER
     install_binary_file /tmp/muthur-launcher "$wrapper"
     rm -f /tmp/muthur-launcher
