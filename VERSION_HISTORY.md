@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+c762880 fix: unset PREFIX before nvm to prevent "not compatible" error
+b9f5267 docs: auto-update generated docs [skip ci]
 02a2753 fix: allow installer to run as root in disposable environments
 e240567 docs: auto-update generated docs [skip ci]
 5c68601 feat: game launcher buttons below orbital display
@@ -50,5 +52,3 @@ d400008 style: fix cargo fmt formatting in main.rs
 9b10054 docs: auto-update generated docs [skip ci]
 83dde0c style: fix cargo fmt formatting in ai.rs
 86b92b6 docs: auto-update generated docs [skip ci]
-5b16f71 fix: correct badge stats to count all tracked files, use neutral colors
-77ddcac docs: auto-update generated docs [skip ci]
