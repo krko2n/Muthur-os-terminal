@@ -167,13 +167,30 @@ BINARY="src-tauri/target/release/muthur-os-terminal"
 
 rewind_progress
 draw_progress 94 "Installing binary..."
+
+# Create launcher wrapper
+cat > /tmp/muthur-launcher << 'WRAPPER'
+#!/bin/bash
+if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
+    exec muthur-bin "$@"
+fi
+if command -v cage &>/dev/null; then
+    exec cage -d -- muthur-bin "$@"
+fi
+echo "No display server available. Install cage: sudo pacman -S cage" >&2
+exit 1
+WRAPPER
+
 if [ "$EUID" -eq 0 ]; then
     install -Dm755 "$BINARY" /usr/local/bin/muthur-bin >> "$BUILD_LOG" 2>&1
+    install -Dm755 /tmp/muthur-launcher /usr/local/bin/muthur >> "$BUILD_LOG" 2>&1
     ln -sf /usr/local/bin/muthur-bin /usr/bin/muthur-os-terminal >> "$BUILD_LOG" 2>&1 || true
 else
     sudo install -Dm755 "$BINARY" /usr/local/bin/muthur-bin >> "$BUILD_LOG" 2>&1
+    sudo install -Dm755 /tmp/muthur-launcher /usr/local/bin/muthur >> "$BUILD_LOG" 2>&1
     sudo ln -sf /usr/local/bin/muthur-bin /usr/bin/muthur-os-terminal >> "$BUILD_LOG" 2>&1 || true
 fi
+rm -f /tmp/muthur-launcher
 
 rewind_progress
 draw_progress 98 "Verifying installation..."

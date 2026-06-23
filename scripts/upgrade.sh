@@ -133,6 +133,21 @@ BINARY="src-tauri/target/release/muthur-os-terminal"
 sudo install -Dm755 "$BINARY" /usr/local/bin/muthur-bin
 sudo ln -sf /usr/local/bin/muthur-bin /usr/bin/muthur-os-terminal 2>/dev/null || true
 
+# Install launcher wrapper (auto-starts cage if no display)
+cat > /tmp/muthur-launcher << 'WRAPPER'
+#!/bin/bash
+if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
+    exec muthur-bin "$@"
+fi
+if command -v cage &>/dev/null; then
+    exec cage -d -- muthur-bin "$@"
+fi
+echo "No display server available. Install cage: sudo pacman -S cage" >&2
+exit 1
+WRAPPER
+sudo install -Dm755 /tmp/muthur-launcher /usr/local/bin/muthur
+rm -f /tmp/muthur-launcher
+
 # --- Restore user data ---
 if [ -d "$BACKUP_DIR/config" ]; then
     mkdir -p "$CONFIG_DIR"
