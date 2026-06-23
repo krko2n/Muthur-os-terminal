@@ -271,7 +271,7 @@ install_deps() {
             maybe_sudo pacman -Sy --noconfirm --needed \
                 base-devel curl wget file openssl xdg-utils \
                 gtk3 libappindicator-gtk3 librsvg webkit2gtk-4.1 \
-                cage greetd seatd
+                cage greetd seatd polkit
             ;;
         debian)
             maybe_sudo apt-get update -qq
@@ -279,14 +279,14 @@ install_deps() {
                 build-essential curl wget file xdg-utils \
                 libssl-dev libgtk-3-dev libayatana-appindicator3-dev \
                 librsvg2-dev libwebkit2gtk-4.1-dev \
-                cage greetd seatd
+                cage greetd seatd policykit-1
             ;;
         fedora)
             maybe_sudo dnf install -y -q \
                 gcc gcc-c++ make curl wget file xdg-utils \
                 openssl-devel gtk3-devel libappindicator-gtk3-devel \
                 librsvg2-devel webkit2gtk4.1-devel \
-                cage greetd seatd
+                cage greetd seatd polkit
             ;;
     esac
 
@@ -475,25 +475,13 @@ if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
     exec muthur-bin "$@"
 fi
 
-if ! command -v cage &>/dev/null; then
-    echo "No display server available. Install cage: sudo pacman -S cage seatd" >&2
-    exit 1
-fi
-
-# If seatd is running and user has seat access, use cage directly
-if [ -S /run/seatd.sock ] && id -nG 2>/dev/null | grep -qw seat; then
+if command -v cage &>/dev/null; then
     exec cage -d -- muthur-bin "$@"
 fi
 
-# Otherwise use seatd-launch to handle seat allocation inline
-if command -v seatd-launch &>/dev/null; then
-    exec seatd-launch -- cage -d -- muthur-bin "$@"
-fi
-
-# Fallback: start seatd, add to group, try cage
-sudo systemctl start seatd 2>/dev/null || true
-sudo usermod -aG seat "$(whoami)" 2>/dev/null || true
-exec sg seat -c "cage -d -- muthur-bin $*"
+echo "No display server available. Install cage and polkit:" >&2
+echo "  sudo pacman -S cage polkit" >&2
+exit 1
 WRAPPER
     install_binary_file /tmp/muthur-launcher "$wrapper"
     rm -f /tmp/muthur-launcher

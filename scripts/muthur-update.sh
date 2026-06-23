@@ -174,19 +174,12 @@ cat > /tmp/muthur-launcher << 'WRAPPER'
 if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
     exec muthur-bin "$@"
 fi
-if ! command -v cage &>/dev/null; then
-    echo "No display server available. Install cage: sudo pacman -S cage seatd" >&2
-    exit 1
-fi
-if [ -S /run/seatd.sock ] && id -nG 2>/dev/null | grep -qw seat; then
+if command -v cage &>/dev/null; then
     exec cage -d -- muthur-bin "$@"
 fi
-if command -v seatd-launch &>/dev/null; then
-    exec seatd-launch -- cage -d -- muthur-bin "$@"
-fi
-sudo systemctl start seatd 2>/dev/null || true
-sudo usermod -aG seat "$(whoami)" 2>/dev/null || true
-exec sg seat -c "cage -d -- muthur-bin $*"
+echo "No display server available. Install cage and polkit:" >&2
+echo "  sudo pacman -S cage polkit" >&2
+exit 1
 WRAPPER
 
 if [ "$EUID" -eq 0 ]; then
