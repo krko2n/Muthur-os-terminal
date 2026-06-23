@@ -23,7 +23,7 @@ set -euo pipefail
 
 # ─── Script Location (portable, follows symlinks) ──────────────────────────
 
-SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")")/.." && pwd)"
 
 # ─── Configuration ──────────────────────────────────────────────────────────
 
@@ -430,7 +430,7 @@ build_app() {
 
     step "[2/2] Compiling application (frontend + backend)..."
     npm run build
-    cd "$SCRIPT_DIR/../src-tauri"
+    cd "$SCRIPT_DIR/src-tauri"
     cargo build --release
     cd "$SCRIPT_DIR"
     info "Build complete"
