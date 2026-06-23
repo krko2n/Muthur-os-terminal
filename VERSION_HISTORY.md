@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+5c68601 feat: game launcher buttons below orbital display
+29771f5 docs: auto-update generated docs [skip ci]
 29d1b13 feat: warn on risky ai commands
 25af33c docs: auto-update generated docs [skip ci]
 a383e1a feat: add ai stop control
@@ -50,5 +52,3 @@ d400008 style: fix cargo fmt formatting in main.rs
 77ddcac docs: auto-update generated docs [skip ci]
 5875a5e chore: remove 370+ build artifacts, reorganize project structure
 8273b0e docs: auto-update generated docs [skip ci]
-0d6ccf2 fix: correct README stats badges to reflect actual repo size
-daca464 docs: auto-update generated docs [skip ci]
