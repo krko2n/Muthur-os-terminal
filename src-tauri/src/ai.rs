@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashSet;
 use std::fs;
+use std::future::Future;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -467,13 +468,31 @@ impl OllamaClient {
         message: &str,
         offline_context: Option<&str>,
     ) -> anyhow::Result<String> {
+        let prompt = Self::chat_prompt(message, offline_context);
+        self.generate(&prompt).await
+    }
+
+    pub async fn chat_with_cancel<F>(
+        &self,
+        message: &str,
+        offline_context: Option<&str>,
+        cancel: F,
+    ) -> anyhow::Result<String>
+    where
+        F: Future<Output = ()>,
+    {
+        let prompt = Self::chat_prompt(message, offline_context);
+        self.generate_with_cancel(&prompt, cancel).await
+    }
+
+    fn chat_prompt(message: &str, offline_context: Option<&str>) -> String {
         let archive_instruction = if offline_context.is_some() {
             "Use the OFFLINE ARCHIVE CONTEXT when it is relevant. Mention the local source title briefly when useful. Do not invent details beyond the archive."
         } else {
             "No offline archive hit was available for this query. Answer from the local model's general knowledge and say when a proper offline source should be installed."
         };
 
-        let prompt = format!(
+        format!(
             "You are MUTHUR, a helpful AI assistant embedded in a futuristic terminal interface. \
              You are a survival-ready offline knowledge system for a harsh, low-connectivity environment. \
              You are friendly, knowledgeable, and efficient - like a skilled copilot and field archivist. \
@@ -485,12 +504,10 @@ impl OllamaClient {
              {}\n\n\
              {}\n\n\
              User: {}",
-            archive_instruction,
-            offline_context.unwrap_or("OFFLINE ARCHIVE CONTEXT: none"),
-            message
-        );
-
-        self.generate(&prompt).await
+             archive_instruction,
+             offline_context.unwrap_or("OFFLINE ARCHIVE CONTEXT: none"),
+             message
+        )
     }
 
     pub fn model_name(&self) -> &str {
@@ -531,5 +548,16 @@ impl OllamaClient {
 
         let ollama_response: OllamaResponse = response.json().await?;
         Ok(ollama_response.response.trim().to_string())
+    }
+
+    async fn generate_with_cancel<F>(&self, prompt: &str, cancel: F) -> anyhow::Result<String>
+    where
+        F: Future<Output = ()>,
+    {
+        tokio::pin!(cancel);
+        tokio::select! {
+            response = self.generate(prompt) => response,
+            _ = &mut cancel => Err(anyhow::anyhow!("AI request cancelled")),
+        }
     }
 }

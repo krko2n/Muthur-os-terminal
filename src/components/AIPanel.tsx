@@ -37,14 +37,28 @@ function formatOfflineHits(query: string, hits: OfflineWikiHit[]) {
   ].join('\n\n');
 }
 
+function createAIRequestId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `ai-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export default function AIPanel() {
   const [messages, setMessages] = useState<Message[]>([
     { role: 'system', content: 'MUTHUR survival AI online.\n\nNormal chat now searches the offline wiki/docs cache before answering.\n\nCommands:\n  # <goal> - suggest a terminal command before you run it\n  wiki <query> - search local offline archive\n  web <query> - remote search when a link exists\n  fetch <url> - get page content\n\nOffline pack:\n  install AI/wiki/maps voluntarily with scripts/muthur-offline-pack.sh' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [status, setStatus] = useState<AIStatus | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const activeRequestRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -75,6 +89,7 @@ export default function AIPanel() {
     if (!input.trim() || loading) return;
 
     const userMessage = input.trim();
+    let aiRequestId: string | null = null;
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setLoading(true);
@@ -128,18 +143,48 @@ export default function AIPanel() {
           content: formatOfflineHits(query, hits)
         }]);
       } else {
-        const response = await invoke('ai_chat', { message: userMessage }) as string;
-        setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+        aiRequestId = createAIRequestId();
+        activeRequestRef.current = aiRequestId;
+        setActiveRequestId(aiRequestId);
+        const response = await invoke('ai_chat', { message: userMessage, requestId: aiRequestId }) as string;
+        if (activeRequestRef.current === aiRequestId) {
+          setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+        }
       }
     } catch (error) {
-      const errMsg = error instanceof Error ? error.message : String(error);
-      setMessages(prev => [...prev, {
-        role: 'system',
-        content: `INTERFACE ERROR: ${errMsg}${errMsg.includes('onnect') ? '\n\nRun: ollama serve' : ''}`
-      }]);
+      const errMsg = errorMessage(error);
+      const wasStopped = errMsg.toLowerCase().includes('cancel');
+      if (!aiRequestId || activeRequestRef.current === aiRequestId) {
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: wasStopped
+            ? 'AI REQUEST STOPPED BY OPERATOR.'
+            : `INTERFACE ERROR: ${errMsg}${errMsg.includes('onnect') ? '\n\nRun: ollama serve' : ''}`
+        }]);
+      }
     }
 
+    if (!aiRequestId || activeRequestRef.current === aiRequestId) {
+      activeRequestRef.current = null;
+      setActiveRequestId(null);
+      setLoading(false);
+    }
+  };
+
+  const stopAIRequest = () => {
+    const requestId = activeRequestRef.current;
+    if (!requestId) return;
+
+    activeRequestRef.current = null;
+    setActiveRequestId(null);
     setLoading(false);
+    setMessages(prev => [...prev, { role: 'system', content: 'AI REQUEST STOPPED BY OPERATOR.' }]);
+    invoke('cancel_ai_request', { requestId }).catch(error => {
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: `STOP SIGNAL FAILED: ${errorMessage(error)}`
+      }]);
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -182,8 +227,19 @@ export default function AIPanel() {
           </div>
         ))}
         {loading && (
-          <div className="text-[1.3vh] text-muthur-primary opacity-40 animate-pulse">
-            PROCESSING QUERY...
+          <div className="flex items-center justify-between gap-[1vh]">
+            <div className="text-[1.3vh] text-muthur-primary opacity-40 animate-pulse">
+              PROCESSING QUERY...
+            </div>
+            {activeRequestId && (
+              <button
+                type="button"
+                onClick={stopAIRequest}
+                className="shrink-0 px-[0.8vh] py-[0.25vh] text-[1vh] border border-muthur-warning text-muthur-warning hover:bg-[rgba(255,170,0,0.12)] transition-colors"
+              >
+                STOP
+              </button>
+            )}
           </div>
         )}
       </div>

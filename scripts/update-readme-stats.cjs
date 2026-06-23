@@ -49,7 +49,10 @@ const TEXT_FILENAMES = new Set([
 ]);
 
 const EXCLUDED = [
+  /^\.agents\//,
+  /^\.codex\//,
   /^\.git\//,
+  /^\.cache\//,
   /^dist(?:-|\/|$)/,
   /^dist-verify(?:-|\/|$)/,
   /^node_modules\//,
@@ -64,6 +67,9 @@ const EXCLUDED = [
 ];
 
 const EXCLUDED_DIRS = new Set([
+  '.agents',
+  '.codex',
+  '.cache',
   '.git',
   'dist',
   'node_modules',
@@ -136,6 +142,7 @@ function badge(label, value, color) {
 const countedFiles = trackedFiles().filter(isCounted).sort((a, b) => a.localeCompare(b));
 const totalFiles = countedFiles.length;
 const lines = countedFiles.reduce((sum, file) => sum + lineCount(file), 0);
+const statsSummary = `${formatNumber(lines)} lines, ${formatNumber(totalFiles)} files`;
 const generated = [
   START,
   `![Lines of Code](${badge('lines of code', formatNumber(lines), 'c9d1d9')})`,
@@ -152,14 +159,14 @@ if (!pattern.test(readme)) {
 const current = readme.match(pattern)[0];
 if (CHECK_ONLY) {
   if (current !== generated) {
-    throw new Error(`README stats are stale. Run: npm run update:readme-stats`);
+    throw new Error(`README stats are stale. Expected ${statsSummary}. Run: npm run update:readme-stats`);
   }
 
-  console.log(`README stats verified: ${formatNumber(lines)} lines, ${formatNumber(totalFiles)} files`);
+  console.log(`README stats verified: ${statsSummary}`);
   process.exit(0);
 }
 
 const next = readme.replace(pattern, generated);
 fs.writeFileSync(README, next);
 
-console.log(`README stats updated: ${formatNumber(lines)} lines, ${formatNumber(totalFiles)} files`);
+console.log(`README stats updated: ${statsSummary}`);

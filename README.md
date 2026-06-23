@@ -255,7 +255,7 @@ What does the chmod command do?
 How do I find large files on my system?
 ```
 
-Normal AI chat runs through your configured Ollama endpoint, which defaults to your local machine. The panel searches the offline archive first when local wiki/docs are available. Commands such as `web <query>` and `fetch <url>` intentionally use the network.
+Normal AI chat runs through your configured Ollama endpoint, which defaults to your local machine. The panel searches the offline archive first when local wiki/docs are available, and long local AI replies can be stopped from the chat panel. Commands such as `web <query>` and `fetch <url>` intentionally use the network.
 
 ### Offline Pack Manager
 
@@ -495,7 +495,7 @@ MIT -- see [LICENSE](LICENSE).
 ---
 
 <!-- MUTHUR-STATS:START -->
-![Lines of Code](https://img.shields.io/badge/lines%20of%20code-25%2C944-c9d1d9?style=flat-square&labelColor=161b22)
+![Lines of Code](https://img.shields.io/badge/lines%20of%20code-26%2C100-c9d1d9?style=flat-square&labelColor=161b22)
 ![Project Files](https://img.shields.io/badge/project%20files-123-c9d1d9?style=flat-square&labelColor=161b22)
 <!-- MUTHUR-STATS:END -->
 

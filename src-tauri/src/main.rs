@@ -11,10 +11,12 @@ mod system;
 use ai::OllamaClient;
 use pty::{PtyManager, SessionId};
 use reqwest::header::LOCATION;
+use std::collections::HashSet;
 use std::io::Write;
 use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use system::SystemMonitor;
 use tauri::{Manager, State, Window};
 
@@ -25,6 +27,29 @@ pub struct AppState {
     pty_manager: Arc<Mutex<PtyManager>>,
     system_monitor: Arc<Mutex<SystemMonitor>>,
     ollama_client: Arc<OllamaClient>,
+    ai_cancelled: Arc<Mutex<HashSet<String>>>,
+}
+
+fn is_ai_request_cancelled(cancelled: &Arc<Mutex<HashSet<String>>>, request_id: &str) -> bool {
+    cancelled
+        .lock()
+        .map(|requests| requests.contains(request_id))
+        .unwrap_or(true)
+}
+
+fn remove_ai_request(cancelled: &Arc<Mutex<HashSet<String>>>, request_id: &str) {
+    if let Ok(mut requests) = cancelled.lock() {
+        requests.remove(request_id);
+    }
+}
+
+async fn wait_for_ai_cancel(cancelled: Arc<Mutex<HashSet<String>>>, request_id: String) {
+    loop {
+        if is_ai_request_cancelled(&cancelled, &request_id) {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(80)).await;
+    }
 }
 
 fn allow_private_fetch_targets() -> bool {
@@ -577,14 +602,51 @@ async fn ai_suggest_command(
 }
 
 #[tauri::command]
-async fn ai_chat(state: State<'_, AppState>, message: String) -> Result<String, String> {
+async fn ai_chat(
+    state: State<'_, AppState>,
+    message: String,
+    request_id: Option<String>,
+) -> Result<String, String> {
     let offline_context = ai::build_offline_wiki_context(&message, 5);
-    let response = state
+
+    if let Some(request_id) = request_id.filter(|id| !id.trim().is_empty()) {
+        let cancelled = state.ai_cancelled.clone();
+        remove_ai_request(&cancelled, &request_id);
+
+        let response = state
+            .ollama_client
+            .chat_with_cancel(
+                &message,
+                offline_context.as_deref(),
+                wait_for_ai_cancel(cancelled.clone(), request_id.clone()),
+            )
+            .await;
+
+        remove_ai_request(&cancelled, &request_id);
+        return response.map_err(|e| e.to_string());
+    }
+
+    state
         .ollama_client
         .chat(&message, offline_context.as_deref())
         .await
-        .map_err(|e| e.to_string())?;
-    Ok(response)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn cancel_ai_request(state: State<'_, AppState>, request_id: String) -> Result<(), String> {
+    let request_id = request_id.trim();
+    if request_id.is_empty() {
+        return Err("AI request id is required".to_string());
+    }
+
+    state
+        .ai_cancelled
+        .lock()
+        .map_err(|_| "AI cancellation registry is unavailable".to_string())?
+        .insert(request_id.to_string());
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -945,11 +1007,13 @@ fn main() {
             let pty_manager = Arc::new(Mutex::new(PtyManager::new()));
             let system_monitor = Arc::new(Mutex::new(SystemMonitor::new()));
             let ollama_client = Arc::new(OllamaClient::new("http://localhost:11434"));
+            let ai_cancelled = Arc::new(Mutex::new(HashSet::new()));
 
             app.manage(AppState {
                 pty_manager,
                 system_monitor,
                 ollama_client,
+                ai_cancelled,
             });
 
             Ok(())
@@ -964,6 +1028,7 @@ fn main() {
             list_directory,
             ai_suggest_command,
             ai_chat,
+            cancel_ai_request,
             search_offline_wiki,
             get_ai_status,
             get_current_dir,
