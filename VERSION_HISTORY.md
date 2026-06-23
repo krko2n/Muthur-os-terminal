@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+6403368 fix: make update auto-stash local changes instead of blocking
+e4ddf28 docs: auto-update generated docs [skip ci]
 803a418 feat: offer display server setup when none is detected
 84f3093 docs: auto-update generated docs [skip ci]
 e850ead refactor: rename mother-ui to muthur-ui
@@ -50,5 +52,3 @@ cd1f68d docs: auto-update generated docs [skip ci]
 811a226 feat: games as launchable fullscreen tabs from file explorer
 22d2b59 feat: full sci-fi cursor CSS system with SVG data URIs
 a35e8d7 feat: sci-fi cursor set with angular SVGs and cyan glow
-e34d06b docs: auto-update generated docs [skip ci]
-16fa011 feat: add PHANTOM and NEON theme presets
