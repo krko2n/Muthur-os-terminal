@@ -3,7 +3,7 @@ use serde::Serialize;
 
 const MAX_WIDTH: u32 = 120;
 const MAX_HEIGHT: u32 = 200;
-const MAX_IMAGE_BYTES: usize = 5 * 1024 * 1024;
+pub const MAX_IMAGE_BYTES: usize = 5 * 1024 * 1024;
 
 // Color ASCII settings
 const COLOR_MAX_COLS: u32 = 80;
@@ -113,32 +113,6 @@ pub fn convert_to_braille(image_bytes: &[u8]) -> Result<String, String> {
     Ok(pixels_to_braille(&resized, target_w, target_h))
 }
 
-pub async fn fetch_and_convert(url: &str) -> Result<String, String> {
-    let bytes = fetch_image_bytes(url).await?;
-    convert_to_braille(&bytes)
-}
-
-async fn fetch_image_bytes(url: &str) -> Result<Vec<u8>, String> {
-    let client = reqwest::Client::builder()
-        .user_agent("MUTHUR/0.1")
-        .timeout(std::time::Duration::from_secs(10))
-        .build()
-        .map_err(|e| e.to_string())?;
-
-    let response = client
-        .get(url)
-        .send()
-        .await
-        .map_err(|e| format!("Image fetch failed: {}", e))?;
-
-    if !response.status().is_success() {
-        return Err(format!("HTTP {}", response.status().as_u16()));
-    }
-
-    let bytes = response.bytes().await.map_err(|e| e.to_string())?;
-    Ok(bytes.to_vec())
-}
-
 // --- Colored ASCII rendering using half-block characters ---
 
 #[derive(Serialize, Clone)]
@@ -229,9 +203,4 @@ pub fn convert_to_color_ascii(image_bytes: &[u8]) -> Result<ColorAsciiResult, St
         width: cols,
         height: final_rows,
     })
-}
-
-pub async fn fetch_and_convert_color(url: &str) -> Result<ColorAsciiResult, String> {
-    let bytes = fetch_image_bytes(url).await?;
-    convert_to_color_ascii(&bytes)
 }

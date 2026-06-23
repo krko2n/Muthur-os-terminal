@@ -64,7 +64,7 @@ AI model selection is configurable without rebuilding:
 - No telemetry or data collection
 - The built-in web browser, AI `web`/`fetch` commands, globe feeds, installer, and optional offline-pack downloads make external network requests only when those features are used
 - Backend fetch commands allow only `http://` and `https://`; `file://`, `javascript:`, `data:`, `ftp://`, and similar schemes are rejected
-- Localhost and private IP fetch targets are blocked by default. Set `MUTHUR_ALLOW_PRIVATE_FETCH=1` only if you intentionally want internal network fetches
+- Localhost, private IP targets, and hostnames that resolve to local/private addresses are blocked by default. Redirect targets are rechecked before they are followed. Set `MUTHUR_ALLOW_PRIVATE_FETCH=1` only if you intentionally want internal network fetches
 
 ### Filesystem Access
 

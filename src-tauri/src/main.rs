@@ -10,6 +10,7 @@ mod system;
 
 use ai::OllamaClient;
 use pty::{PtyManager, SessionId};
+use reqwest::header::LOCATION;
 use std::io::Write;
 use std::net::IpAddr;
 use std::path::{Path, PathBuf};
@@ -18,6 +19,7 @@ use system::SystemMonitor;
 use tauri::{Manager, State, Window};
 
 const OFFLINE_PACK_VERSION: &str = "2026.06.20.1";
+const MAX_FETCH_REDIRECTS: usize = 10;
 
 pub struct AppState {
     pty_manager: Arc<Mutex<PtyManager>>,
@@ -29,16 +31,7 @@ fn allow_private_fetch_targets() -> bool {
     env_flag("MUTHUR_ALLOW_PRIVATE_FETCH")
 }
 
-fn is_private_or_local_host(host: &str) -> bool {
-    let host = host.trim_matches(['[', ']']).to_ascii_lowercase();
-    if host == "localhost" || host.ends_with(".localhost") {
-        return true;
-    }
-
-    let Ok(ip) = host.parse::<IpAddr>() else {
-        return false;
-    };
-
+fn is_private_or_local_ip(ip: IpAddr) -> bool {
     match ip {
         IpAddr::V4(addr) => {
             addr.is_private()
@@ -54,6 +47,17 @@ fn is_private_or_local_host(host: &str) -> bool {
             addr.is_loopback() || addr.is_unspecified() || unique_local || link_local
         }
     }
+}
+
+fn is_private_or_local_host(host: &str) -> bool {
+    let host = host.trim_matches(['[', ']']).to_ascii_lowercase();
+    if host == "localhost" || host.ends_with(".localhost") {
+        return true;
+    }
+
+    host.parse::<IpAddr>()
+        .map(is_private_or_local_ip)
+        .unwrap_or(false)
 }
 
 fn validate_fetch_url(raw_url: &str) -> Result<reqwest::Url, String> {
@@ -85,16 +89,117 @@ fn validate_fetch_url(raw_url: &str) -> Result<reqwest::Url, String> {
     Ok(parsed)
 }
 
-fn guarded_redirect_policy() -> reqwest::redirect::Policy {
-    reqwest::redirect::Policy::custom(|attempt| {
-        if attempt.previous().len() > 10 {
-            attempt.error("too many redirects")
-        } else if let Err(reason) = validate_fetch_url(attempt.url().as_str()) {
-            attempt.error(format!("blocked redirect target: {}", reason))
-        } else {
-            attempt.follow()
+async fn ensure_public_resolved_target(url: &reqwest::Url) -> Result<(), String> {
+    if allow_private_fetch_targets() {
+        return Ok(());
+    }
+
+    let host = url
+        .host_str()
+        .ok_or_else(|| "URL must include a host".to_string())?;
+    let port = url
+        .port_or_known_default()
+        .ok_or_else(|| "URL must use a known http/https port".to_string())?;
+    let mut resolved = tokio::net::lookup_host((host, port))
+        .await
+        .map_err(|e| format!("Could not resolve URL host '{}': {}", host, e))?;
+
+    let mut saw_address = false;
+    for address in &mut resolved {
+        saw_address = true;
+        let ip = address.ip();
+        if is_private_or_local_ip(ip) {
+            return Err(format!(
+                "Blocked hostname '{}' because it resolves to local/private address {}. Set MUTHUR_ALLOW_PRIVATE_FETCH=1 to allow it.",
+                host, ip
+            ));
         }
-    })
+    }
+
+    if !saw_address {
+        return Err(format!(
+            "Could not resolve URL host '{}': no addresses returned",
+            host
+        ));
+    }
+
+    Ok(())
+}
+
+async fn validate_fetch_url_resolved(raw_url: &str) -> Result<reqwest::Url, String> {
+    let url = validate_fetch_url(raw_url)?;
+    ensure_public_resolved_target(&url).await?;
+    Ok(url)
+}
+
+fn guarded_http_client(timeout_secs: u64) -> Result<reqwest::Client, String> {
+    reqwest::Client::builder()
+        .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0")
+        .timeout(std::time::Duration::from_secs(timeout_secs))
+        .redirect(reqwest::redirect::Policy::none())
+        .build()
+        .map_err(|e| e.to_string())
+}
+
+fn validate_redirect_target(
+    current_url: &reqwest::Url,
+    location: &str,
+) -> Result<reqwest::Url, String> {
+    let joined = current_url
+        .join(location)
+        .map_err(|_| "Redirect target is not a valid URL".to_string())?;
+    validate_fetch_url(joined.as_str())
+}
+
+async fn guarded_get(
+    client: &reqwest::Client,
+    initial_url: reqwest::Url,
+) -> Result<reqwest::Response, String> {
+    let mut url = initial_url;
+
+    for _ in 0..=MAX_FETCH_REDIRECTS {
+        ensure_public_resolved_target(&url).await?;
+        let response = client
+            .get(url.clone())
+            .send()
+            .await
+            .map_err(|e| format!("Request failed: {}", e))?;
+
+        if !response.status().is_redirection() {
+            return Ok(response);
+        }
+
+        let location = response
+            .headers()
+            .get(LOCATION)
+            .ok_or_else(|| "Redirect response did not include a Location header".to_string())?
+            .to_str()
+            .map_err(|_| "Redirect Location header is not valid UTF-8".to_string())?;
+
+        url = validate_redirect_target(&url, location)?;
+    }
+
+    Err("Too many redirects".to_string())
+}
+
+async fn guarded_get_bytes(
+    client: &reqwest::Client,
+    url: reqwest::Url,
+    max_bytes: usize,
+) -> Result<Vec<u8>, String> {
+    let response = guarded_get(client, url).await?;
+    if let Some(length) = response.content_length() {
+        if length > max_bytes as u64 {
+            return Err(format!("Response too large (>{} bytes)", max_bytes));
+        }
+    }
+
+    let bytes = response.bytes().await.map_err(|e| e.to_string())?;
+    if bytes.len() > max_bytes {
+        return Err(format!("Response too large (>{} bytes)", max_bytes));
+    }
+
+    Ok(bytes.to_vec())
 }
 
 fn env_flag(name: &str) -> bool {
@@ -509,19 +614,10 @@ async fn get_current_dir() -> Result<String, String> {
 
 #[tauri::command]
 async fn fetch_json(url: String) -> Result<String, String> {
-    let url = validate_fetch_url(&url)?;
-    let client = reqwest::Client::builder()
-        .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0")
-        .timeout(std::time::Duration::from_secs(15))
-        .redirect(guarded_redirect_policy())
-        .build()
-        .map_err(|e| e.to_string())?;
+    let url = validate_fetch_url_resolved(&url).await?;
+    let client = guarded_http_client(15)?;
 
-    let response = client
-        .get(url)
-        .send()
-        .await
-        .map_err(|e| format!("Request failed: {}", e))?;
+    let response = guarded_get(&client, url).await?;
 
     if !response.status().is_success() {
         return Err(format!("HTTP {}", response.status().as_u16()));
@@ -532,19 +628,10 @@ async fn fetch_json(url: String) -> Result<String, String> {
 
 #[tauri::command]
 async fn fetch_url(url: String) -> Result<String, String> {
-    let url = validate_fetch_url(&url)?;
-    let client = reqwest::Client::builder()
-        .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0")
-        .timeout(std::time::Duration::from_secs(10))
-        .redirect(guarded_redirect_policy())
-        .build()
-        .map_err(|e| e.to_string())?;
+    let url = validate_fetch_url_resolved(&url).await?;
+    let client = guarded_http_client(10)?;
 
-    let response = client
-        .get(url)
-        .send()
-        .await
-        .map_err(|e| format!("Request failed: {}", e))?;
+    let response = guarded_get(&client, url).await?;
 
     let status = response.status();
     if !status.is_success() {
@@ -562,19 +649,10 @@ async fn fetch_url(url: String) -> Result<String, String> {
 
 #[tauri::command]
 async fn fetch_url_structured(url: String) -> Result<serde_json::Value, String> {
-    let url = validate_fetch_url(&url)?;
-    let client = reqwest::Client::builder()
-        .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0")
-        .timeout(std::time::Duration::from_secs(15))
-        .redirect(guarded_redirect_policy())
-        .build()
-        .map_err(|e| e.to_string())?;
+    let url = validate_fetch_url_resolved(&url).await?;
+    let client = guarded_http_client(15)?;
 
-    let response = client
-        .get(url)
-        .send()
-        .await
-        .map_err(|e| format!("Request failed: {}", e))?;
+    let response = guarded_get(&client, url).await?;
 
     let final_url = response.url().to_string();
     let status = response.status();
@@ -593,14 +671,18 @@ async fn fetch_url_structured(url: String) -> Result<serde_json::Value, String> 
 
 #[tauri::command]
 async fn render_image_ascii(url: String) -> Result<String, String> {
-    let url = validate_fetch_url(&url)?;
-    ascii_image::fetch_and_convert(url.as_str()).await
+    let url = validate_fetch_url_resolved(&url).await?;
+    let client = guarded_http_client(10)?;
+    let bytes = guarded_get_bytes(&client, url, ascii_image::MAX_IMAGE_BYTES).await?;
+    ascii_image::convert_to_braille(&bytes)
 }
 
 #[tauri::command]
 async fn render_image_color_ascii(url: String) -> Result<serde_json::Value, String> {
-    let url = validate_fetch_url(&url)?;
-    let result = ascii_image::fetch_and_convert_color(url.as_str()).await?;
+    let url = validate_fetch_url_resolved(&url).await?;
+    let client = guarded_http_client(10)?;
+    let bytes = guarded_get_bytes(&client, url, ascii_image::MAX_IMAGE_BYTES).await?;
+    let result = ascii_image::convert_to_color_ascii(&bytes)?;
     serde_json::to_value(result).map_err(|e| e.to_string())
 }
 
@@ -901,7 +983,8 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::validate_fetch_url;
+    use super::{is_private_or_local_ip, validate_fetch_url};
+    use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
     #[test]
     fn fetch_url_policy_allows_public_http_urls() {
@@ -929,5 +1012,25 @@ mod tests {
         if let Some(value) = previous {
             std::env::set_var("MUTHUR_ALLOW_PRIVATE_FETCH", value);
         }
+    }
+
+    #[test]
+    fn fetch_url_policy_detects_private_resolved_addresses() {
+        assert!(is_private_or_local_ip(IpAddr::V4(Ipv4Addr::new(
+            127, 0, 0, 1
+        ))));
+        assert!(is_private_or_local_ip(IpAddr::V4(Ipv4Addr::new(
+            10, 0, 0, 8
+        ))));
+        assert!(is_private_or_local_ip(IpAddr::V6(Ipv6Addr::LOCALHOST)));
+        assert!(is_private_or_local_ip(IpAddr::V6(
+            "fd00::1".parse().unwrap()
+        )));
+        assert!(!is_private_or_local_ip(IpAddr::V4(Ipv4Addr::new(
+            93, 184, 216, 34
+        ))));
+        assert!(!is_private_or_local_ip(IpAddr::V6(
+            "2606:2800:220:1:248:1893:25c8:1946".parse().unwrap()
+        )));
     }
 }
