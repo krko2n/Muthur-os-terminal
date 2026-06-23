@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# mother-ui - MUTHUR native session manager
+# muthur-ui - MUTHUR native session manager
 
 set -euo pipefail
 
@@ -18,12 +18,12 @@ RESET='\033[0m'
 
 usage() {
     echo ""
-    echo -e "${BOLD}mother-ui${RESET} - MUTHUR Session Manager"
+    echo -e "${BOLD}muthur-ui${RESET} - MUTHUR Session Manager"
     echo ""
     echo "Usage:"
-    echo "  mother-ui enable    Enable MUTHUR fullscreen startup"
-    echo "  mother-ui disable   Disable MUTHUR startup"
-    echo "  mother-ui status    Show current configuration"
+    echo "  muthur-ui enable    Enable MUTHUR fullscreen startup"
+    echo "  muthur-ui disable   Disable MUTHUR startup"
+    echo "  muthur-ui status    Show current configuration"
     echo ""
     exit 1
 }

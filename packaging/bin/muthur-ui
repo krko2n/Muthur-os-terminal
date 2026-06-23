@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# mother-ui - MUTHUR OS Terminal Autostart Manager
+# muthur-ui - MUTHUR OS Terminal Autostart Manager
 #
 # Usage:
-#   mother-ui enable   - Auto-launch MUTHUR fullscreen at login
-#   mother-ui disable  - Disable fullscreen startup
+#   muthur-ui enable   - Auto-launch MUTHUR fullscreen at login
+#   muthur-ui disable  - Disable fullscreen startup
 #
 # Handles three login environments:
 #   1. greetd     - Modifies initial_session in /etc/greetd/config.toml
@@ -31,12 +31,12 @@ RESET='\033[0m'
 
 usage() {
     echo ""
-    echo -e "${BOLD}mother-ui${RESET} - MUTHUR OS Autostart Manager"
+    echo -e "${BOLD}muthur-ui${RESET} - MUTHUR OS Autostart Manager"
     echo ""
     echo "Usage:"
-    echo "  mother-ui enable    Enable MUTHUR fullscreen autostart"
-    echo "  mother-ui disable   Disable fullscreen startup"
-    echo "  mother-ui status    Show current configuration"
+    echo "  muthur-ui enable    Enable MUTHUR fullscreen autostart"
+    echo "  muthur-ui disable   Disable fullscreen startup"
+    echo "  muthur-ui status    Show current configuration"
     echo ""
     exit 1
 }

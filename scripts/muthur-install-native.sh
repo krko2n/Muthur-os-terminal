@@ -84,7 +84,7 @@ info "Session: $SESSION_DIR/muthur.desktop"
 
 step "Installing utilities"
 [ -f "$ROOT_DIR/packaging/bin/kys" ] && sudo install -Dm755 "$ROOT_DIR/packaging/bin/kys" "$INSTALL_DIR/kys" || warn "kys utility missing"
-[ -f "$ROOT_DIR/scripts/mother-ui-native.sh" ] && sudo install -Dm755 "$ROOT_DIR/scripts/mother-ui-native.sh" "$INSTALL_DIR/mother-ui" || warn "mother-ui utility missing"
+[ -f "$ROOT_DIR/scripts/muthur-ui-native.sh" ] && sudo install -Dm755 "$ROOT_DIR/scripts/muthur-ui-native.sh" "$INSTALL_DIR/muthur-ui" || warn "muthur-ui utility missing"
 info "Utilities installed"
 
 mkdir -p "$DESKTOP_DIR" "$CONFIG_DIR"

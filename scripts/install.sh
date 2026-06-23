@@ -474,9 +474,9 @@ install_assets() {
         info "Command: $INSTALL_DIR/kys"
     fi
 
-    if [ -f "$SCRIPT_DIR/packaging/bin/mother-ui" ]; then
-        install_binary_file "$SCRIPT_DIR/packaging/bin/mother-ui" "$INSTALL_DIR/mother-ui"
-        info "Command: $INSTALL_DIR/mother-ui"
+    if [ -f "$SCRIPT_DIR/packaging/bin/muthur-ui" ]; then
+        install_binary_file "$SCRIPT_DIR/packaging/bin/muthur-ui" "$INSTALL_DIR/muthur-ui"
+        info "Command: $INSTALL_DIR/muthur-ui"
     fi
 
     # ── Session Infrastructure ──
@@ -566,7 +566,7 @@ verify_installation() {
     fi
 
     # CLI utilities
-    [ -x "$INSTALL_DIR/mother-ui" ] && info "mother-ui OK" || warn "mother-ui missing"
+    [ -x "$INSTALL_DIR/muthur-ui" ] && info "muthur-ui OK" || warn "muthur-ui missing"
     [ -x "$INSTALL_DIR/kys" ] && info "kys OK" || warn "kys missing"
 
     # Config directories
@@ -593,9 +593,9 @@ print_summary() {
     echo ""
     echo "  Commands:"
     echo "    muthur               Launch MUTHUR OS Terminal"
-    echo "    mother-ui enable     Enable fullscreen autostart"
-    echo "    mother-ui disable    Disable autostart"
-    echo "    mother-ui status     Show current configuration"
+    echo "    muthur-ui enable     Enable fullscreen autostart"
+    echo "    muthur-ui disable    Disable autostart"
+    echo "    muthur-ui status     Show current configuration"
     echo "    kys                  System shutdown (10s countdown)"
     echo ""
     echo "  Configuration:"

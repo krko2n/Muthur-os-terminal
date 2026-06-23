@@ -131,7 +131,7 @@ That's it. This one command does everything:
 5. Builds MUTHUR from source (takes 5-10 minutes)
 6. Places the app in `/usr/local/bin/` so you can run it from anywhere
 7. Creates a desktop shortcut so it shows up in your app menu
-8. Installs extra tools: `mother-ui`, `kys`
+8. Installs extra tools: `muthur-ui`, `kys`
 
 The script will ask for your sudo password when it needs to install system-wide files.
 
@@ -191,7 +191,7 @@ Launches the terminal in fullscreen. Use it like any terminal -- type commands, 
 ### Make MUTHUR start automatically on login
 
 ```bash
-mother-ui enable
+muthur-ui enable
 ```
 
 Next time you log in, MUTHUR launches fullscreen automatically.
@@ -199,13 +199,13 @@ Next time you log in, MUTHUR launches fullscreen automatically.
 To turn this off:
 
 ```bash
-mother-ui disable
+muthur-ui disable
 ```
 
 ### Check what's configured
 
 ```bash
-mother-ui status
+muthur-ui status
 ```
 
 Shows whether autostart is active and what login system you're using.
@@ -280,7 +280,7 @@ Want MUTHUR to BE your desktop? No taskbar, no other apps -- just MUTHUR as the 
 **Quick setup:**
 
 ```bash
-mother-ui enable
+muthur-ui enable
 ```
 
 **Full lockdown** (prevents keyboard escape routes):
@@ -418,7 +418,7 @@ Then re-run the installer or source nvm again.
 ```bash
 # Remove the binary and tools
 sudo rm /usr/local/bin/muthur
-sudo rm /usr/local/bin/mother-ui
+sudo rm /usr/local/bin/muthur-ui
 sudo rm /usr/local/bin/kys
 sudo rm /usr/bin/muthur-session
 sudo rm /usr/bin/muthur-os-terminal
@@ -471,7 +471,7 @@ src/components/         React frontend
   CustomCursor.tsx      Animated cursor
 
 packaging/              System integration
-  bin/mother-ui         Autostart manager
+  bin/muthur-ui         Autostart manager
   bin/kys               Shutdown command
   muthur-session        Kiosk compositor wrapper
   kiosk/                Lockdown configs

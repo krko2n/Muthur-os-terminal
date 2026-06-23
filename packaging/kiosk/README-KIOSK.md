@@ -14,7 +14,7 @@ kiosk environment where it becomes the sole user interface after boot.
 
 ```bash
 # 1. Enable MUTHUR autostart
-sudo mother-ui enable
+sudo muthur-ui enable
 
 # 2. Apply kiosk hardening (OPTIONAL - locks down system)
 sudo cp packaging/kiosk/muthur-kiosk.conf /etc/systemd/logind.conf.d/
@@ -71,7 +71,7 @@ rm /etc/systemd/logind.conf.d/muthur-kiosk.conf
 rm /etc/sysctl.d/99-muthur-kiosk.conf
 systemctl unmask getty@tty2.service
 systemctl unmask ctrl-alt-del.target
-mother-ui disable
+muthur-ui disable
 reboot
 ```
 
@@ -79,7 +79,7 @@ reboot
 
 ```bash
 ssh user@kiosk-machine
-sudo mother-ui disable
+sudo muthur-ui disable
 sudo rm /etc/systemd/logind.conf.d/muthur-kiosk.conf
 sudo rm /etc/sysctl.d/99-muthur-kiosk.conf
 sudo reboot
@@ -104,7 +104,7 @@ sudo systemctl unmask getty@tty{2,3,4,5,6}.service
 sudo systemctl unmask ctrl-alt-del.target
 
 # Disable autostart
-sudo mother-ui disable
+sudo muthur-ui disable
 
 # Restore kernel params
 sudo sysctl -w kernel.sysrq=1
@@ -131,4 +131,4 @@ If MUTHUR crashes during kiosk mode:
 - SSH access is NOT affected by kiosk lockdown. If sshd is running, remote
   administration remains available.
 - The kiosk hardening is deliberate and manual. It is NEVER auto-applied by
-  `mother-ui enable` to prevent accidental lockouts.
+  `muthur-ui enable` to prevent accidental lockouts.
