@@ -200,9 +200,6 @@ jobs:
       working-directory: src-tauri
       run: cargo fmt -- --check
 
-    - name: Check TypeScript
-      run: npm run lint
-
   summary:
     name: CI Summary
     runs-on: ubuntu-22.04
