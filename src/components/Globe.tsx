@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { feature } from 'topojson-client';
 import { invoke } from '@tauri-apps/api/core';
 import { playSound } from '../audio';
+import { GAME_REGISTRY, GameId } from './games';
 
 type GlobeMode = 'events' | 'orbitals' | 'cyber';
 
@@ -411,6 +412,31 @@ export default function Globe() {
         >
           REFRESH
         </button>
+      </div>
+
+      <div className="flex gap-[0.5vh] justify-center items-center shrink-0 py-[0.3vh]">
+        {GAME_REGISTRY.map((game) => {
+          const colors: Record<GameId, { text: string; border: string; bg: string; dot: string }> = {
+            'signal-lock': { text: '#ff4444', border: '#ff4444', bg: 'rgba(255,68,68,0.12)', dot: '#ff4444' },
+            'sector-tactics': { text: '#00ff41', border: '#00ff41', bg: 'rgba(0,255,65,0.12)', dot: '#00ff41' },
+            'void-cards': { text: '#48ddff', border: '#48ddff', bg: 'rgba(72,221,255,0.12)', dot: '#48ddff' },
+          };
+          const c = colors[game.id];
+          return (
+            <button
+              key={game.id}
+              onClick={() => {
+                playSound('game', 0.1);
+                window.dispatchEvent(new CustomEvent('open-game', { detail: game.id }));
+              }}
+              className="flex items-center gap-[0.4vh] px-[0.7vh] py-[0.25vh] text-[0.85vh] font-mono border rounded-sm transition-all hover:brightness-125"
+              style={{ color: c.text, borderColor: c.border, backgroundColor: c.bg }}
+            >
+              <span className="w-[0.6vh] h-[0.6vh] rounded-full" style={{ backgroundColor: c.dot }} />
+              {game.name}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
