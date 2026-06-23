@@ -165,16 +165,23 @@ Already have MUTHUR installed and want the latest version? Run:
 
 ```bash
 cd Muthur-os-terminal
-git pull
-./install.sh
+make update
 ```
 
-The same `install.sh` handles upgrades. It will:
-- Rebuild with the latest code
-- Replace old binaries with new ones
-- Keep your personal config, logs, and crash reports untouched
+That's it. The update system works like a professional app update:
+- Auto-stashes any local changes
+- Pulls the latest version from upstream
+- Rebuilds frontend and backend
+- Installs the new binary
+- Restores your local changes afterward
 
-You never lose your settings when upgrading.
+Your settings, game saves, scores, and config are never touched.
+
+If you prefer a full reinstall (re-checks dependencies, offers offline pack):
+
+```bash
+./install.sh
+```
 
 ---
 
@@ -401,6 +408,23 @@ sudo dnf install gcc gcc-c++ make gtk3-devel webkit2gtk4.1-devel librsvg2-devel 
 
 Then re-run `./install.sh`.
 
+### "Failed to initialize GTK" crash on launch
+
+MUTHUR needs a display server (X11 or Wayland). If you're on a headless system, TTY, or minimal VM without a desktop:
+
+```bash
+# Option 1: Minimal (boots directly into MUTHUR)
+sudo pacman -S cage greetd    # Arch
+muthur-ui enable
+reboot
+
+# Option 2: Standard Xorg
+sudo pacman -S xorg-server xorg-xinit    # Arch
+startx muthur
+```
+
+The installer offers these options automatically on first install.
+
 ### nvm fails with "PREFIX environment variable" error
 
 nvm refuses to load when `PREFIX` or `NPM_CONFIG_PREFIX` are set in your environment. The installer clears these automatically, but if you hit this running nvm manually:
@@ -507,7 +531,7 @@ MIT -- see [LICENSE](LICENSE).
 ---
 
 <!-- MUTHUR-STATS:START -->
-![Lines of Code](https://img.shields.io/badge/lines%20of%20code-26%2C423-c9d1d9?style=flat-square&labelColor=161b22)
+![Lines of Code](https://img.shields.io/badge/lines%20of%20code-26%2C447-c9d1d9?style=flat-square&labelColor=161b22)
 ![Project Files](https://img.shields.io/badge/project%20files-123-c9d1d9?style=flat-square&labelColor=161b22)
 <!-- MUTHUR-STATS:END -->
 
