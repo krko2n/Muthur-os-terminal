@@ -133,29 +133,45 @@ BINARY="src-tauri/target/release/muthur-os-terminal"
 sudo install -Dm755 "$BINARY" /usr/local/bin/muthur-bin
 sudo ln -sf /usr/local/bin/muthur-bin /usr/bin/muthur-os-terminal 2>/dev/null || true
 
-# Install launcher wrapper (auto-starts cage if no display)
+# Install launcher wrapper (self-healing: installs missing deps, configures seat)
 cat > /tmp/muthur-launcher << 'WRAPPER'
 #!/bin/bash
 if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
     exec muthur-bin "$@"
 fi
-if ! command -v cage &>/dev/null; then
-    echo "No display server. Run: sudo pacman -S cage" >&2
-    exit 1
-fi
-if ! pgrep -x seatd >/dev/null 2>&1; then
+install_missing() {
+    local missing=()
+    command -v cage &>/dev/null || missing+=(cage)
+    command -v seatd &>/dev/null || missing+=(seatd)
+    [ ${#missing[@]} -eq 0 ] && return 0
+    echo "Installing missing dependencies: ${missing[*]}"
+    if command -v pacman &>/dev/null; then
+        sudo pacman -S --noconfirm --needed "${missing[@]}"
+    elif command -v apt-get &>/dev/null; then
+        sudo apt-get install -y "${missing[@]}"
+    elif command -v dnf &>/dev/null; then
+        sudo dnf install -y "${missing[@]}"
+    else
+        echo "Cannot auto-install: ${missing[*]}. Install manually." >&2
+        exit 1
+    fi
+}
+install_missing
+if ! systemctl is-active --quiet seatd 2>/dev/null; then
+    sudo systemctl enable seatd 2>/dev/null || true
     sudo systemctl start seatd 2>/dev/null || true
+    sleep 0.3
 fi
 if ! id -nG | grep -qw seat; then
-    echo "User not in seat group. Run: sudo usermod -aG seat \$USER && re-login" >&2
-    echo "Attempting to continue anyway..." >&2
+    sudo usermod -aG seat "$USER"
+    exec sg seat -c "$0 $*"
 fi
 exec cage -d -- muthur-bin "$@"
 WRAPPER
 sudo install -Dm755 /tmp/muthur-launcher /usr/local/bin/muthur
 rm -f /tmp/muthur-launcher
 
-# Enable seatd service and add user to seat group
+# Pre-configure seat management during install
 sudo systemctl enable seatd 2>/dev/null || true
 sudo systemctl start seatd 2>/dev/null || true
 sudo usermod -aG seat "$USER" 2>/dev/null || true

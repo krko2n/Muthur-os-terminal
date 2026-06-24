@@ -464,31 +464,49 @@ install_assets() {
 
     install_binary_file "$binary" "$INSTALL_DIR/muthur-bin"
 
-    # Create launcher wrapper that auto-starts cage when no display is available
+    # Create launcher wrapper (self-healing: installs missing deps, configures seat)
     local wrapper="$INSTALL_DIR/muthur"
     cat > /tmp/muthur-launcher << 'WRAPPER'
 #!/bin/bash
 # MUTHUR OS Terminal launcher
-# Starts cage automatically if no display server is running.
+# Auto-detects and fixes missing dependencies before starting.
 
 if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
     exec muthur-bin "$@"
 fi
 
-if ! command -v cage &>/dev/null; then
-    echo "No display server. Run: sudo pacman -S cage" >&2
-    exit 1
-fi
+# --- Auto-install missing packages ---
+install_missing() {
+    local missing=()
+    command -v cage &>/dev/null || missing+=(cage)
+    command -v seatd &>/dev/null || missing+=(seatd)
+    [ ${#missing[@]} -eq 0 ] && return 0
 
-# Ensure seatd service is running (requires root for socket bind)
-if ! pgrep -x seatd >/dev/null 2>&1; then
+    echo "Installing missing dependencies: ${missing[*]}"
+    if command -v pacman &>/dev/null; then
+        sudo pacman -S --noconfirm --needed "${missing[@]}"
+    elif command -v apt-get &>/dev/null; then
+        sudo apt-get install -y "${missing[@]}"
+    elif command -v dnf &>/dev/null; then
+        sudo dnf install -y "${missing[@]}"
+    else
+        echo "Cannot auto-install: ${missing[*]}. Install manually." >&2
+        exit 1
+    fi
+}
+install_missing
+
+# --- Ensure seatd service is enabled and running ---
+if ! systemctl is-active --quiet seatd 2>/dev/null; then
+    sudo systemctl enable seatd 2>/dev/null || true
     sudo systemctl start seatd 2>/dev/null || true
+    sleep 0.3
 fi
 
-# Check seat group membership
+# --- Ensure user is in seat group (apply immediately) ---
 if ! id -nG | grep -qw seat; then
-    echo "User not in seat group. Run: sudo usermod -aG seat \$USER && re-login" >&2
-    echo "Attempting to continue anyway..." >&2
+    sudo usermod -aG seat "$USER"
+    exec sg seat -c "$0 $*"
 fi
 
 exec cage -d -- muthur-bin "$@"
@@ -621,7 +639,7 @@ offer_display_setup() {
     # Skip in quiet mode
     [ "$QUIET" = "--quiet" ] && return 0
 
-    # Enable seatd service (runs as root, provides seat access to cage)
+    # Ensure seat management is fully configured
     maybe_sudo systemctl enable seatd 2>/dev/null || true
     maybe_sudo systemctl start seatd 2>/dev/null || true
     maybe_sudo usermod -aG seat "${SUDO_USER:-$USER}" 2>/dev/null || true
