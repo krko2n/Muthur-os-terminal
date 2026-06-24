@@ -521,6 +521,9 @@ needs_software_renderer() {
 }
 if needs_software_renderer; then
     export WLR_RENDERER=pixman
+    export WEBKIT_DISABLE_COMPOSITING_MODE=1
+    export WEBKIT_DISABLE_DMABUF_RENDERER=1
+    export GDK_BACKEND=wayland
 fi
 
 exec cage -d -- muthur-bin "$@"
