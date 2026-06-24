@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+5a0de5e fix: enable WebKit software rendering in VM environments
+cc3d303 docs: auto-update generated docs [skip ci]
 e9e2629 fix: acquire sudo credentials before build starts
 3edc34a docs: auto-update generated docs [skip ci]
 ab949b1 fix: auto-detect missing GPU and fallback to pixman software renderer
@@ -50,5 +52,3 @@ b9f5267 docs: auto-update generated docs [skip ci]
 e240567 docs: auto-update generated docs [skip ci]
 5c68601 feat: game launcher buttons below orbital display
 29771f5 docs: auto-update generated docs [skip ci]
-29d1b13 feat: warn on risky ai commands
-25af33c docs: auto-update generated docs [skip ci]
