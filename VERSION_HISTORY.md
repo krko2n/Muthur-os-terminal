@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+4a4d98b fix: self-healing launcher that auto-installs deps and configures seat
+eddb95d docs: auto-update generated docs [skip ci]
 60fcd4c fix: use seatd as system service instead of bypassing it
 5b1aafc docs: auto-update generated docs [skip ci]
 1858099 fix: use LIBSEAT_BACKEND=logind in all launcher wrappers
@@ -50,5 +52,3 @@ a383e1a feat: add ai stop control
 32e4df5 docs: auto-update generated docs [skip ci]
 109bba9 feat: improve offline pack manager
 ad8afea docs: auto-update generated docs [skip ci]
-14d7c83 fix: harden backend fetch targets
-2677589 docs: auto-update generated docs [skip ci]
