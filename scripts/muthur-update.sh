@@ -231,17 +231,35 @@ if ! id -nG | grep -qw seat; then
     exec sg seat -c "$0 $*"
 fi
 
-# Always allow software rendering (harmless on real GPUs, required on VMs)
+# Always permit software rendering (no-op on real GPUs)
 export WLR_RENDERER_ALLOW_SOFTWARE=1
 
-# Force software GL if no working hardware GPU
-if [ "$(cat /sys/class/drm/card0/device/enable 2>/dev/null)" != "1" ] || \
-   ! ls /dev/dri/renderD* &>/dev/null 2>&1 || \
-   grep -qi 'vmware\|virtualbox\|qemu\|kvm\|hyperv\|parallels' /sys/class/dmi/id/product_name 2>/dev/null; then
+# Detect VM or missing GPU -- use pixman + software GL
+USE_SOFTWARE=0
+# Check DMI for hypervisor (sys_vendor, product_name, board_vendor)
+for dmi in /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name /sys/class/dmi/id/board_vendor; do
+    if grep -qi 'vmware\|virtualbox\|qemu\|kvm\|hyperv\|parallels\|innotek\|bochs' "$dmi" 2>/dev/null; then
+        USE_SOFTWARE=1
+        break
+    fi
+done
+# Also check systemd-detect-virt as backup
+if [ "$USE_SOFTWARE" = "0" ] && command -v systemd-detect-virt &>/dev/null; then
+    if [ "$(systemd-detect-virt 2>/dev/null)" != "none" ]; then
+        USE_SOFTWARE=1
+    fi
+fi
+# No render nodes at all
+if ! ls /dev/dri/renderD* &>/dev/null 2>&1; then
+    USE_SOFTWARE=1
+fi
+
+if [ "$USE_SOFTWARE" = "1" ]; then
+    export WLR_RENDERER=pixman
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER=llvmpipe
-    export WEBKIT_DISABLE_DMABUF_RENDERER=1
     export WEBKIT_DISABLE_COMPOSITING_MODE=1
+    export WEBKIT_DISABLE_DMABUF_RENDERER=1
 fi
 
 exec cage -d -- muthur-bin "$@"
