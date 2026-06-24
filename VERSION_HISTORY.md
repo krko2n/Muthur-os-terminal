@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+ebde84f fix: use Mesa llvmpipe for WebKit rendering in VM environments
+eb9b806 docs: auto-update generated docs [skip ci]
 5a0de5e fix: enable WebKit software rendering in VM environments
 cc3d303 docs: auto-update generated docs [skip ci]
 e9e2629 fix: acquire sudo credentials before build starts
@@ -50,5 +52,3 @@ c762880 fix: unset PREFIX before nvm to prevent "not compatible" error
 b9f5267 docs: auto-update generated docs [skip ci]
 02a2753 fix: allow installer to run as root in disposable environments
 e240567 docs: auto-update generated docs [skip ci]
-5c68601 feat: game launcher buttons below orbital display
-29771f5 docs: auto-update generated docs [skip ci]
