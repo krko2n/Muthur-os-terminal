@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+ab949b1 fix: auto-detect missing GPU and fallback to pixman software renderer
+7a67c1a docs: auto-update generated docs [skip ci]
 4a4d98b fix: self-healing launcher that auto-installs deps and configures seat
 eddb95d docs: auto-update generated docs [skip ci]
 60fcd4c fix: use seatd as system service instead of bypassing it
@@ -50,5 +52,3 @@ e240567 docs: auto-update generated docs [skip ci]
 25af33c docs: auto-update generated docs [skip ci]
 a383e1a feat: add ai stop control
 32e4df5 docs: auto-update generated docs [skip ci]
-109bba9 feat: improve offline pack manager
-ad8afea docs: auto-update generated docs [skip ci]
