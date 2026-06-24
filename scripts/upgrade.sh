@@ -140,13 +140,11 @@ if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
     exec muthur-bin "$@"
 fi
 if ! command -v cage &>/dev/null; then
-    echo "No display server. Install: sudo pacman -S cage seatd" >&2
+    echo "No display server. Run: sudo pacman -S cage" >&2
     exit 1
 fi
-if [ -S /run/seatd.sock ]; then
-    sudo rm -f /run/seatd.sock 2>/dev/null || true
-fi
-exec seatd-launch -- cage -d -- muthur-bin "$@"
+export LIBSEAT_BACKEND=logind
+exec cage -d -- muthur-bin "$@"
 WRAPPER
 sudo install -Dm755 /tmp/muthur-launcher /usr/local/bin/muthur
 rm -f /tmp/muthur-launcher

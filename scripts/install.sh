@@ -476,17 +476,13 @@ if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
 fi
 
 if ! command -v cage &>/dev/null; then
-    echo "No display server. Install: sudo pacman -S cage seatd" >&2
+    echo "No display server. Run: sudo pacman -S cage" >&2
     exit 1
 fi
 
-# Remove stale system seatd socket so seatd-launch can create its own
-if [ -S /run/seatd.sock ]; then
-    sudo rm -f /run/seatd.sock 2>/dev/null || true
-fi
-
-# seatd-launch spawns a private seat manager for this session -- no service needed
-exec seatd-launch -- cage -d -- muthur-bin "$@"
+# Use systemd-logind for seat management (works on any systemd system, no seatd needed)
+export LIBSEAT_BACKEND=logind
+exec cage -d -- muthur-bin "$@"
 WRAPPER
     install_binary_file /tmp/muthur-launcher "$wrapper"
     rm -f /tmp/muthur-launcher
@@ -616,7 +612,7 @@ offer_display_setup() {
     # Skip in quiet mode
     [ "$QUIET" = "--quiet" ] && return 0
 
-    # Disable system seatd -- the launcher uses seatd-launch per session instead
+    # Disable system seatd -- launcher uses logind directly
     maybe_sudo systemctl disable seatd 2>/dev/null || true
     maybe_sudo systemctl stop seatd 2>/dev/null || true
     maybe_sudo rm -f /run/seatd.sock 2>/dev/null || true
