@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+91d7cb8 fix: set WLR_RENDERER_ALLOW_SOFTWARE unconditionally
+74541e7 docs: auto-update generated docs [skip ci]
 a4c43d0 fix: add WLR_RENDERER_ALLOW_SOFTWARE=1 for software rendering
 8318d36 docs: auto-update generated docs [skip ci]
 7636755 fix: prevent WebGL crash loop in VM environments
@@ -50,5 +52,3 @@ bb4d1dd docs: auto-update generated docs [skip ci]
 2132c3c fix: use absolute path to src-tauri in build step
 e3b1f17 docs: auto-update generated docs [skip ci]
 d5d082b fix: build without bundling to avoid linuxdeploy dependency
-55c8b5d docs: auto-update generated docs [skip ci]
-dfe3514 fix: add xdg-utils to installer dependencies for AppImage bundling
