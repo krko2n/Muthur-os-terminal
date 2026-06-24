@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+e9e2629 fix: acquire sudo credentials before build starts
+3edc34a docs: auto-update generated docs [skip ci]
 ab949b1 fix: auto-detect missing GPU and fallback to pixman software renderer
 7a67c1a docs: auto-update generated docs [skip ci]
 4a4d98b fix: self-healing launcher that auto-installs deps and configures seat
@@ -50,5 +52,3 @@ e240567 docs: auto-update generated docs [skip ci]
 29771f5 docs: auto-update generated docs [skip ci]
 29d1b13 feat: warn on risky ai commands
 25af33c docs: auto-update generated docs [skip ci]
-a383e1a feat: add ai stop control
-32e4df5 docs: auto-update generated docs [skip ci]
