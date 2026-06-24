@@ -197,6 +197,11 @@ install_missing() {
     local missing=()
     command -v cage &>/dev/null || missing+=(cage)
     command -v seatd &>/dev/null || missing+=(seatd)
+    # mesa provides llvmpipe (software GL) needed for VM rendering
+    if ! ls /usr/lib/dri/swrast_dri.so &>/dev/null 2>&1 && \
+       ! ls /usr/lib64/dri/swrast_dri.so &>/dev/null 2>&1; then
+        missing+=(mesa)
+    fi
     [ ${#missing[@]} -eq 0 ] && return 0
 
     echo "Installing missing dependencies: ${missing[*]}"
@@ -239,9 +244,9 @@ needs_software_renderer() {
     return 1
 }
 if needs_software_renderer; then
-    export WLR_RENDERER=pixman
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER=llvmpipe
+    export MESA_GL_VERSION_OVERRIDE=3.3
     export WEBKIT_DISABLE_DMABUF_RENDERER=1
 fi
 
