@@ -166,6 +166,18 @@ if ! id -nG | grep -qw seat; then
     sudo usermod -aG seat "$USER"
     exec sg seat -c "$0 $*"
 fi
+needs_software_renderer() {
+    ls /dev/dri/renderD* &>/dev/null 2>&1 || return 0
+    if command -v systemd-detect-virt &>/dev/null; then
+        local vtype
+        vtype="$(systemd-detect-virt 2>/dev/null || true)"
+        [ "$vtype" != "none" ] && [ -n "$vtype" ] && return 0
+    fi
+    return 1
+}
+if needs_software_renderer; then
+    export WLR_RENDERER=pixman
+fi
 exec cage -d -- muthur-bin "$@"
 WRAPPER
 sudo install -Dm755 /tmp/muthur-launcher /usr/local/bin/muthur
