@@ -143,11 +143,22 @@ if ! command -v cage &>/dev/null; then
     echo "No display server. Run: sudo pacman -S cage" >&2
     exit 1
 fi
-export LIBSEAT_BACKEND=logind
+if ! pgrep -x seatd >/dev/null 2>&1; then
+    sudo systemctl start seatd 2>/dev/null || true
+fi
+if ! id -nG | grep -qw seat; then
+    echo "User not in seat group. Run: sudo usermod -aG seat \$USER && re-login" >&2
+    echo "Attempting to continue anyway..." >&2
+fi
 exec cage -d -- muthur-bin "$@"
 WRAPPER
 sudo install -Dm755 /tmp/muthur-launcher /usr/local/bin/muthur
 rm -f /tmp/muthur-launcher
+
+# Enable seatd service and add user to seat group
+sudo systemctl enable seatd 2>/dev/null || true
+sudo systemctl start seatd 2>/dev/null || true
+sudo usermod -aG seat "$USER" 2>/dev/null || true
 
 # --- Restore user data ---
 if [ -d "$BACKUP_DIR/config" ]; then

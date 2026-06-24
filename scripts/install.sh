@@ -480,8 +480,17 @@ if ! command -v cage &>/dev/null; then
     exit 1
 fi
 
-# Use systemd-logind for seat management (works on any systemd system, no seatd needed)
-export LIBSEAT_BACKEND=logind
+# Ensure seatd service is running (requires root for socket bind)
+if ! pgrep -x seatd >/dev/null 2>&1; then
+    sudo systemctl start seatd 2>/dev/null || true
+fi
+
+# Check seat group membership
+if ! id -nG | grep -qw seat; then
+    echo "User not in seat group. Run: sudo usermod -aG seat \$USER && re-login" >&2
+    echo "Attempting to continue anyway..." >&2
+fi
+
 exec cage -d -- muthur-bin "$@"
 WRAPPER
     install_binary_file /tmp/muthur-launcher "$wrapper"
@@ -612,10 +621,10 @@ offer_display_setup() {
     # Skip in quiet mode
     [ "$QUIET" = "--quiet" ] && return 0
 
-    # Disable system seatd -- launcher uses logind directly
-    maybe_sudo systemctl disable seatd 2>/dev/null || true
-    maybe_sudo systemctl stop seatd 2>/dev/null || true
-    maybe_sudo rm -f /run/seatd.sock 2>/dev/null || true
+    # Enable seatd service (runs as root, provides seat access to cage)
+    maybe_sudo systemctl enable seatd 2>/dev/null || true
+    maybe_sudo systemctl start seatd 2>/dev/null || true
+    maybe_sudo usermod -aG seat "${SUDO_USER:-$USER}" 2>/dev/null || true
     maybe_sudo systemctl enable greetd 2>/dev/null || true
 
     echo ""

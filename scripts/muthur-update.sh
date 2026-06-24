@@ -183,8 +183,17 @@ if ! command -v cage &>/dev/null; then
     exit 1
 fi
 
-# Use systemd-logind for seat management (works on any systemd system, no seatd needed)
-export LIBSEAT_BACKEND=logind
+# Ensure seatd service is running (requires root for socket bind)
+if ! pgrep -x seatd >/dev/null 2>&1; then
+    sudo systemctl start seatd 2>/dev/null || true
+fi
+
+# Check seat group membership
+if ! id -nG | grep -qw seat; then
+    echo "User not in seat group. Run: sudo usermod -aG seat \$USER && re-login" >&2
+    echo "Attempting to continue anyway..." >&2
+fi
+
 exec cage -d -- muthur-bin "$@"
 WRAPPER
 
@@ -199,15 +208,15 @@ else
 fi
 rm -f /tmp/muthur-launcher
 
-# Disable system seatd -- launcher uses logind directly
+# Enable seatd service (runs as root, can bind /run/seatd.sock)
 if [ "$EUID" -eq 0 ]; then
-    systemctl disable seatd >> "$BUILD_LOG" 2>&1 || true
-    systemctl stop seatd >> "$BUILD_LOG" 2>&1 || true
-    rm -f /run/seatd.sock 2>/dev/null || true
+    systemctl enable seatd >> "$BUILD_LOG" 2>&1 || true
+    systemctl start seatd >> "$BUILD_LOG" 2>&1 || true
+    usermod -aG seat "${SUDO_USER:-$USER}" >> "$BUILD_LOG" 2>&1 || true
 else
-    sudo systemctl disable seatd >> "$BUILD_LOG" 2>&1 || true
-    sudo systemctl stop seatd >> "$BUILD_LOG" 2>&1 || true
-    sudo rm -f /run/seatd.sock 2>/dev/null || true
+    sudo systemctl enable seatd >> "$BUILD_LOG" 2>&1 || true
+    sudo systemctl start seatd >> "$BUILD_LOG" 2>&1 || true
+    sudo usermod -aG seat "$USER" >> "$BUILD_LOG" 2>&1 || true
 fi
 
 rewind_progress
