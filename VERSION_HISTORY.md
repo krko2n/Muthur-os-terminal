@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+1858099 fix: use LIBSEAT_BACKEND=logind in all launcher wrappers
+03c2973 docs: auto-update generated docs [skip ci]
 c523ff0 fix: disable system seatd and clean socket for seatd-launch to work
 575ca8f docs: auto-update generated docs [skip ci]
 d48dd6e fix: use seatd-launch to run cage without system seatd service
@@ -50,5 +52,3 @@ ad8afea docs: auto-update generated docs [skip ci]
 2677589 docs: auto-update generated docs [skip ci]
 04715a1 fix: preserve shell script executable modes
 fdfdd85 docs: auto-update generated docs [skip ci]
-df3dacb fix: keep installer scripts linux safe
-1bfd8eb docs: auto-update generated docs [skip ci]
