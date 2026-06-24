@@ -231,22 +231,15 @@ if ! id -nG | grep -qw seat; then
     exec sg seat -c "$0 $*"
 fi
 
-# --- GPU renderer: fallback to software rendering if no usable GPU ---
-needs_software_renderer() {
-    # No render nodes at all
-    ls /dev/dri/renderD* &>/dev/null 2>&1 || return 0
-    # Virtual machine (GPU drivers often broken/missing)
-    if command -v systemd-detect-virt &>/dev/null; then
-        local vtype
-        vtype="$(systemd-detect-virt 2>/dev/null || true)"
-        [ "$vtype" != "none" ] && [ -n "$vtype" ] && return 0
-    fi
-    return 1
-}
-if needs_software_renderer; then
+# Always allow software rendering (harmless on real GPUs, required on VMs)
+export WLR_RENDERER_ALLOW_SOFTWARE=1
+
+# Force software GL if no working hardware GPU
+if [ "$(cat /sys/class/drm/card0/device/enable 2>/dev/null)" != "1" ] || \
+   ! ls /dev/dri/renderD* &>/dev/null 2>&1 || \
+   grep -qi 'vmware\|virtualbox\|qemu\|kvm\|hyperv\|parallels' /sys/class/dmi/id/product_name 2>/dev/null; then
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER=llvmpipe
-    export WLR_RENDERER_ALLOW_SOFTWARE=1
     export WEBKIT_DISABLE_DMABUF_RENDERER=1
     export WEBKIT_DISABLE_COMPOSITING_MODE=1
 fi
