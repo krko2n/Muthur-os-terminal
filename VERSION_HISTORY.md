@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+de6ed4c fix: robust VM detection checking multiple DMI fields and systemd-detect-virt
+1de019f docs: auto-update generated docs [skip ci]
 91d7cb8 fix: set WLR_RENDERER_ALLOW_SOFTWARE unconditionally
 74541e7 docs: auto-update generated docs [skip ci]
 a4c43d0 fix: add WLR_RENDERER_ALLOW_SOFTWARE=1 for software rendering
@@ -50,5 +52,3 @@ ea96bb1 docs: auto-update generated docs [skip ci]
 4860c37 fix: resolve SCRIPT_DIR to project root, not scripts/
 bb4d1dd docs: auto-update generated docs [skip ci]
 2132c3c fix: use absolute path to src-tauri in build step
-e3b1f17 docs: auto-update generated docs [skip ci]
-d5d082b fix: build without bundling to avoid linuxdeploy dependency
