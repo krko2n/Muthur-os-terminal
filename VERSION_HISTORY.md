@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+a4c43d0 fix: add WLR_RENDERER_ALLOW_SOFTWARE=1 for software rendering
+8318d36 docs: auto-update generated docs [skip ci]
 7636755 fix: prevent WebGL crash loop in VM environments
 7475d27 docs: auto-update generated docs [skip ci]
 332729c fix: drop WLR_RENDERER=pixman so WebKit gets a working EGL context
@@ -50,5 +52,3 @@ e3b1f17 docs: auto-update generated docs [skip ci]
 d5d082b fix: build without bundling to avoid linuxdeploy dependency
 55c8b5d docs: auto-update generated docs [skip ci]
 dfe3514 fix: add xdg-utils to installer dependencies for AppImage bundling
-75d9a64 ci: remove duplicate lint step in test job
-c10e4ae docs: auto-update generated docs [skip ci]
