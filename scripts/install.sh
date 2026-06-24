@@ -522,8 +522,8 @@ needs_software_renderer() {
 if needs_software_renderer; then
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER=llvmpipe
-    export MESA_GL_VERSION_OVERRIDE=3.3
     export WEBKIT_DISABLE_DMABUF_RENDERER=1
+    export WEBKIT_DISABLE_COMPOSITING_MODE=1
 fi
 
 exec cage -d -- muthur-bin "$@"

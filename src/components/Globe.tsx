@@ -1,10 +1,23 @@
-import { useRef, useState, useMemo, useEffect } from 'react';
+import { useRef, useState, useMemo, useEffect, Component, ReactNode } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { feature } from 'topojson-client';
 import { invoke } from '@tauri-apps/api/core';
 import { playSound } from '../audio';
 import { GAME_REGISTRY, GameId } from './games';
+
+class WebGLErrorBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() { return this.state.hasError ? this.props.fallback : this.props.children; }
+}
+
+function isWebGLAvailable(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+  } catch { return false; }
+}
 
 type GlobeMode = 'events' | 'orbitals' | 'cyber';
 
@@ -372,16 +385,18 @@ export default function Globe() {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex-1 min-h-0">
-        {worldLines.length > 0 ? (
-          <Canvas
-            camera={{ position: [0, 0.5, 5.5], fov: 45 }}
-            gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
-            style={{ background: 'transparent' }}
-            frameloop="always"
-            dpr={1}
-          >
-            <RotatingGlobe mode={mode} worldLines={worldLines.slice(0, visibleLines)} conflicts={conflicts} signalNodes={signalNodes} />
-          </Canvas>
+        {worldLines.length > 0 && isWebGLAvailable() ? (
+          <WebGLErrorBoundary fallback={<div className="flex items-center justify-center h-full text-[1.1vh] opacity-30">WEBGL UNAVAILABLE</div>}>
+            <Canvas
+              camera={{ position: [0, 0.5, 5.5], fov: 45 }}
+              gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
+              style={{ background: 'transparent' }}
+              frameloop="always"
+              dpr={1}
+            >
+              <RotatingGlobe mode={mode} worldLines={worldLines.slice(0, visibleLines)} conflicts={conflicts} signalNodes={signalNodes} />
+            </Canvas>
+          </WebGLErrorBoundary>
         ) : (
           <div className="flex items-center justify-center h-full text-[1.1vh] opacity-30">
             {status}
