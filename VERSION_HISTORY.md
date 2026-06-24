@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+7636755 fix: prevent WebGL crash loop in VM environments
+7475d27 docs: auto-update generated docs [skip ci]
 332729c fix: drop WLR_RENDERER=pixman so WebKit gets a working EGL context
 c527366 docs: auto-update generated docs [skip ci]
 ebde84f fix: use Mesa llvmpipe for WebKit rendering in VM environments
@@ -50,5 +52,3 @@ d5d082b fix: build without bundling to avoid linuxdeploy dependency
 dfe3514 fix: add xdg-utils to installer dependencies for AppImage bundling
 75d9a64 ci: remove duplicate lint step in test job
 c10e4ae docs: auto-update generated docs [skip ci]
-c762880 fix: unset PREFIX before nvm to prevent "not compatible" error
-b9f5267 docs: auto-update generated docs [skip ci]
