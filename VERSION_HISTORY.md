@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+60fcd4c fix: use seatd as system service instead of bypassing it
+5b1aafc docs: auto-update generated docs [skip ci]
 1858099 fix: use LIBSEAT_BACKEND=logind in all launcher wrappers
 03c2973 docs: auto-update generated docs [skip ci]
 c523ff0 fix: disable system seatd and clean socket for seatd-launch to work
@@ -50,5 +52,3 @@ a383e1a feat: add ai stop control
 ad8afea docs: auto-update generated docs [skip ci]
 14d7c83 fix: harden backend fetch targets
 2677589 docs: auto-update generated docs [skip ci]
-04715a1 fix: preserve shell script executable modes
-fdfdd85 docs: auto-update generated docs [skip ci]
