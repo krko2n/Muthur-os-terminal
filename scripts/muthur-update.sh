@@ -23,7 +23,9 @@ RESET="${ESC}[0m"
 BUILD_LOG="${TMPDIR:-/tmp}/muthur-update-build.log"
 START_TIME=$SECONDS
 
+SUDO_KEEPER_PID=""
 cleanup() {
+    [ -n "$SUDO_KEEPER_PID" ] && kill "$SUDO_KEEPER_PID" 2>/dev/null || true
     printf "%b" "$SHOW"
 }
 trap cleanup EXIT INT TERM
@@ -103,6 +105,18 @@ STASHED=""
 
 printf "%b" "$HIDE"
 rm -f "$BUILD_LOG"
+
+# Acquire sudo credentials up front (before progress display hides the prompt)
+if [ "$EUID" -ne 0 ]; then
+    printf "%b" "$SHOW"
+    echo "  Sudo access is required to install the update."
+    sudo -v || { echo "Sudo authentication failed."; exit 1; }
+    printf "%b" "$HIDE"
+    # Keep sudo alive in background during the build
+    (while true; do sudo -n true 2>/dev/null; sleep 50; done) &
+    SUDO_KEEPER_PID=$!
+fi
+
 draw_frame
 draw_progress 2 "Preparing update controller..."
 sleep 0.15
