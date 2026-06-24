@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+332729c fix: drop WLR_RENDERER=pixman so WebKit gets a working EGL context
+c527366 docs: auto-update generated docs [skip ci]
 ebde84f fix: use Mesa llvmpipe for WebKit rendering in VM environments
 eb9b806 docs: auto-update generated docs [skip ci]
 5a0de5e fix: enable WebKit software rendering in VM environments
@@ -50,5 +52,3 @@ dfe3514 fix: add xdg-utils to installer dependencies for AppImage bundling
 c10e4ae docs: auto-update generated docs [skip ci]
 c762880 fix: unset PREFIX before nvm to prevent "not compatible" error
 b9f5267 docs: auto-update generated docs [skip ci]
-02a2753 fix: allow installer to run as root in disposable environments
-e240567 docs: auto-update generated docs [skip ci]
