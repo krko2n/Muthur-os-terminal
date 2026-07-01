@@ -11,6 +11,7 @@ mod system;
 use ai::OllamaClient;
 use pty::{PtyManager, SessionId};
 use reqwest::header::LOCATION;
+use serde::Serialize;
 use std::collections::HashSet;
 use std::io::Write;
 use std::net::IpAddr;
@@ -22,12 +23,33 @@ use tauri::{Manager, State, Window};
 
 const OFFLINE_PACK_VERSION: &str = "2026.06.20.1";
 const MAX_FETCH_REDIRECTS: usize = 10;
+#[cfg(target_os = "linux")]
+const VM_MARKERS: &[&str] = &[
+    "virtualbox",
+    "vmware",
+    "qemu",
+    "kvm",
+    "bochs",
+    "hyper-v",
+    "microsoft corporation",
+    "parallels",
+    "xen",
+    "bhyve",
+];
 
 pub struct AppState {
     pty_manager: Arc<Mutex<PtyManager>>,
     system_monitor: Arc<Mutex<SystemMonitor>>,
     ollama_client: Arc<OllamaClient>,
     ai_cancelled: Arc<Mutex<HashSet<String>>>,
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct RenderProfile {
+    safe_render: bool,
+    terminal_webgl: bool,
+    reason: String,
 }
 
 fn is_ai_request_cancelled(cancelled: &Arc<Mutex<HashSet<String>>>, request_id: &str) -> bool {
@@ -238,6 +260,133 @@ fn env_flag(name: &str) -> bool {
         .unwrap_or(false)
 }
 
+#[cfg(target_os = "linux")]
+fn read_linux_dmi_field(field: &str) -> Option<String> {
+    std::fs::read_to_string(format!("/sys/devices/virtual/dmi/id/{}", field))
+        .ok()
+        .map(|value| value.trim().to_ascii_lowercase())
+        .filter(|value| !value.is_empty())
+}
+
+#[cfg(target_os = "linux")]
+fn linux_dmi_vm_reason() -> Option<String> {
+    let fields = [
+        "sys_vendor",
+        "product_name",
+        "product_version",
+        "board_vendor",
+        "board_name",
+        "bios_vendor",
+    ];
+
+    let dmi_values: Vec<String> = fields
+        .iter()
+        .filter_map(|field| read_linux_dmi_field(field))
+        .collect();
+    if dmi_values.is_empty() {
+        return Some("graphics environment detection failed".to_string());
+    }
+
+    if dmi_values
+        .iter()
+        .any(|value| VM_MARKERS.iter().any(|marker| value.contains(marker)))
+    {
+        return Some("virtual machine detected".to_string());
+    }
+
+    None
+}
+
+#[cfg(target_os = "linux")]
+fn linux_cpu_vm_reason() -> Option<String> {
+    std::fs::read_to_string("/proc/cpuinfo")
+        .ok()
+        .map(|value| value.to_ascii_lowercase())
+        .filter(|value| value.contains("hypervisor"))
+        .map(|_| "virtual machine detected".to_string())
+}
+
+#[cfg(target_os = "linux")]
+fn linux_wayland_only_reason() -> Option<String> {
+    let has_wayland = std::env::var("WAYLAND_DISPLAY")
+        .map(|value| !value.trim().is_empty())
+        .unwrap_or(false)
+        || std::env::var("XDG_SESSION_TYPE")
+            .map(|value| value.trim().eq_ignore_ascii_case("wayland"))
+            .unwrap_or(false);
+    let has_x11 = std::env::var("DISPLAY")
+        .map(|value| !value.trim().is_empty())
+        .unwrap_or(false);
+
+    if has_wayland && !has_x11 {
+        Some("wayland-only session detected".to_string())
+    } else {
+        None
+    }
+}
+
+fn detect_render_reason() -> Option<String> {
+    if env_flag("MUTHUR_HARDWARE_RENDER") {
+        return None;
+    }
+
+    if env_flag("MUTHUR_SAFE_RENDER") {
+        return Some("safe rendering forced".to_string());
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        linux_dmi_vm_reason()
+            .or_else(linux_cpu_vm_reason)
+            .or_else(linux_wayland_only_reason)
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    {
+        None
+    }
+}
+
+fn build_render_profile() -> RenderProfile {
+    let reason = detect_render_reason();
+    let safe_render = reason.is_some();
+    let terminal_webgl = if env_flag("MUTHUR_ENABLE_WEBGL") {
+        true
+    } else if safe_render {
+        false
+    } else {
+        !cfg!(target_os = "linux")
+    };
+
+    RenderProfile {
+        safe_render,
+        terminal_webgl,
+        reason: reason.unwrap_or_else(|| {
+            if env_flag("MUTHUR_HARDWARE_RENDER") {
+                "hardware rendering forced".to_string()
+            } else {
+                "hardware render profile".to_string()
+            }
+        }),
+    }
+}
+
+fn apply_startup_render_profile() {
+    let profile = build_render_profile();
+
+    if profile.safe_render {
+        // WebKitGTK can blank or flash in VMs when GPU compositing paths are unstable.
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+        std::env::set_var("LIBGL_ALWAYS_SOFTWARE", "1");
+        std::env::set_var("MUTHUR_RENDER_PROFILE", "safe");
+        eprintln!("MUTHUR render profile: safe ({})", profile.reason);
+    } else {
+        std::env::set_var("MUTHUR_RENDER_PROFILE", "hardware");
+        eprintln!("MUTHUR render profile: hardware");
+    }
+}
+
 fn allowed_filesystem_roots() -> Vec<PathBuf> {
     let mut roots = Vec::new();
 
@@ -293,6 +442,11 @@ async fn create_terminal_session(
     let mut pty = state.pty_manager.lock().map_err(|e| e.to_string())?;
     let session_id = pty.create_session(window).map_err(|e| e.to_string())?;
     Ok(session_id.to_string())
+}
+
+#[tauri::command]
+fn get_render_profile() -> RenderProfile {
+    build_render_profile()
 }
 
 #[tauri::command]
@@ -1001,6 +1155,7 @@ fn html_to_text(html: &str) -> String {
 fn main() {
     // Initialize crash handler
     crash::init_crash_handler();
+    apply_startup_render_profile();
 
     tauri::Builder::default()
         .setup(|app| {
@@ -1020,6 +1175,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             create_terminal_session,
+            get_render_profile,
             write_to_terminal,
             resize_terminal,
             close_terminal_session,

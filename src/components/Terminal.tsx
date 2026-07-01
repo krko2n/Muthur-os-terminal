@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebglAddon } from '@xterm/addon-webgl';
@@ -36,6 +36,12 @@ interface TerminalProps {
   onReplaceSettings: (settings: InterfaceSettings) => void;
   onOpenPalette: () => void;
   onOpenShutdown: () => void;
+}
+
+interface RenderProfile {
+  safeRender: boolean;
+  terminalWebgl: boolean;
+  reason: string;
 }
 
 function cssVar(name: string, fallback: string) {
@@ -87,6 +93,32 @@ function getTerminalTheme() {
 
 function shellQuote(value: string) {
   return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+async function getRenderProfile(): Promise<RenderProfile> {
+  try {
+    return await invoke<RenderProfile>('get_render_profile');
+  } catch {
+    return {
+      safeRender: true,
+      terminalWebgl: false,
+      reason: 'fallback safe render profile',
+    };
+  }
+}
+
+function loadTerminalWebglIfSafe(terminal: XTerm, profile: RenderProfile) {
+  if (!profile.terminalWebgl) return;
+
+  try {
+    const webglAddon = new WebglAddon();
+    webglAddon.onContextLoss(() => {
+      webglAddon.dispose();
+    });
+    terminal.loadAddon(webglAddon);
+  } catch {
+    // Fall back to canvas renderer.
+  }
 }
 
 export default function Terminal({
@@ -187,11 +219,8 @@ export default function Terminal({
         const fitAddon = new FitAddon();
         terminal.loadAddon(fitAddon);
 
-        try {
-          const webglAddon = new WebglAddon();
-          webglAddon.onContextLoss(() => { webglAddon.dispose(); });
-          terminal.loadAddon(webglAddon);
-        } catch {}
+        const renderProfile = await getRenderProfile();
+        loadTerminalWebglIfSafe(terminal, renderProfile);
 
         const unlistenOutput = await listen(`terminal-output-${sessionId}`, (ev: any) => {
           terminal.write(ev.payload);
@@ -379,11 +408,8 @@ export default function Terminal({
       const sessionId = await invoke('create_terminal_session') as string;
 
       // GPU-accelerated rendering (falls back to canvas if WebGL unavailable)
-      try {
-        const webglAddon = new WebglAddon();
-        webglAddon.onContextLoss(() => { webglAddon.dispose(); });
-        terminal.loadAddon(webglAddon);
-      } catch {}
+      const renderProfile = await getRenderProfile();
+      loadTerminalWebglIfSafe(terminal, renderProfile);
 
       // OSC 7: CWD tracking from shell
       terminal.parser.registerOscHandler(7, (data: string) => {
