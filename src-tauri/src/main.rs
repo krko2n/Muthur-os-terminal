@@ -1,4 +1,4 @@
-// Prevents additional console window on Windows in release
+﻿// Prevents additional console window on Windows in release
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod ai;
@@ -375,7 +375,7 @@ fn apply_startup_render_profile() {
     let profile = build_render_profile();
 
     if profile.safe_render {
-        // WebKitGTK can blank or flash in VMs when GPU compositing paths are unstable.
+        // WebKitGTK may blank or flash in VMs when GPU compositing paths are unstable.
         std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
         std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
         std::env::set_var("LIBGL_ALWAYS_SOFTWARE", "1");
@@ -1255,3 +1255,4 @@ mod tests {
         )));
     }
 }
+
