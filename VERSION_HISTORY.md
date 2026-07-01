@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+eecb547 ci: rerun checks with updated README stats
+d947b16 docs: auto-update generated docs [skip ci]
 1aaca55 ci: rerun checks after README stats update
 65587ca ci: rerun checks after README stats update
 753d503 docs: auto-update generated docs [skip ci]
@@ -50,5 +52,3 @@ cce2abf feat: install display server by default, offer autostart toggle
 db8f3e4 docs: auto-update generated docs [skip ci]
 6403368 fix: make update auto-stash local changes instead of blocking
 e4ddf28 docs: auto-update generated docs [skip ci]
-803a418 feat: offer display server setup when none is detected
-84f3093 docs: auto-update generated docs [skip ci]
