@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "CapabilityFile",
   "description": "Capability formats accepted in a capability file.",
@@ -2610,3 +2610,4 @@
     }
   }
 }
+
