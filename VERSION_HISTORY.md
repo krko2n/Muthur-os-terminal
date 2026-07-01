@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+595ddc0 ci: trigger checks after README stats update
+4e47ee5 docs: auto-update generated docs [skip ci]
 eecb547 ci: rerun checks with updated README stats
 d947b16 docs: auto-update generated docs [skip ci]
 1aaca55 ci: rerun checks after README stats update
@@ -50,5 +52,3 @@ a5941e7 fix: add seatd for cage GPU access on VMs and headless systems
 cce2abf feat: install display server by default, offer autostart toggle
 32388b1 docs: update README for make update and GTK troubleshooting
 db8f3e4 docs: auto-update generated docs [skip ci]
-6403368 fix: make update auto-stash local changes instead of blocking
-e4ddf28 docs: auto-update generated docs [skip ci]
