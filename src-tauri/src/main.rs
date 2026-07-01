@@ -375,7 +375,7 @@ fn apply_startup_render_profile() {
     let profile = build_render_profile();
 
     if profile.safe_render {
-        // WebKitGTK may blank or flash in VMs when GPU compositing paths are unstable.
+        // WebKitGTK can blank or flash in VMs when GPU compositing paths are unstable.
         std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
         std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
         std::env::set_var("LIBGL_ALWAYS_SOFTWARE", "1");
@@ -1255,4 +1255,5 @@ mod tests {
         )));
     }
 }
+
 
