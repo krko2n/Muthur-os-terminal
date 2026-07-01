@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+7a78bb2 fix: auto-enable safe rendering in Linux VMs
+e4c0e8e docs: auto-update generated docs [skip ci]
 de6ed4c fix: robust VM detection checking multiple DMI fields and systemd-detect-virt
 1de019f docs: auto-update generated docs [skip ci]
 91d7cb8 fix: set WLR_RENDERER_ALLOW_SOFTWARE unconditionally
@@ -50,5 +52,3 @@ e4ddf28 docs: auto-update generated docs [skip ci]
 e850ead refactor: rename mother-ui to muthur-ui
 ea96bb1 docs: auto-update generated docs [skip ci]
 4860c37 fix: resolve SCRIPT_DIR to project root, not scripts/
-bb4d1dd docs: auto-update generated docs [skip ci]
-2132c3c fix: use absolute path to src-tauri in build step
