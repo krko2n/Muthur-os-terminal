@@ -2,6 +2,9 @@
 
 Auto-generated from git log.
 
+1aaca55 ci: rerun checks after README stats update
+65587ca ci: rerun checks after README stats update
+753d503 docs: auto-update generated docs [skip ci]
 7a78bb2 fix: auto-enable safe rendering in Linux VMs
 e4c0e8e docs: auto-update generated docs [skip ci]
 de6ed4c fix: robust VM detection checking multiple DMI fields and systemd-detect-virt
@@ -49,6 +52,3 @@ db8f3e4 docs: auto-update generated docs [skip ci]
 e4ddf28 docs: auto-update generated docs [skip ci]
 803a418 feat: offer display server setup when none is detected
 84f3093 docs: auto-update generated docs [skip ci]
-e850ead refactor: rename mother-ui to muthur-ui
-ea96bb1 docs: auto-update generated docs [skip ci]
-4860c37 fix: resolve SCRIPT_DIR to project root, not scripts/
