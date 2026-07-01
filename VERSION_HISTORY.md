@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+4f501a5 fix: normalize render profile source formatting
+392f6ea docs: auto-update generated docs [skip ci]
 595ddc0 ci: trigger checks after README stats update
 4e47ee5 docs: auto-update generated docs [skip ci]
 eecb547 ci: rerun checks with updated README stats
@@ -50,5 +52,3 @@ a5941e7 fix: add seatd for cage GPU access on VMs and headless systems
 5481fdb feat: auto-launch cage when no display server is running
 3a988f6 docs: auto-update generated docs [skip ci]
 cce2abf feat: install display server by default, offer autostart toggle
-32388b1 docs: update README for make update and GTK troubleshooting
-db8f3e4 docs: auto-update generated docs [skip ci]
