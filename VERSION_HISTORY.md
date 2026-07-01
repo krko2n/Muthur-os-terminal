@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+4d0fff2 fix: normalize Rust source line endings
+021d189 docs: auto-update generated docs [skip ci]
 4f501a5 fix: normalize render profile source formatting
 392f6ea docs: auto-update generated docs [skip ci]
 595ddc0 ci: trigger checks after README stats update
@@ -50,5 +52,3 @@ a5941e7 fix: add seatd for cage GPU access on VMs and headless systems
 9deda43 fix: install cage launcher wrapper in update scripts
 1d7de67 docs: auto-update generated docs [skip ci]
 5481fdb feat: auto-launch cage when no display server is running
-3a988f6 docs: auto-update generated docs [skip ci]
-cce2abf feat: install display server by default, offer autostart toggle
