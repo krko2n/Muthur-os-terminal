@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+dc9a8da security: add audit baseline and command safety#	README.md
+b893b3c docs: auto-update generated docs [skip ci]
 4d0fff2 fix: normalize Rust source line endings
 021d189 docs: auto-update generated docs [skip ci]
 4f501a5 fix: normalize render profile source formatting
@@ -50,5 +52,3 @@ a0d335c docs: auto-update generated docs [skip ci]
 a5941e7 fix: add seatd for cage GPU access on VMs and headless systems
 3b24894 docs: auto-update generated docs [skip ci]
 9deda43 fix: install cage launcher wrapper in update scripts
-1d7de67 docs: auto-update generated docs [skip ci]
-5481fdb feat: auto-launch cage when no display server is running
