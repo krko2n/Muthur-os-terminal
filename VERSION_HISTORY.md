@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+a0efead chore: normalize muthur-core folder structure
+f3be456 docs: auto-update generated docs [skip ci]
 dc9a8da security: add audit baseline and command safety#	README.md
 b893b3c docs: auto-update generated docs [skip ci]
 4d0fff2 fix: normalize Rust source line endings
@@ -50,5 +52,3 @@ c203532 fix: add polkit so cage works immediately without seatd setup
 9546bba fix: use seatd-launch for reliable cage startup without re-login
 a0d335c docs: auto-update generated docs [skip ci]
 a5941e7 fix: add seatd for cage GPU access on VMs and headless systems
-3b24894 docs: auto-update generated docs [skip ci]
-9deda43 fix: install cage launcher wrapper in update scripts
