@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { AIIcon } from './SystemIcons';
+import { detectCommandRisks } from '../commandSafety';
 
 interface Message {
   role: 'user' | 'assistant' | 'system' | 'warning';
@@ -20,42 +21,6 @@ interface AIStatus {
   online: boolean;
   offlineArchive: boolean;
 }
-
-interface CommandRiskRule {
-  pattern: RegExp;
-  reason: string;
-}
-
-const COMMAND_RISK_RULES: CommandRiskRule[] = [
-  {
-    pattern: /\brm\s+-(?=[^\n;&|]*r)(?=[^\n;&|]*f)[^\n;&|]*/i,
-    reason: 'forced recursive deletion',
-  },
-  {
-    pattern: /\b(?:mkfs|wipefs|fdisk|parted|sgdisk|gdisk|cryptsetup\s+luksFormat)\b/i,
-    reason: 'disk partitioning, formatting, or wipe operation',
-  },
-  {
-    pattern: /\bdd\s+[^;\n]*(?:of=\/dev\/|if=\/dev\/)/i,
-    reason: 'raw block-device copy',
-  },
-  {
-    pattern: /\b(?:curl|wget)\b[^\n|;&]*(?:\||\s+-O\s+-|\s+-qO\s+-)[^\n]*(?:sh|bash|zsh|fish)\b/i,
-    reason: 'remote script piped into a shell',
-  },
-  {
-    pattern: /\b(?:chmod|chown)\s+-R\b[^\n;&|]*(?:\s\/|\s~|\s\$HOME)\b/i,
-    reason: 'recursive permission or ownership change over a broad path',
-  },
-  {
-    pattern: /\b(?:shutdown|reboot|poweroff|systemctl\s+(?:reboot|poweroff|halt))\b/i,
-    reason: 'system power or session control',
-  },
-  {
-    pattern: /:\s*\(\s*\)\s*\{\s*:\s*\|\s*:\s*&\s*\}\s*;/,
-    reason: 'fork-bomb pattern',
-  },
-];
 
 function formatOfflineHits(query: string, hits: OfflineWikiHit[]) {
   if (!hits.length) {
@@ -85,16 +50,6 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error);
 }
 
-function detectCommandRisks(command: string) {
-  const reasons = new Set<string>();
-  for (const rule of COMMAND_RISK_RULES) {
-    if (rule.pattern.test(command)) {
-      reasons.add(rule.reason);
-    }
-  }
-  return Array.from(reasons);
-}
-
 function commandSuggestionMessages(response: string): Message[] {
   const suggestion: Message = {
     role: 'assistant',
@@ -113,6 +68,7 @@ function commandSuggestionMessages(response: string): Message[] {
         ...risks.map(risk => `- ${risk}`),
         '',
         'Terminal commands run with your user privileges. Read every path and flag, prefer dry-run modes, and back up anything important before execution.',
+        'Dangerous queued commands require explicit confirmation before MUTHUR sends them to the terminal.',
       ].join('\n'),
     },
     suggestion,

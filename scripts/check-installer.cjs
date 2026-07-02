@@ -34,6 +34,42 @@ assertPattern(
   'dry-run exits after preflight and before dependency installation'
 );
 
+assertIncludes(
+  'scripts/install.sh',
+  'Privileged operations that may be requested:',
+  'dry-run/preflight privileged operation plan'
+);
+
+assertIncludes(
+  'scripts/install.sh',
+  'MUTHUR_ALLOW_PRIVILEGED_INSTALL',
+  '--quiet privileged operation opt-in'
+);
+
+assertPattern(
+  'scripts/install.sh',
+  /--quiet refuses privileged changes without MUTHUR_ALLOW_PRIVILEGED_INSTALL=1/,
+  '--quiet refuses privileged changes without explicit opt-in'
+);
+
+assertPattern(
+  'scripts/install.sh',
+  /confirm_privileged_operation[\s\S]*?Continue with this privileged operation\? \[y\/N\]/,
+  'interactive confirmation before privileged installer operations'
+);
+
+assertIncludes(
+  'scripts/install.sh',
+  'confirm_launcher_privileged',
+  'launcher prompts before runtime privileged operations'
+);
+
+assertIncludes(
+  'scripts/install.sh',
+  'MUTHUR_LAUNCHER_ALLOW_PRIVILEGED',
+  'launcher privileged operation opt-in'
+);
+
 assertPattern(
   'scripts/install.sh',
   /if \[ "\$SKIP_DEPS" = "true" \][\s\S]*?else[\s\S]*?install_deps[\s\S]*?install_rust[\s\S]*?install_node/s,

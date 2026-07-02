@@ -200,16 +200,73 @@ jobs:
       working-directory: src-tauri
       run: cargo fmt -- --check
 
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: '24'
+
+    - name: Cache Cargo
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          src-tauri/target/
+        key: ${{ runner.os }}-cargo-audit-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-audit-
+
+    - name: Install NPM dependencies
+      run: |
+        if [ -f package-lock.json ]; then
+          npm ci --legacy-peer-deps
+        else
+          npm install --legacy-peer-deps
+        fi
+
+    - name: Run npm audit
+      run: npm run audit:npm
+
+    - name: Install cargo-audit
+      run: |
+        if ! command -v cargo-audit >/dev/null 2>&1; then
+          cargo install cargo-audit --locked
+        fi
+
+    - name: Run cargo audit
+      run: npm run audit:cargo
+
+    - name: Install cargo-deny
+      run: |
+        if ! command -v cargo-deny >/dev/null 2>&1; then
+          cargo install cargo-deny --locked
+        fi
+
+    - name: Run cargo deny
+      run: npm run audit:cargo-deny
+
   summary:
     name: CI Summary
     runs-on: ubuntu-22.04
-    needs: [check, test]
+    needs: [check, test, security-audit]
     if: always()
 
     steps:
     - name: Check CI status
       run: |
-        if [ "${{ needs.check.result }}" != "success" ] || [ "${{ needs.test.result }}" != "success" ]; then
+        if [ "${{ needs.check.result }}" != "success" ] || [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.security-audit.result }}" != "success" ]; then
           echo "CI failed - check logs above"
           exit 1
         fi

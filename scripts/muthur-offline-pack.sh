@@ -157,6 +157,7 @@ should_install_docs() {
 install_ai() {
     step "Offline AI"
     if ! command -v ollama >/dev/null 2>&1; then
+        warn "Ollama's upstream installer may request sudo; review its prompt before accepting."
         if ask_yes "Ollama is missing. Install it now?" "n"; then
             curl -fsSL https://ollama.com/install.sh | sh || warn "Ollama installer failed"
         else

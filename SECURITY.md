@@ -19,25 +19,50 @@ If you discover a security vulnerability in MUTHUR OS Terminal, please report it
 
 ### Installation Security
 
-The source installer can install system packages and toolchains. Review it before running:
+The source installer can install system packages, build the app, write launchers,
+write session files, enable/start services, and add the user to the `seat` group.
+Review the plan before running:
 
 ```bash
 ./install.sh --dry-run
 ./install.sh --no-deps
+./install.sh --no-ollama
 ./install.sh --prefix "$HOME/.local"
 ```
 
-The installer may call distro package managers and, unless dependencies already exist or `--no-deps` is used, may download Rust/Node tooling from their upstream installers. Optional Ollama/offline-AI setup can be skipped with `--no-ollama`.
+`--prefix "$HOME/.local"` is the safest user-level install path. It skips
+system session files and system command links.
 
-### Privilege Management
+In interactive mode, the installer shows and asks before privileged operation
+categories such as system package installation, writes under `/usr/bin`,
+`/usr/local`, or `/usr/share`, service enable/start, and adding the user to a
+group.
 
-MUTHUR follows the principle of least privilege:
+`--dry-run` prints the privileged operations that may be requested and exits
+before making changes.
 
-- Installation scripts run with user privileges by default
-- `sudo` is only invoked for specific operations that require it:
-  - Copying binary to `/usr/local/bin/`
-  - Creating system-wide desktop entries
-- You will be prompted before any elevated privilege operation
+`--quiet` does not allow privileged system changes by default. Automation that
+intentionally needs those changes must set:
+
+```bash
+MUTHUR_ALLOW_PRIVILEGED_INSTALL=1 ./install.sh --quiet
+```
+
+The generated launcher also prompts before runtime package, service, group, or
+`/run/user` fixes. Non-interactive launcher use must opt in explicitly:
+
+```bash
+MUTHUR_LAUNCHER_ALLOW_PRIVILEGED=1 muthur
+```
+
+Running the installer as root is blocked on installed systems. Root is allowed in
+CI, containers, live ISO sessions, and similar disposable environments because
+those workflows commonly have no normal user elevation path and the environment
+is expected to be rebuilt.
+
+Optional Ollama/offline-pack setup remains voluntary. The Ollama upstream
+installer may request its own privilege escalation; review that prompt before
+accepting.
 
 ### AI Model Configuration
 
@@ -56,6 +81,21 @@ AI model selection is configurable without rebuilding:
    ```
 
 3. **Default**: `llama3.2` if not configured
+
+### AI Command Safety
+
+AI command help is a suggestion workflow:
+
+- AI may suggest a command
+- The command is displayed before use
+- Known dangerous command patterns are flagged
+- Dangerous queued commands require explicit confirmation before MUTHUR sends
+  them to the terminal
+
+The classifier covers common high-risk patterns such as `rm -rf`, `mkfs`, `dd`,
+fork bombs, `chmod -R 777`, `chown -R`, `sudo`, package install/remove commands,
+service start/stop/enable commands, disk tools, and curl/wget piped into a
+shell. This is a safety layer, not a sandbox or complete command verifier.
 
 ### Data Privacy
 
@@ -79,6 +119,16 @@ MUTHUR_SHOW_HIDDEN_FILES=1 muthur
 
 Use these only when you want broader local filesystem visibility.
 
+### Tauri Asset Protocol
+
+The Tauri asset protocol is enabled for local app/offline functionality, but it
+is not allowed to read arbitrary filesystem paths. The scope is restricted to
+resource, app-data, app-config, local offline-pack, MUTHUR config, and MUTHUR
+crash/log data locations.
+
+The previous broad `["**"]` scope is not acceptable unless a future change
+documents a specific need and adds compensating path validation.
+
 ### Configuration Files
 
 User configuration is stored in:
@@ -87,18 +137,44 @@ User configuration is stored in:
 
 These files never leave your machine.
 
-### Dependencies
+### Dependency Audits
 
-Dependencies are pinned through `package-lock.json` and `src-tauri/Cargo.lock`. Contributors should run the project checks before submitting changes:
+Dependencies are pinned through `package-lock.json` and `src-tauri/Cargo.lock`.
+Dependabot monitors npm, Cargo, and GitHub Actions dependencies weekly.
+
+Run these checks before security-sensitive changes:
 
 ```bash
+npm ci --legacy-peer-deps
 npm run lint
 npm run format:check
+npm run installer:check
 npm run test
 npm run version:check
+npm run audit:npm
+npm run audit:cargo
+npm run audit:cargo-deny
+npm run audit
+npm run build
+
+cd src-tauri
+cargo test --no-fail-fast
 cargo fmt -- --check
 cargo clippy --all-targets --all-features -- -D warnings
+cargo audit
+cargo deny check
 ```
+
+`npm run audit:npm` runs `npm audit --audit-level=moderate`.
+`npm run audit:cargo` runs `cargo audit` from `src-tauri`.
+`npm run audit:cargo-deny` runs `cargo deny check` from `src-tauri`.
+`npm run audit` runs all three audit checks.
+
+The CI security-audit job installs npm dependencies using the existing lockfile
+flow, installs `cargo-audit` and `cargo-deny` if needed, then runs the npm,
+Rust advisory, and cargo-deny checks. Audit failures are not ignored. OSV scan
+is not mandatory yet; it can be added later if it stays reliable and low
+maintenance.
 
 ### Build Security
 
@@ -112,9 +188,12 @@ Production builds use:
 
 - Linux only (Arch, Ubuntu, Debian, Fedora tested)
 - Requires local Ollama installation for AI features
-- No sandboxing for terminal sessions (runs with user privileges)
+- No sandboxing for terminal sessions; commands run with user privileges
+- AI command detection is incomplete and is not a security boundary
 - Browser/search/globe features are not anonymous; requests go to the remote sites they access
 - Offline wiki/map/model packs can be large and are user-approved downloads
+- Installer privilege prompts reduce surprise but cannot make third-party package manager or upstream installer behavior risk-free
+- Future asset protocol entry points must keep validating and constraining local paths
 
 ## Security Checklist for Contributors
 
@@ -124,6 +203,8 @@ Before submitting code:
 - [ ] Use parameterized queries (if applicable)
 - [ ] Follow Rust safety guidelines
 - [ ] Run `npm run lint`, `npm run test`, `cargo fmt`, `cargo clippy`, and vulnerability/audit tooling where available
+- [ ] Run `npm run audit` or document why the environment could not run it
+- [ ] Terminal command paths do not auto-run generated dangerous commands
 - [ ] No unsafe code without justification
 - [ ] Document security-relevant design decisions
 

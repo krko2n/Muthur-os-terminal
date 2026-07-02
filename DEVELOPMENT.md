@@ -247,8 +247,20 @@ cargo test
 ### Frontend Tests
 
 ```bash
-npm test
+npm run test
 ```
+
+### Security Audits
+
+```bash
+npm run audit:npm
+npm run audit:cargo
+npm run audit:cargo-deny
+npm run audit
+```
+
+`cargo audit` and `cargo deny check` require `cargo-audit` and `cargo-deny`.
+CI installs them for the security audit job.
 
 ### Integration Tests
 

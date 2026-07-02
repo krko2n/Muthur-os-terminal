@@ -46,14 +46,23 @@
         "decorations": false,
         "transparent": false,
         "resizable": true,
-        "alwaysOnTop": false
+        "alwaysOnTop": false,
+        "backgroundColor": "#05080d"
       }
     ],
     "security": {
       "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: asset:; font-src 'self' data:; connect-src 'self' http://localhost:11434 https://cdn.jsdelivr.net https://ucdpapi.pcr.uu.se",
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": [
+          "$RESOURCE/**",
+          "$APPDATA/muthur/**",
+          "$APPCONFIG/muthur/**",
+          "$LOCALDATA/muthur/**",
+          "$HOME/.local/share/muthur/offline/**",
+          "$HOME/.config/muthur/**",
+          "$HOME/.config/xKOR_3RR0R/**"
+        ]
       }
     }
   },

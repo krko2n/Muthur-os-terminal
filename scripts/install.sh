@@ -12,6 +12,7 @@
 #   ./install.sh --no-deps  Skip system/Rust/Node dependency installation
 #   ./install.sh --no-ollama  Skip optional Ollama/offline-AI steps
 #   ./install.sh --prefix ~/.local  Install user binaries under a custom prefix
+#   MUTHUR_ALLOW_PRIVILEGED_INSTALL=1 ./install.sh --quiet  Allow quiet privileged changes
 #
 # Supports: Arch Linux, Ubuntu/Debian, Fedora
 #
@@ -40,6 +41,11 @@ QUIET=""
 DRY_RUN="false"
 SKIP_DEPS="false"
 SKIP_OLLAMA="false"
+ALLOW_PRIVILEGED_INSTALL="false"
+
+case "${MUTHUR_ALLOW_PRIVILEGED_INSTALL:-}" in
+    1|true|TRUE|yes|YES) ALLOW_PRIVILEGED_INSTALL="true" ;;
+esac
 
 usage() {
     cat <<EOF
@@ -52,6 +58,11 @@ Options:
   --no-ollama          Skip optional Ollama/offline-AI steps
   --prefix <path>      Install user binaries under <path>/bin (default: /usr/local)
   --help, -h           Show this help
+
+Environment:
+  MUTHUR_ALLOW_PRIVILEGED_INSTALL=1
+        Allow --quiet runs to perform privileged system changes after the plan
+        has been printed. Interactive runs still prompt before privileged work.
 EOF
 }
 
@@ -120,6 +131,87 @@ err()     { echo -e "${RED}[ERR]${NC} $*"; }
 step()    { echo -e "${BLUE}[>>]${NC} $*"; }
 dimtext() { echo -e "${DIM}$*${NC}"; }
 
+PRIVILEGE_CONFIRMATIONS=""
+
+has_privilege_confirmation() {
+    case " $PRIVILEGE_CONFIRMATIONS " in
+        *" $1 "*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+confirm_privileged_operation() {
+    local key="$1"
+    local title="$2"
+    shift 2
+
+    has_privilege_confirmation "$key" && return 0
+
+    echo ""
+    warn "Privileged operation: $title"
+    while [ "$#" -gt 0 ]; do
+        echo "  - $1"
+        shift
+    done
+
+    if [ "$DRY_RUN" = "true" ]; then
+        return 0
+    fi
+
+    if [ "$QUIET" = "--quiet" ] && [ "$ALLOW_PRIVILEGED_INSTALL" != "true" ]; then
+        err "--quiet refuses privileged changes without MUTHUR_ALLOW_PRIVILEGED_INSTALL=1."
+        err "Rerun interactively, use --prefix \"\$HOME/.local\", or set the env var intentionally."
+        return 1
+    fi
+
+    if [ "$ALLOW_PRIVILEGED_INSTALL" = "true" ]; then
+        warn "Allowed by MUTHUR_ALLOW_PRIVILEGED_INSTALL=1."
+        PRIVILEGE_CONFIRMATIONS="$PRIVILEGE_CONFIRMATIONS $key"
+        return 0
+    fi
+
+    if [ ! -t 0 ]; then
+        err "Cannot confirm privileged operation without an interactive terminal."
+        err "Use --prefix \"\$HOME/.local\" or set MUTHUR_ALLOW_PRIVILEGED_INSTALL=1 for automation."
+        return 1
+    fi
+
+    local answer=""
+    read -r -p "  Continue with this privileged operation? [y/N] " answer || answer=""
+    case "$answer" in
+        y|Y|yes|YES)
+            PRIVILEGE_CONFIRMATIONS="$PRIVILEGE_CONFIRMATIONS $key"
+            return 0
+            ;;
+        *)
+            warn "Privileged operation declined: $title"
+            return 1
+            ;;
+    esac
+}
+
+print_privileged_plan() {
+    echo -e " ${BOLD}Privileged operations that may be requested:${NC}"
+
+    if [ "$SKIP_DEPS" != "true" ]; then
+        echo "  - install system packages for $OS with the distro package manager"
+    fi
+
+    if needs_sudo_for_install_dir; then
+        echo "  - write launchers and binaries under $INSTALL_DIR"
+    fi
+
+    if [ "$SYSTEM_ASSETS" = "true" ]; then
+        echo "  - write system command links under $SYSTEM_BIN"
+        echo "  - write native session files under $SESSION_DIR"
+    fi
+
+    echo "  - optional display setup may enable/start seatd or greetd"
+    echo "  - optional display setup may add the user to the seat group"
+    echo "  - generated launcher prompts before runtime package/service/group fixes"
+    echo ""
+}
+
 is_disposable_env() {
     # Explicit override
     [ "${MUTHUR_ALLOW_ROOT:-}" = "1" ] && return 0
@@ -163,6 +255,11 @@ install_binary_file() {
     local source="$1"
     local target="$2"
     if needs_sudo_for_install_dir; then
+        confirm_privileged_operation \
+            "system-install-paths" \
+            "write files under system install paths" \
+            "sudo mkdir/install/chmod for $INSTALL_DIR" \
+            "target file: $target" || exit 1
         maybe_sudo mkdir -p "$(dirname "$target")"
         maybe_sudo install -Dm755 "$source" "$target"
         maybe_sudo chmod 755 "$target"
@@ -221,8 +318,9 @@ preflight() {
     echo -e " ${BOLD}Version:${NC}  $VERSION"
     echo -e " ${BOLD}Binary:${NC}   $INSTALL_DIR/muthur"
     echo -e " ${BOLD}Config:${NC}   $CONFIG_DIR"
-    echo -e " ${BOLD}Options:${NC}  dry-run=$DRY_RUN no-deps=$SKIP_DEPS no-ollama=$SKIP_OLLAMA system-assets=$SYSTEM_ASSETS"
+    echo -e " ${BOLD}Options:${NC}  dry-run=$DRY_RUN no-deps=$SKIP_DEPS no-ollama=$SKIP_OLLAMA system-assets=$SYSTEM_ASSETS privileged-env=$ALLOW_PRIVILEGED_INSTALL"
     echo ""
+    print_privileged_plan
 
     # Advisory checks (non-fatal)
     check_optional_deps
@@ -265,6 +363,11 @@ check_optional_deps() {
 
 install_deps() {
     step "Installing system dependencies..."
+    confirm_privileged_operation \
+        "system-packages" \
+        "install system packages" \
+        "uses sudo with pacman, apt-get, or dnf when not already root" \
+        "packages include build tools, WebKit/GTK, cage, greetd, seatd, and polkit" || exit 1
 
     case $OS in
         arch)
@@ -475,6 +578,48 @@ if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
     exec muthur-bin "$@"
 fi
 
+PRIVILEGED_APPROVALS=""
+
+confirm_launcher_privileged() {
+    local key="$1"
+    local title="$2"
+    shift 2
+
+    case " $PRIVILEGED_APPROVALS " in
+        *" $key "*) return 0 ;;
+    esac
+
+    echo "MUTHUR launcher privileged operation: $title"
+    while [ "$#" -gt 0 ]; do
+        echo "  - $1"
+        shift
+    done
+
+    if [ "${MUTHUR_LAUNCHER_ALLOW_PRIVILEGED:-}" = "1" ]; then
+        echo "  Allowed by MUTHUR_LAUNCHER_ALLOW_PRIVILEGED=1"
+        PRIVILEGED_APPROVALS="$PRIVILEGED_APPROVALS $key"
+        return 0
+    fi
+
+    if [ ! -t 0 ]; then
+        echo "Refusing privileged launcher change without an interactive terminal." >&2
+        echo "Set MUTHUR_LAUNCHER_ALLOW_PRIVILEGED=1 only if this is intentional." >&2
+        exit 1
+    fi
+
+    local answer=""
+    read -r -p "Continue? [y/N] " answer || answer=""
+    case "$answer" in
+        y|Y|yes|YES)
+            PRIVILEGED_APPROVALS="$PRIVILEGED_APPROVALS $key"
+            ;;
+        *)
+            echo "Privileged launcher operation declined." >&2
+            exit 1
+            ;;
+    esac
+}
+
 # --- Auto-install missing packages ---
 install_missing() {
     local missing=()
@@ -483,6 +628,10 @@ install_missing() {
     [ ${#missing[@]} -eq 0 ] && return 0
 
     echo "Installing missing dependencies: ${missing[*]}"
+    confirm_launcher_privileged \
+        "missing-packages" \
+        "install missing runtime packages" \
+        "sudo package manager install for: ${missing[*]}"
     if command -v pacman &>/dev/null; then
         sudo pacman -S --noconfirm --needed "${missing[@]}"
     elif command -v apt-get &>/dev/null; then
@@ -498,6 +647,11 @@ install_missing
 
 # --- Ensure seatd service is enabled and running ---
 if ! systemctl is-active --quiet seatd 2>/dev/null; then
+    confirm_launcher_privileged \
+        "seatd-service" \
+        "enable/start seatd service" \
+        "sudo systemctl enable seatd" \
+        "sudo systemctl start seatd"
     sudo systemctl enable seatd 2>/dev/null || true
     sudo systemctl start seatd 2>/dev/null || true
     sleep 0.3
@@ -505,11 +659,32 @@ fi
 
 # --- Ensure user is in seat group (apply immediately) ---
 if ! id -nG | grep -qw seat; then
+    confirm_launcher_privileged \
+        "seat-group" \
+        "add current user to seat group" \
+        "sudo usermod -aG seat $USER"
     sudo usermod -aG seat "$USER"
     exec sg seat -c "$0 $*"
 fi
 
+# --- Ensure XDG_RUNTIME_DIR exists (critical for Wayland socket) ---
+if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
+    XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    if [ ! -d "$XDG_RUNTIME_DIR" ]; then
+        confirm_launcher_privileged \
+            "xdg-runtime-dir" \
+            "create runtime directory under /run/user" \
+            "sudo mkdir/chown/chmod $XDG_RUNTIME_DIR"
+        sudo mkdir -p "$XDG_RUNTIME_DIR"
+        sudo chown "$(id -u):$(id -g)" "$XDG_RUNTIME_DIR"
+        sudo chmod 0700 "$XDG_RUNTIME_DIR"
+    fi
+    export XDG_RUNTIME_DIR
+fi
+
 export WLR_RENDERER_ALLOW_SOFTWARE=1
+export GDK_BACKEND=wayland
+export XDG_SESSION_TYPE=wayland
 
 USE_SOFTWARE=0
 for dmi in /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name /sys/class/dmi/id/board_vendor; do
@@ -531,17 +706,56 @@ if [ "$USE_SOFTWARE" = "1" ]; then
     export WLR_RENDERER=pixman
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER=llvmpipe
+    export WLR_NO_HARDWARE_CURSORS=1
     export WEBKIT_DISABLE_COMPOSITING_MODE=1
     export WEBKIT_DISABLE_DMABUF_RENDERER=1
+    export WEBKIT_DISABLE_GPU_PROCESS=1
+    export WEBKIT_HARDWARE_ACCELERATION_POLICY=never
 fi
 
-exec cage -d -- muthur-bin "$@"
+# --- Startup logging ---
+LOGDIR="${HOME}/.local/state/muthur"
+mkdir -p "$LOGDIR"
+LOGFILE="$LOGDIR/startup.log"
+{
+    echo "=== MUTHUR startup $(date '+%Y-%m-%d %H:%M:%S') ==="
+    echo "XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR"
+    echo "USE_SOFTWARE=$USE_SOFTWARE"
+    for dmi in /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name /sys/class/dmi/id/board_vendor; do
+        [ -r "$dmi" ] && echo "DMI $(basename "$dmi")=$(cat "$dmi" 2>/dev/null)"
+    done
+    command -v systemd-detect-virt &>/dev/null && echo "systemd-detect-virt=$(systemd-detect-virt 2>/dev/null)"
+    echo "WLR_RENDERER=${WLR_RENDERER:-<unset>}"
+    echo "WLR_RENDERER_ALLOW_SOFTWARE=${WLR_RENDERER_ALLOW_SOFTWARE:-<unset>}"
+    echo "WLR_NO_HARDWARE_CURSORS=${WLR_NO_HARDWARE_CURSORS:-<unset>}"
+    echo "GDK_BACKEND=${GDK_BACKEND:-<unset>}"
+    echo "LIBGL_ALWAYS_SOFTWARE=${LIBGL_ALWAYS_SOFTWARE:-<unset>}"
+    echo "GALLIUM_DRIVER=${GALLIUM_DRIVER:-<unset>}"
+    echo "WEBKIT_DISABLE_COMPOSITING_MODE=${WEBKIT_DISABLE_COMPOSITING_MODE:-<unset>}"
+    echo "WEBKIT_DISABLE_DMABUF_RENDERER=${WEBKIT_DISABLE_DMABUF_RENDERER:-<unset>}"
+    echo "WEBKIT_DISABLE_GPU_PROCESS=${WEBKIT_DISABLE_GPU_PROCESS:-<unset>}"
+    echo "WEBKIT_HARDWARE_ACCELERATION_POLICY=${WEBKIT_HARDWARE_ACCELERATION_POLICY:-<unset>}"
+    echo "CMD: cage -- muthur-bin $*"
+} >> "$LOGFILE" 2>&1
+
+# Run cage in foreground (not -d) so child inherits the full Wayland session
+cage -- muthur-bin "$@" >> "$LOGFILE" 2>&1
+EXIT_CODE=$?
+echo "EXIT_CODE=$EXIT_CODE ($(date '+%H:%M:%S'))" >> "$LOGFILE"
+if [ "$EXIT_CODE" -ne 0 ]; then
+    sleep 2
+fi
+exit $EXIT_CODE
 WRAPPER
     install_binary_file /tmp/muthur-launcher "$wrapper"
     rm -f /tmp/muthur-launcher
 
     # Symlink to standard system path only for the default system install.
     if [ "$SYSTEM_ASSETS" = "true" ]; then
+        confirm_privileged_operation \
+            "system-binary-link" \
+            "write system command link" \
+            "sudo ln -sf $INSTALL_DIR/muthur-bin $SYSTEM_BIN/muthur-os-terminal" || exit 1
         maybe_sudo ln -sf "$INSTALL_DIR/muthur-bin" "$SYSTEM_BIN/muthur-os-terminal"
     else
         dimtext "  System symlink skipped for custom prefix"
@@ -561,6 +775,11 @@ WRAPPER
 
     # ── Session Infrastructure ──
     if [ "$SYSTEM_ASSETS" = "true" ] && [ -f "$SCRIPT_DIR/packaging/muthur-session" ]; then
+        confirm_privileged_operation \
+            "system-session-files" \
+            "write native session files" \
+            "sudo install $SYSTEM_BIN/muthur-session" \
+            "sudo install $SESSION_DIR/muthur.desktop" || exit 1
         maybe_sudo install -Dm755 "$SCRIPT_DIR/packaging/muthur-session" "$SYSTEM_BIN/muthur-session"
         maybe_sudo chmod 755 "$SYSTEM_BIN/muthur-session"
         info "Session: $SYSTEM_BIN/muthur-session"
@@ -666,6 +885,15 @@ offer_display_setup() {
     [ "$QUIET" = "--quiet" ] && return 0
 
     # Ensure seat management is fully configured
+    confirm_privileged_operation \
+        "display-services" \
+        "configure display services and seat access" \
+        "sudo systemctl enable/start seatd" \
+        "sudo usermod -aG seat ${SUDO_USER:-$USER}" \
+        "sudo systemctl enable greetd" || {
+            warn "Display service setup skipped. Launch manually after configuring seatd/greetd."
+            return 0
+        }
     maybe_sudo systemctl enable seatd 2>/dev/null || true
     maybe_sudo systemctl start seatd 2>/dev/null || true
     maybe_sudo usermod -aG seat "${SUDO_USER:-$USER}" 2>/dev/null || true
