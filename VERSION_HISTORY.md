@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+4805eb5 fix: simplify cli argv handling
+922c872 docs: auto-update generated docs [skip ci]
 b7ee307 test: include cli help smoke check
 0f7e65d docs: auto-update generated docs [skip ci]
 8478426 test: validate cli help skeleton
@@ -50,5 +52,3 @@ ab949b1 fix: auto-detect missing GPU and fallback to pixman software renderer
 eddb95d docs: auto-update generated docs [skip ci]
 60fcd4c fix: use seatd as system service instead of bypassing it
 5b1aafc docs: auto-update generated docs [skip ci]
-1858099 fix: use LIBSEAT_BACKEND=logind in all launcher wrappers
-03c2973 docs: auto-update generated docs [skip ci]
