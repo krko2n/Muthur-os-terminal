@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+21cec57 feat: add cli entrypoint skeleton
+adac3ca docs: auto-update generated docs [skip ci]
 75cba7f feat: add cli help skeleton
 c7482cd docs: add core repo structure audit
 621fe3e docs: auto-update generated docs [skip ci]
@@ -50,5 +52,3 @@ c523ff0 fix: disable system seatd and clean socket for seatd-launch to work
 575ca8f docs: auto-update generated docs [skip ci]
 d48dd6e fix: use seatd-launch to run cage without system seatd service
 f30383d docs: auto-update generated docs [skip ci]
-c203532 fix: add polkit so cage works immediately without seatd setup
-543a772 docs: auto-update generated docs [skip ci]
