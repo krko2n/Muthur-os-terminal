@@ -18,8 +18,17 @@ output/
 
 # Environment
 .env
+.env.*
 .env.local
 .env.*.local
+
+# Secrets / keys (never commit)
+*.pem
+*.key
+id_rsa
+id_ed25519
+*.p12
+*.pfx
 
 # IDE
 .vscode/*
@@ -111,6 +120,7 @@ agent_orchestration.log
 
 # Internal development files (not for end users)
 CLAUDE.md
+.claude/
 TODO.md
 mother_internal_specification.md
 .gitmessage
