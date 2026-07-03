@@ -531,8 +531,8 @@ MIT -- see [LICENSE](LICENSE).
 ---
 
 <!-- MUTHUR-STATS:START -->
-![Lines of Code](https://img.shields.io/badge/lines%20of%20code-27%2C610-c9d1d9?style=flat-square&labelColor=161b22)
-![Project Files](https://img.shields.io/badge/project%20files-135-c9d1d9?style=flat-square&labelColor=161b22)
+![Lines of Code](https://img.shields.io/badge/lines%20of%20code-27%2C971-c9d1d9?style=flat-square&labelColor=161b22)
+![Project Files](https://img.shields.io/badge/project%20files-137-c9d1d9?style=flat-square&labelColor=161b22)
 <!-- MUTHUR-STATS:END -->
 
 </div>

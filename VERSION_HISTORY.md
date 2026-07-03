@@ -2,6 +2,9 @@
 
 Auto-generated from git log.
 
+75cba7f feat: add cli help skeleton
+c7482cd docs: add core repo structure audit
+621fe3e docs: auto-update generated docs [skip ci]
 a0efead chore: normalize muthur-core folder structure
 f3be456 docs: auto-update generated docs [skip ci]
 dc9a8da security: add audit baseline and command safety#	README.md
@@ -49,6 +52,3 @@ d48dd6e fix: use seatd-launch to run cage without system seatd service
 f30383d docs: auto-update generated docs [skip ci]
 c203532 fix: add polkit so cage works immediately without seatd setup
 543a772 docs: auto-update generated docs [skip ci]
-9546bba fix: use seatd-launch for reliable cage startup without re-login
-a0d335c docs: auto-update generated docs [skip ci]
-a5941e7 fix: add seatd for cage GPU access on VMs and headless systems
