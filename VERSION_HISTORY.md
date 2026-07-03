@@ -2,6 +2,10 @@
 
 Auto-generated from git log.
 
+09cf7d1 feat: add package manifest schema and validation
+5f732ca chore: remove CLAUDE.md from git tracking
+0fee8b2 docs: add claude code project memory
+0ad38c8 docs: auto-update generated docs [skip ci]
 3db377d fix: narrow config environment values
 684920f docs: auto-update generated docs [skip ci]
 b295dd7 test: include cli config smoke check
@@ -48,7 +52,3 @@ b893b3c docs: auto-update generated docs [skip ci]
 eecb547 ci: rerun checks with updated README stats
 d947b16 docs: auto-update generated docs [skip ci]
 1aaca55 ci: rerun checks after README stats update
-65587ca ci: rerun checks after README stats update
-753d503 docs: auto-update generated docs [skip ci]
-7a78bb2 fix: auto-enable safe rendering in Linux VMs
-e4c0e8e docs: auto-update generated docs [skip ci]
