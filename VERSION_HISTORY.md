@@ -2,6 +2,10 @@
 
 Auto-generated from git log.
 
+ce9cbeb feat: route cli status command
+1788bc3 feat: add cli status command
+e5ece7d feat: add terminal status service
+6b2de32 docs: auto-update generated docs [skip ci]
 4805eb5 fix: simplify cli argv handling
 922c872 docs: auto-update generated docs [skip ci]
 b7ee307 test: include cli help smoke check
@@ -48,7 +52,3 @@ e9e2629 fix: acquire sudo credentials before build starts
 3edc34a docs: auto-update generated docs [skip ci]
 ab949b1 fix: auto-detect missing GPU and fallback to pixman software renderer
 7a67c1a docs: auto-update generated docs [skip ci]
-4a4d98b fix: self-healing launcher that auto-installs deps and configures seat
-eddb95d docs: auto-update generated docs [skip ci]
-60fcd4c fix: use seatd as system service instead of bypassing it
-5b1aafc docs: auto-update generated docs [skip ci]
