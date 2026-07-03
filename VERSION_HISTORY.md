@@ -2,6 +2,10 @@
 
 Auto-generated from git log.
 
+86a3058 chore: harden .gitignore for private/secret safety
+4a82b97 docs: define installer presets for Arch ISO
+a3837c2 docs: add old Muthur command compatibility report
+b6eaa1c docs: auto-update generated docs [skip ci]
 800c7cd feat: add GUI status panel widget backed by core API
 b224dcb docs: add GUI contract with window behavior specification
 5871186 docs: auto-update generated docs [skip ci]
@@ -48,7 +52,3 @@ a0efead chore: normalize muthur-core folder structure
 f3be456 docs: auto-update generated docs [skip ci]
 dc9a8da security: add audit baseline and command safety#	README.md
 b893b3c docs: auto-update generated docs [skip ci]
-4d0fff2 fix: normalize Rust source line endings
-021d189 docs: auto-update generated docs [skip ci]
-4f501a5 fix: normalize render profile source formatting
-392f6ea docs: auto-update generated docs [skip ci]
