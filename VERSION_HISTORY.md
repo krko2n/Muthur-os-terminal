@@ -2,6 +2,9 @@
 
 Auto-generated from git log.
 
+800c7cd feat: add GUI status panel widget backed by core API
+b224dcb docs: add GUI contract with window behavior specification
+5871186 docs: auto-update generated docs [skip ci]
 3ad2d2c feat: define known package permissions and rejection behavior
 55a755d docs: auto-update generated docs [skip ci]
 09cf7d1 feat: add package manifest schema and validation
@@ -49,6 +52,3 @@ b893b3c docs: auto-update generated docs [skip ci]
 021d189 docs: auto-update generated docs [skip ci]
 4f501a5 fix: normalize render profile source formatting
 392f6ea docs: auto-update generated docs [skip ci]
-595ddc0 ci: trigger checks after README stats update
-4e47ee5 docs: auto-update generated docs [skip ci]
-eecb547 ci: rerun checks with updated README stats
