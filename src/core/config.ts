@@ -35,12 +35,14 @@ const DEFAULT_CONFIG: MuthurConfig = {
 };
 
 function configHome(): string {
-  if (process.env.XDG_CONFIG_HOME) return process.env.XDG_CONFIG_HOME;
+  const xdgConfigHome = process.env.XDG_CONFIG_HOME;
+  if (xdgConfigHome) return xdgConfigHome;
   return path.join(os.homedir(), '.config');
 }
 
 export function resolveMuthurConfigPath(): string {
-  if (process.env.MUTHUR_CONFIG) return process.env.MUTHUR_CONFIG;
+  const explicitPath = process.env.MUTHUR_CONFIG;
+  if (explicitPath) return explicitPath;
   return path.join(configHome(), 'muthur', 'config.json');
 }
 
@@ -69,13 +71,15 @@ function applyEnvOverrides(config: MuthurConfig): { config: MuthurConfig; source
   const sources: string[] = [];
   let ai = config.ai;
 
-  if (process.env.MUTHUR_AI_MODEL) {
-    ai = { ...ai, model: process.env.MUTHUR_AI_MODEL };
+  const modelOverride = process.env.MUTHUR_AI_MODEL;
+  if (modelOverride) {
+    ai = { ...ai, model: modelOverride };
     sources.push('MUTHUR_AI_MODEL');
   }
 
-  if (process.env.MUTHUR_AI_BASE_URL) {
-    ai = { ...ai, baseUrl: process.env.MUTHUR_AI_BASE_URL };
+  const baseUrlOverride = process.env.MUTHUR_AI_BASE_URL;
+  if (baseUrlOverride) {
+    ai = { ...ai, baseUrl: baseUrlOverride };
     sources.push('MUTHUR_AI_BASE_URL');
   }
 
