@@ -2,6 +2,9 @@
 
 Auto-generated from git log.
 
+c818981 test: include cli status smoke check
+50528f1 test: validate cli status skeleton
+7e96856 docs: auto-update generated docs [skip ci]
 803850f docs: list cli status command in help
 9f3239b docs: auto-update generated docs [skip ci]
 ce9cbeb feat: route cli status command
@@ -49,6 +52,3 @@ c527366 docs: auto-update generated docs [skip ci]
 ebde84f fix: use Mesa llvmpipe for WebKit rendering in VM environments
 eb9b806 docs: auto-update generated docs [skip ci]
 5a0de5e fix: enable WebKit software rendering in VM environments
-cc3d303 docs: auto-update generated docs [skip ci]
-e9e2629 fix: acquire sudo credentials before build starts
-3edc34a docs: auto-update generated docs [skip ci]
