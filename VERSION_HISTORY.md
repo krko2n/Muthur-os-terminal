@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+3db377d fix: narrow config environment values
+684920f docs: auto-update generated docs [skip ci]
 b295dd7 test: include cli config smoke check
 772c1c1 docs: auto-update generated docs [skip ci]
 b112a95 test: validate cli config skeleton
@@ -50,5 +52,3 @@ d947b16 docs: auto-update generated docs [skip ci]
 753d503 docs: auto-update generated docs [skip ci]
 7a78bb2 fix: auto-enable safe rendering in Linux VMs
 e4c0e8e docs: auto-update generated docs [skip ci]
-de6ed4c fix: robust VM detection checking multiple DMI fields and systemd-detect-virt
-1de019f docs: auto-update generated docs [skip ci]
