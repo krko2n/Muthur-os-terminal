@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+59e4bf3 chore: add public/private remote sync helper scripts
+dcab576 docs: auto-update generated docs [skip ci]
 86a3058 chore: harden .gitignore for private/secret safety
 4a82b97 docs: define installer presets for Arch ISO
 a3837c2 docs: add old Muthur command compatibility report
@@ -50,5 +52,3 @@ c7482cd docs: add core repo structure audit
 621fe3e docs: auto-update generated docs [skip ci]
 a0efead chore: normalize muthur-core folder structure
 f3be456 docs: auto-update generated docs [skip ci]
-dc9a8da security: add audit baseline and command safety#	README.md
-b893b3c docs: auto-update generated docs [skip ci]
