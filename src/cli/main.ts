@@ -1,10 +1,11 @@
+import { runConfigCommand } from './commands/config';
 import { runStatusCommand } from './commands/status';
 import { renderHelp, renderVersion } from './help';
 
 const CLI_VERSION = '0.1.1';
 
 export function runCli(args: readonly string[] = []): number {
-  const [command] = args;
+  const [command, ...rest] = args;
 
   if (!command || command === '--help' || command === '-h' || command === 'help') {
     console.log(renderHelp(CLI_VERSION));
@@ -18,6 +19,10 @@ export function runCli(args: readonly string[] = []): number {
 
   if (command === 'status') {
     return runStatusCommand();
+  }
+
+  if (command === 'config') {
+    return runConfigCommand(rest);
   }
 
   console.error(`Unknown command: ${command}`);
