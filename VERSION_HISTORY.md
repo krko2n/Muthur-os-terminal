@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+803850f docs: list cli status command in help
+9f3239b docs: auto-update generated docs [skip ci]
 ce9cbeb feat: route cli status command
 1788bc3 feat: add cli status command
 e5ece7d feat: add terminal status service
@@ -50,5 +52,3 @@ eb9b806 docs: auto-update generated docs [skip ci]
 cc3d303 docs: auto-update generated docs [skip ci]
 e9e2629 fix: acquire sudo credentials before build starts
 3edc34a docs: auto-update generated docs [skip ci]
-ab949b1 fix: auto-detect missing GPU and fallback to pixman software renderer
-7a67c1a docs: auto-update generated docs [skip ci]
