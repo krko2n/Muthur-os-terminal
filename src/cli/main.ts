@@ -1,0 +1,23 @@
+import { renderHelp, renderVersion } from './help';
+
+const CLI_VERSION = '0.1.1';
+
+export function runCli(args: readonly string[] = []): number {
+  const [command] = args;
+
+  if (!command || command === '--help' || command === '-h' || command === 'help') {
+    console.log(renderHelp(CLI_VERSION));
+    return 0;
+  }
+
+  if (command === '--version' || command === '-v' || command === 'version') {
+    console.log(renderVersion(CLI_VERSION));
+    return 0;
+  }
+
+  console.error(`Unknown command: ${command}`);
+  console.error('Run `muthur --help` for available command groups.');
+  return 1;
+}
+
+runCli(globalThis.process?.argv.slice(2) ?? []);
