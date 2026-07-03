@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+b295dd7 test: include cli config smoke check
+772c1c1 docs: auto-update generated docs [skip ci]
 b112a95 test: validate cli config skeleton
 2847811 docs: auto-update generated docs [skip ci]
 61e73b5 test: accept namespace os import
@@ -50,5 +52,3 @@ d947b16 docs: auto-update generated docs [skip ci]
 e4c0e8e docs: auto-update generated docs [skip ci]
 de6ed4c fix: robust VM detection checking multiple DMI fields and systemd-detect-virt
 1de019f docs: auto-update generated docs [skip ci]
-91d7cb8 fix: set WLR_RENDERER_ALLOW_SOFTWARE unconditionally
-74541e7 docs: auto-update generated docs [skip ci]
