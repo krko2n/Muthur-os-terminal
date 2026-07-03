@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+b7ee307 test: include cli help smoke check
+0f7e65d docs: auto-update generated docs [skip ci]
 8478426 test: validate cli help skeleton
 38bfdbb docs: auto-update generated docs [skip ci]
 21cec57 feat: add cli entrypoint skeleton
@@ -50,5 +52,3 @@ eddb95d docs: auto-update generated docs [skip ci]
 5b1aafc docs: auto-update generated docs [skip ci]
 1858099 fix: use LIBSEAT_BACKEND=logind in all launcher wrappers
 03c2973 docs: auto-update generated docs [skip ci]
-c523ff0 fix: disable system seatd and clean socket for seatd-launch to work
-575ca8f docs: auto-update generated docs [skip ci]
