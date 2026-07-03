@@ -2,6 +2,13 @@
 
 Auto-generated from git log.
 
+61e73b5 test: accept namespace os import
+b8529a3 fix: use namespace import for node os
+2172ad0 docs: list cli config command in help
+dd45a56 feat: route cli config command
+e3b6af7 feat: add cli config command
+487057e feat: add local config service
+e2eb993 docs: auto-update generated docs [skip ci]
 c818981 test: include cli status smoke check
 50528f1 test: validate cli status skeleton
 7e96856 docs: auto-update generated docs [skip ci]
@@ -45,10 +52,3 @@ de6ed4c fix: robust VM detection checking multiple DMI fields and systemd-detect
 74541e7 docs: auto-update generated docs [skip ci]
 a4c43d0 fix: add WLR_RENDERER_ALLOW_SOFTWARE=1 for software rendering
 8318d36 docs: auto-update generated docs [skip ci]
-7636755 fix: prevent WebGL crash loop in VM environments
-7475d27 docs: auto-update generated docs [skip ci]
-332729c fix: drop WLR_RENDERER=pixman so WebKit gets a working EGL context
-c527366 docs: auto-update generated docs [skip ci]
-ebde84f fix: use Mesa llvmpipe for WebKit rendering in VM environments
-eb9b806 docs: auto-update generated docs [skip ci]
-5a0de5e fix: enable WebKit software rendering in VM environments
