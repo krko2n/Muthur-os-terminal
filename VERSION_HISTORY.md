@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+8478426 test: validate cli help skeleton
+38bfdbb docs: auto-update generated docs [skip ci]
 21cec57 feat: add cli entrypoint skeleton
 adac3ca docs: auto-update generated docs [skip ci]
 75cba7f feat: add cli help skeleton
@@ -50,5 +52,3 @@ eddb95d docs: auto-update generated docs [skip ci]
 03c2973 docs: auto-update generated docs [skip ci]
 c523ff0 fix: disable system seatd and clean socket for seatd-launch to work
 575ca8f docs: auto-update generated docs [skip ci]
-d48dd6e fix: use seatd-launch to run cage without system seatd service
-f30383d docs: auto-update generated docs [skip ci]
