@@ -20,4 +20,4 @@ export function runCli(args: readonly string[] = []): number {
   return 1;
 }
 
-runCli(globalThis.process?.argv.slice(2) ?? []);
+runCli(process.argv.slice(2));
