@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+b112a95 test: validate cli config skeleton
+2847811 docs: auto-update generated docs [skip ci]
 61e73b5 test: accept namespace os import
 b8529a3 fix: use namespace import for node os
 2172ad0 docs: list cli config command in help
@@ -50,5 +52,3 @@ de6ed4c fix: robust VM detection checking multiple DMI fields and systemd-detect
 1de019f docs: auto-update generated docs [skip ci]
 91d7cb8 fix: set WLR_RENDERER_ALLOW_SOFTWARE unconditionally
 74541e7 docs: auto-update generated docs [skip ci]
-a4c43d0 fix: add WLR_RENDERER_ALLOW_SOFTWARE=1 for software rendering
-8318d36 docs: auto-update generated docs [skip ci]
