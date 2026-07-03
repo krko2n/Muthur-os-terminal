@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+3ad2d2c feat: define known package permissions and rejection behavior
+55a755d docs: auto-update generated docs [skip ci]
 09cf7d1 feat: add package manifest schema and validation
 5f732ca chore: remove CLAUDE.md from git tracking
 0fee8b2 docs: add claude code project memory
@@ -50,5 +52,3 @@ b893b3c docs: auto-update generated docs [skip ci]
 595ddc0 ci: trigger checks after README stats update
 4e47ee5 docs: auto-update generated docs [skip ci]
 eecb547 ci: rerun checks with updated README stats
-d947b16 docs: auto-update generated docs [skip ci]
-1aaca55 ci: rerun checks after README stats update
