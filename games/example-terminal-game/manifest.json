@@ -1,0 +1,12 @@
+{
+  "id": "example-terminal-game",
+  "name": "Example Terminal Game",
+  "version": "0.1.0",
+  "type": "command",
+  "description": "Optional placeholder package for a tiny terminal game entrypoint.",
+  "author": "MUTHUR Development",
+  "license": "MIT",
+  "entrypoint": "index.js",
+  "dependencies": ["task-game-pack-setup"],
+  "permissions": ["system.info"]
+}
