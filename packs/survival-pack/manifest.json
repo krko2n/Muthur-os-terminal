@@ -1,0 +1,11 @@
+{
+  "id": "survival-pack",
+  "name": "Survival Pack",
+  "version": "0.1.0",
+  "type": "data",
+  "description": "Offline placeholder pack for local survival reference content.",
+  "author": "MUTHUR Development",
+  "license": "CC-BY-4.0",
+  "entrypoint": "wiki/survival-field-manual.placeholder.jsonl",
+  "dependencies": []
+}
