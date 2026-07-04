@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+b3460e2 feat: add survival pack placeholders
+fe8d443 docs: auto-update generated docs [skip ci]
 d54da65 feat: add example terminal game package
 5072cb3 docs: auto-update generated docs [skip ci]
 59e4bf3 chore: add public/private remote sync helper scripts
@@ -50,5 +52,3 @@ b7ee307 test: include cli help smoke check
 21cec57 feat: add cli entrypoint skeleton
 adac3ca docs: auto-update generated docs [skip ci]
 75cba7f feat: add cli help skeleton
-c7482cd docs: add core repo structure audit
-621fe3e docs: auto-update generated docs [skip ci]
