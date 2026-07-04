@@ -2,6 +2,8 @@
 
 Auto-generated from git log.
 
+d54da65 feat: add example terminal game package
+5072cb3 docs: auto-update generated docs [skip ci]
 59e4bf3 chore: add public/private remote sync helper scripts
 dcab576 docs: auto-update generated docs [skip ci]
 86a3058 chore: harden .gitignore for private/secret safety
@@ -50,5 +52,3 @@ adac3ca docs: auto-update generated docs [skip ci]
 75cba7f feat: add cli help skeleton
 c7482cd docs: add core repo structure audit
 621fe3e docs: auto-update generated docs [skip ci]
-a0efead chore: normalize muthur-core folder structure
-f3be456 docs: auto-update generated docs [skip ci]
