@@ -23,7 +23,7 @@ reqwest = { version = "0.13", default-features = false, features = ["json", "rus
 sysinfo = "0.39"
 anyhow = "1.0"
 thiserror = "2.0"
-toml = "0.8"
+toml = "1.1"
 scraper = "0.21"
 image = "0.25"
 
