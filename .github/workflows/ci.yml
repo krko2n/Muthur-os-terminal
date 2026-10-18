@@ -51,7 +51,7 @@ jobs:
         node-version: '24'
 
     - name: Cache Cargo
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/.cargo/bin/
@@ -64,7 +64,7 @@ jobs:
           ${{ runner.os }}-cargo-
 
     - name: Cache Node modules
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: node_modules
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -137,7 +137,7 @@ jobs:
         node-version: '24'
 
     - name: Cache Cargo
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/.cargo/bin/
@@ -216,7 +216,7 @@ jobs:
         node-version: '24'
 
     - name: Cache Cargo
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/.cargo/bin/
