@@ -30,4 +30,4 @@ export function runCli(args: readonly string[] = []): number {
   return 1;
 }
 
-runCli(process.argv.slice(2));
+process.exitCode = runCli(process.argv.slice(2));

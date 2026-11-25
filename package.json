@@ -11,6 +11,9 @@
   },
   "homepage": "https://github.com/krko2n/Muthur-os-terminal",
   "license": "MIT",
+  "bin": {
+    "muthur": "dist-cli/muthur.mjs"
+  },
   "scripts": {
     "dev": "vite",
     "lint": "tsc --noEmit",
@@ -22,6 +25,7 @@
     "audit": "npm run audit:npm && npm run audit:cargo && npm run audit:cargo-deny",
     "test": "node scripts/smoke-test.cjs",
     "version:check": "node scripts/version-check.cjs",
+    "build:cli": "node -r ./scripts/vite-no-cmd-netuse.cjs ./node_modules/vite/bin/vite.js build --config vite.cli.config.js --configLoader native",
     "build": "tsc && node -r ./scripts/vite-no-cmd-netuse.cjs ./node_modules/vite/bin/vite.js build --configLoader native",
     "preview": "vite preview",
     "tauri": "tauri",

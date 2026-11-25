@@ -5,6 +5,7 @@ node_modules/
 # Build outputs
 dist/
 dist-ssr/
+dist-cli/
 dist-verify*/
 target/
 target-codex*/
