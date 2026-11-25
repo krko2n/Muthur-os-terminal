@@ -25,7 +25,8 @@ anyhow = "1.0"
 thiserror = "2.0"
 toml = "0.8"
 scraper = "0.21"
-image = "0.25"
+# AVIF encoding (ravif/rav1e) is not needed: Muthur only decodes images.
+image = { version = "0.25", default-features = false, features = ["rayon", "bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2"
