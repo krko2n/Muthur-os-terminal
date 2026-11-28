@@ -21,6 +21,7 @@ For detailed commit history, see [VERSION_HISTORY.md](VERSION_HISTORY.md).
 - The boot screen follows the selected theme instead of a fixed dark blue.
 
 ### Fixed
+- `scripts/uninstall.sh` now accepts `--prefix <path>` and reads the prefix recorded by `install.sh` in `~/.config/muthur/install-prefix`, so custom-prefix installs (for example `~/.local`) are fully removed.
 - WebKit aborted on the first sound (blank window) because the installer and PKGBUILD did not pull in gst-plugins-base/good (autoaudiosink).
 - BIOS BLUE status red was unreadable on its blue background (2.4:1 contrast).
 - `./install.sh --no-deps` failed with "cargo: command not found" in non-interactive shells because ~/.cargo/env was only loaded by the skipped Rust step.
