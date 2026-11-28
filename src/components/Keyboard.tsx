@@ -137,6 +137,7 @@ function normalizeKeyDef(keyDef: KeyDef): KeyDef {
 
 export default function Keyboard() {
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
+  const [blinkingKeys, setBlinkingKeys] = useState<Set<string>>(new Set());
   const [capsLock, setCapsLock] = useState(false);
   const [shiftHeld, setShiftHeld] = useState(false);
   const [passwordMode, setPasswordMode] = useState(false);
@@ -196,6 +197,18 @@ export default function Keyboard() {
     [customRows]
   );
 
+  // eDEX-UI blinks a key once after it is released.
+  const blink = useCallback((code: string) => {
+    setBlinkingKeys(prev => new Set(prev).add(code));
+    window.setTimeout(() => {
+      setBlinkingKeys(prev => {
+        const next = new Set(prev);
+        next.delete(code);
+        return next;
+      });
+    }, 500);
+  }, []);
+
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') {
       setPasswordMode(prev => !prev);
@@ -204,7 +217,10 @@ export default function Keyboard() {
     setActiveKeys(prev => new Set(prev).add(e.code));
     if (e.code === 'CapsLock') setCapsLock(prev => !prev);
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') setShiftHeld(true);
-    if (!passwordMode) playSound('keyboard', 0.08);
+    if (!passwordMode && !e.repeat) {
+      if (e.code === 'Enter' || e.code === 'NumpadEnter') playSound('granted', 0.1);
+      else playSound('keyboard', 0.08);
+    }
   }, [passwordMode]);
 
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
@@ -214,7 +230,8 @@ export default function Keyboard() {
       return next;
     });
     if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') setShiftHeld(false);
-  }, []);
+    blink(e.code === 'NumpadEnter' ? 'Enter' : e.code);
+  }, [blink]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -295,6 +312,7 @@ export default function Keyboard() {
     setActiveKeys(prev => new Set(prev).add(keyDef.code));
     setTimeout(() => {
       setActiveKeys(prev => { const n = new Set(prev); n.delete(keyDef.code); return n; });
+      blink(keyDef.code);
     }, 150);
   };
 
@@ -340,6 +358,7 @@ export default function Keyboard() {
               const isCapsKey = keyDef.code === 'CapsLock';
               const isSpace = keyDef.code === 'Space';
               const highlighted = active || (isShiftKey && stickyShift) || (isCapsKey && capsLock);
+              const blinking = !highlighted && (blinkingKeys.has(keyDef.code) || (keyDef.isEnterBottom && blinkingKeys.has('Enter')));
 
               if (keyDef.isEnterBottom) {
                 return (
@@ -349,7 +368,7 @@ export default function Keyboard() {
                       event.preventDefault();
                       handleClick({ ...keyDef, code: 'Enter' });
                     }}
-                    className={`edex-key edex-key-enter-bottom ${highlighted ? 'edex-key-active' : ''}`}
+                    className={`edex-key edex-key-enter-bottom ${highlighted ? 'edex-key-active' : ''} ${blinking ? 'edex-key-blink' : ''}`}
                     style={{ flex: `${keyDef.w / totalW}` }}
                   >
                     <span className="edex-key-label">RET</span>
@@ -364,11 +383,8 @@ export default function Keyboard() {
                     event.preventDefault();
                     handleClick(keyDef);
                   }}
-                  className={`edex-key ${keyDef.isModifier ? 'edex-key-mod' : ''} ${isSpace ? 'edex-key-space' : ''} ${keyDef.isEnter ? 'edex-key-enter enter-key-top' : ''} ${highlighted ? 'edex-key-active' : ''}`}
-                  style={{
-                    flex: `${keyDef.w / totalW}`,
-                    ...(keyDef.isEnter ? { marginBottom: '-0.15vw', paddingBottom: '0.15vw', borderBottomRightRadius: 0 } : {}),
-                  }}
+                  className={`edex-key ${keyDef.isModifier ? 'edex-key-mod' : ''} ${isSpace ? 'edex-key-space' : ''} ${keyDef.isEnter ? 'edex-key-enter enter-key-top' : ''} ${highlighted ? 'edex-key-active' : ''} ${blinking ? 'edex-key-blink' : ''}`}
+                  style={{ flex: `${keyDef.w / totalW}` }}
                 >
                   <span className="edex-key-label">{isSpace ? 'SPACE' : label}</span>
                   {!keyDef.isModifier && keyDef.shift !== keyDef.lower && !isShifted && (

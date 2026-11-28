@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { loadTs } = require('../helpers/load-ts.cjs');
 
-const { formatBytes, formatRate, usagePercent, litDotCount, formatUptime } = loadTs('src/core/metrics.ts');
+const { formatBytes, formatRate, usagePercent, litDotCount, formatUptime, statusLevel, enteredDanger } = loadTs('src/core/metrics.ts');
 
 const GIB = 1024 ** 3;
 
@@ -44,4 +44,31 @@ test('formatUptime switches format by magnitude', () => {
   assert.equal(formatUptime(5 * 3600 + 5 * 60), '5:05');
   assert.equal(formatUptime(3 * 86400 + 4 * 3600), '3d 4h');
   assert.equal(formatUptime(-10), '0m');
+});
+
+test('statusLevel grades usage into ok, warn and danger at the thresholds', () => {
+  assert.equal(statusLevel(0), 'ok');
+  assert.equal(statusLevel(69.9), 'ok');
+  assert.equal(statusLevel(70), 'warn');
+  assert.equal(statusLevel(89.9), 'warn');
+  assert.equal(statusLevel(90), 'danger');
+  assert.equal(statusLevel(100), 'danger');
+  assert.equal(statusLevel(50, 40, 60), 'warn');
+});
+
+test('statusLevel treats unknown values as ok and tolerates swapped thresholds', () => {
+  for (const bad of [NaN, -5, undefined]) {
+    assert.equal(statusLevel(bad), 'ok', `input ${bad}`);
+  }
+  assert.equal(statusLevel(95, 90, 70), 'danger');
+  assert.equal(statusLevel(75, 90, 70), 'warn');
+});
+
+test('enteredDanger fires once when a reading crosses into danger', () => {
+  assert.equal(enteredDanger(undefined, 'danger'), true);
+  assert.equal(enteredDanger('ok', 'danger'), true);
+  assert.equal(enteredDanger('warn', 'danger'), true);
+  assert.equal(enteredDanger('danger', 'danger'), false, 'no repeat while it stays red');
+  assert.equal(enteredDanger('danger', 'warn'), false);
+  assert.equal(enteredDanger('ok', 'warn'), false);
 });
