@@ -3,24 +3,38 @@ import MuthurLogo from './MuthurLogo';
 import { playSound } from '../audio';
 import { BootPresetId } from '../theme';
 
+// eDEX-UI style: a dense kernel/service log that scrolls past quickly.
+// Lines starting with "OK " or "WARN " get a coloured status tag.
 const CORE_BOOT_LOG = [
   'MUTHUR CORE // COLD START',
-  'Power bus accepted',
-  'Display plane sealed',
-  'Input matrix armed',
-  'Audio bus calibrated',
-  'Operator profile resolved',
-  'Theme register loaded',
-  'Layout register loaded',
-  'Terminal bridge attached',
-  'Local command channel ready',
-  'Structured web channel ready',
-  'Orbital display cache verified',
-  'Control deck online',
-  'Micro-sim module armed',
-  'AI endpoint handshake queued',
-  'Session watchdog armed',
-  'Native shell handoff prepared',
+  '[    0.000000] Linux version detected, MUTHUR interface layer 0.1',
+  '[    0.000000] Command line: quiet splash muthur.session=native',
+  '[    0.004172] DMI: operator console, BIOS handoff accepted',
+  '[    0.012904] tsc: Fast TSC calibration using PIT',
+  '[    0.081337] Memory: map verified, sealed interface region reserved',
+  '[    0.120041] smpboot: CPU topology detected, all cores online',
+  '[    0.211874] ACPI: power bus accepted',
+  '[    0.318552] drm: display plane sealed, framebuffer attached',
+  '[    0.402116] input: virtual matrix keyboard registered',
+  '[    0.488903] snd: audio bus calibrated',
+  'OK Started Journal Service.',
+  'OK Mounted operator home volume.',
+  'OK Reached target Local File Systems.',
+  'OK Started Network Name Resolution.',
+  'OK Reached target Network.',
+  '[    1.204771] muthur: theme register loaded',
+  '[    1.236015] muthur: layout register loaded',
+  '[    1.288430] muthur: terminal bridge attached (pty)',
+  'OK Started Local Command Channel.',
+  'OK Started Structured Web Channel.',
+  'WARN AI endpoint not answering; continuing offline.',
+  'OK Verified orbital display cache.',
+  'OK Started System Telemetry.',
+  'OK Started Session Watchdog.',
+  '[    1.902244] muthur: control deck online',
+  '[    1.954118] muthur: micro-sim module armed',
+  'OK Reached target Graphical Interface.',
+  'OK Started MUTHUR Operator Session.',
   'MUTHUR interface nominal',
   'Boot Complete',
 ];
@@ -116,7 +130,7 @@ export default function LoadingScreen({ onComplete, bootPreset = 'core' }: Loadi
     const baseDelay = line === '' ? 80 :
                       line.startsWith('===') ? 150 :
                       line === 'Boot Complete' ? 400 :
-                      Math.max(45, 190 * Math.pow(1 - progress, 2));
+                      Math.max(bootLog.length > 24 ? 28 : 45, (bootLog.length > 24 ? 120 : 190) * Math.pow(1 - progress, 2));
 
     const timer = setTimeout(() => {
       setVisibleLines(prev => prev + 1);
@@ -147,12 +161,12 @@ export default function LoadingScreen({ onComplete, bootPreset = 'core' }: Loadi
 
   if (phase === 'logo') {
     return (
-      <div className="w-screen h-screen bg-[#05080d] flex items-center justify-center overflow-hidden">
+      <div className="w-screen h-screen bg-[var(--color-bg)] flex items-center justify-center overflow-hidden">
         <div
           className="flex flex-col items-center gap-6"
           style={{ opacity: logoOpacity, transition: 'opacity 1s ease-in' }}
         >
-          <MuthurLogo size="12vh" color="var(--color-accent)" shadowColor="rgba(0,255,65,0.08)" />
+          <MuthurLogo size="12vh" color="var(--color-accent)" shadowColor="rgba(var(--color-r),var(--color-g),var(--color-b),0.08)" />
           <div className="text-muthur-primary font-display text-[1.2vh] tracking-[0.5em] uppercase opacity-70 animate-pulse">
             CORE WAKE
           </div>
@@ -163,7 +177,7 @@ export default function LoadingScreen({ onComplete, bootPreset = 'core' }: Loadi
 
   if (phase === 'title') {
     return (
-      <div className="w-screen h-screen bg-[#05080d] flex items-center justify-center overflow-hidden">
+      <div className="w-screen h-screen bg-[var(--color-bg)] flex items-center justify-center overflow-hidden">
         <div className={`title-glitch ${glitchActive ? 'active' : ''}`}>
           <h1 className="text-[10vh] font-display font-bold text-muthur-primary tracking-[0.2em] text-glow">
             MUTHUR
@@ -174,7 +188,7 @@ export default function LoadingScreen({ onComplete, bootPreset = 'core' }: Loadi
   }
 
   return (
-    <div className="w-screen h-screen bg-[#05080d] flex items-center justify-center overflow-hidden">
+    <div className="w-screen h-screen bg-[var(--color-bg)] flex items-center justify-center overflow-hidden">
       <div
         ref={containerRef}
         className="w-full h-full p-8 font-mono overflow-hidden flex flex-col"
@@ -199,8 +213,7 @@ export default function LoadingScreen({ onComplete, bootPreset = 'core' }: Loadi
                   : 'text-muthur-secondary opacity-55'
               }`}
             >
-              <span className="opacity-35 mr-3 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-              {line || ' '}
+              <BootLine line={line} index={i} />
             </div>
           ))}
           {visibleLines < bootLog.length && (
@@ -224,4 +237,15 @@ export default function LoadingScreen({ onComplete, bootPreset = 'core' }: Loadi
       </div>
     </div>
   );
+}
+
+function BootLine({ line, index }: { line: string; index: number }) {
+  if (line.startsWith('OK ')) {
+    return <><span className="status-ok mr-2">[  OK  ]</span>{line.slice(3)}</>;
+  }
+  if (line.startsWith('WARN ')) {
+    return <><span className="status-warn mr-2">[ WARN ]</span>{line.slice(5)}</>;
+  }
+  if (line.startsWith('[')) return <>{line}</>;
+  return <><span className="opacity-35 mr-3 tabular-nums">{String(index + 1).padStart(2, '0')}</span>{line || ' '}</>;
 }

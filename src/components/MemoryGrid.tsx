@@ -1,4 +1,4 @@
-import { formatBytes, litDotCount, usagePercent } from '../core/metrics';
+import { formatBytes, litDotCount, statusLevel, usagePercent } from '../core/metrics';
 
 // eDEX-UI memory module: a 40 x 8 field of dots, lit in proportion to used RAM.
 const COLUMNS = 40;
@@ -19,7 +19,7 @@ export default function MemoryGrid({ used = 0, total = 0 }: MemoryGridProps) {
     <div className="shrink-0">
       <div className="text-[10px] tracking-wider opacity-50 mb-1 flex items-center justify-between panel-header-bracket border-t border-muthur-border pt-1">
         <span>MEMORY</span>
-        <span className="text-muthur-primary tabular-nums">{known ? `${percent.toFixed(0)}%` : '--'}</span>
+        <span className={`tabular-nums ${known ? `status-${statusLevel(percent, 75, 90)}` : 'text-muthur-primary'}`}>{known ? `${percent.toFixed(0)}%` : '--'}</span>
       </div>
       <div
         className="memory-grid"

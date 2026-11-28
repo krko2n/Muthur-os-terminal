@@ -49,3 +49,24 @@ export function formatUptime(seconds: number): string {
   if (hours > 0) return `${hours}:${String(minutes).padStart(2, '0')}`;
   return `${minutes}m`;
 }
+
+export type StatusLevel = 'ok' | 'warn' | 'danger';
+
+/**
+ * Grades a usage percentage for colour-coding: "ok" below `warnAt`, "warn"
+ * from `warnAt`, "danger" from `dangerAt`. Unknown or negative values are "ok".
+ * Thresholds that arrive in the wrong order are swapped.
+ */
+export function statusLevel(percent: number, warnAt = 70, dangerAt = 90): StatusLevel {
+  const value = finiteNonNegative(percent);
+  const low = Math.min(warnAt, dangerAt);
+  const high = Math.max(warnAt, dangerAt);
+  if (value >= high) return 'danger';
+  if (value >= low) return 'warn';
+  return 'ok';
+}
+
+/** True only on the step into "danger", so an alarm sounds once per incident, not on every poll. */
+export function enteredDanger(previous: StatusLevel | undefined, next: StatusLevel): boolean {
+  return next === 'danger' && previous !== 'danger';
+}

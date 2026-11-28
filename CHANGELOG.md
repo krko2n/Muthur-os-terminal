@@ -9,8 +9,25 @@ For detailed commit history, see [VERSION_HISTORY.md](VERSION_HISTORY.md).
 
 ## [Unreleased]
 
+### Added
+- GREEN TERMINAL (green on pure black) and GREY OPS (grey chrome with green/orange/red status) themes.
+- Status colours in every theme: CPU, RAM, disk, per-process CPU and network state turn orange when worth a look and red when dangerous; an alarm sounds once when a reading enters the red.
+- Installer boots straight into MUTHUR by default: autostart after a desktop login, or a greetd autologin session (cage) on machines without a graphical login. `--no-boot` opts out.
+- eDEX-style kernel boot log with [ OK ]/[ WARN ] tags, staggered panel sounds and a terminal output tick.
+
+### Changed
+- First-boot setup opens as a SETTINGS tab inside the main window instead of a floating dialog; choices apply live.
+- On-screen keyboard matches eDEX-UI: flat keys, solid fill while pressed, a blink on release, outlined space bar and a seamless L-shaped Enter.
+- The boot screen follows the selected theme instead of a fixed dark blue.
+
 ### Fixed
 - `scripts/uninstall.sh` now accepts `--prefix <path>` and reads the prefix recorded by `install.sh` in `~/.config/muthur/install-prefix`, so custom-prefix installs (for example `~/.local`) are fully removed.
+- WebKit aborted on the first sound (blank window) because the installer and PKGBUILD did not pull in gst-plugins-base/good (autoaudiosink).
+- BIOS BLUE status red was unreadable on its blue background (2.4:1 contrast).
+- `./install.sh --no-deps` failed with "cargo: command not found" in non-interactive shells because ~/.cargo/env was only loaded by the skipped Rust step.
+- The SETTINGS tab could show the shell instead of its content: React reused the node the terminal is attached to.
+- The fullscreen boot session (greetd + cage) exited immediately on virtual machines and machines without a GPU render node ("Unable to create the wlroots renderer"); it now falls back to software rendering like the launcher, and logs to ~/.local/state/muthur/session.log instead of the runtime directory that is wiped on logout.
+- The interactive installer enabled greetd even when another display manager (LightDM, GDM, SDDM) already owned the screen.
 
 ### Planned
 - Plugin system for custom widgets

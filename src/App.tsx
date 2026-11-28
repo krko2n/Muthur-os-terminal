@@ -7,11 +7,11 @@ import RightPanel from './components/RightPanel';
 import BottomPanel from './components/BottomPanel';
 import CustomCursor from './components/CustomCursor';
 import LoadingScreen from './components/LoadingScreen';
-import FirstRunSetup from './components/FirstRunSetup';
 import CommandPalette from './components/CommandPalette';
 import ShutdownScreen from './components/ShutdownScreen';
 import PanelBoundary from './components/PanelBoundary';
 import { configureAudio, playSound } from './audio';
+import { enteredDanger, statusLevel, usagePercent, StatusLevel } from './core/metrics';
 import {
   applyInterfaceSettings,
   getLayoutPreset,
@@ -38,6 +38,7 @@ function App() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [shutdownOpen, setShutdownOpen] = useState(false);
   const dragging = useRef<'left' | 'right' | 'bottom' | null>(null);
+  const alarmLevels = useRef<Record<string, StatusLevel>>({});
 
   useEffect(() => {
     applyInterfaceSettings(settings);
@@ -104,8 +105,17 @@ function App() {
   useEffect(() => {
     const updateStats = async () => {
       try {
-        const stats = await invoke('get_system_stats');
+        const stats = await invoke('get_system_stats') as any;
         setSystemStats(stats);
+        // Sound the alarm once when CPU, RAM or a disk crosses into the red.
+        const readings: Record<string, StatusLevel> = {
+          cpu: statusLevel(stats?.cpu_usage ?? 0),
+          ram: statusLevel(usagePercent(stats?.memory_used ?? 0, stats?.memory_total ?? 0), 75, 90),
+        };
+        for (const disk of stats?.disk ?? []) readings[`disk:${disk.mount_point}`] = statusLevel(disk.used_percent, 80, 95);
+        const raise = Object.entries(readings).some(([key, level]) => enteredDanger(alarmLevels.current[key], level));
+        alarmLevels.current = readings;
+        if (raise) playSound('alarm', 0.16);
       } catch (error) {
         console.error('Failed to fetch system stats:', error);
       }
@@ -191,6 +201,8 @@ function App() {
   useEffect(() => {
     if (booted && !assembled) {
       playSound('expand', 0.2);
+      // One panel sound per module as they slide in (matches the CSS transition delays).
+      const panelSounds = [200, 400, 600, 800].map((delay) => setTimeout(() => playSound('panels', 0.08), delay));
       const timer = setTimeout(() => {
         setAssembled(true);
         playSound('panels', 0.15);
@@ -198,7 +210,10 @@ function App() {
         setGreeting(`Welcome back, ${user}`);
         setTimeout(() => setGreeting(''), 2500);
       }, 600);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        panelSounds.forEach(clearTimeout);
+      };
     }
   }, [booted, assembled]);
 
@@ -226,13 +241,6 @@ function App() {
         onOpenShutdown={() => setShutdownOpen(true)}
       />
       <ShutdownScreen open={shutdownOpen} onCancel={() => setShutdownOpen(false)} />
-      {!settings.firstRunComplete && (
-        <FirstRunSetup
-          settings={settings}
-          onSettingsChange={updateSettings}
-          onComplete={() => updateSettings({ firstRunComplete: true })}
-        />
-      )}
 
       <div className="flex flex-col h-full">
         {/* Header with drag region */}

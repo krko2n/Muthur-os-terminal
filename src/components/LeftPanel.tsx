@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { CpuIcon, StorageIcon } from './SystemIcons';
 import HardwareInspector from './HardwareInspector';
 import MemoryGrid from './MemoryGrid';
-import { formatUptime } from '../core/metrics';
+import { formatUptime, statusLevel } from '../core/metrics';
 import { useOnline } from '../hooks/useOnline';
 
 interface LeftPanelProps {
@@ -116,7 +116,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
             <CpuIcon size={10} />
             CPU
           </span>
-          <span className="text-muthur-primary tabular-nums">
+          <span className={`tabular-nums status-${statusLevel(systemStats?.cpu_usage ?? 0)}`}>
             {systemStats ? `${systemStats.cpu_usage.toFixed(0)}%` : '--'}
           </span>
         </div>
@@ -125,7 +125,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
           width={200}
           height={40}
           className="w-full h-[5vh] rounded-sm"
-          style={{ background: 'rgba(0,255,65,0.02)' }}
+          style={{ background: 'rgba(var(--color-r),var(--color-g),var(--color-b),0.02)' }}
         />
       </div>
 
@@ -148,11 +148,11 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
             <div key={`${disk.mount_point}-${index}`} className="text-[10px]">
               <div className="flex justify-between text-muthur-secondary opacity-60 mb-[0.2vh]">
                 <span className="truncate max-w-[12vh]">{disk.mount_point}</span>
-                <span className="tabular-nums text-muthur-primary">{disk.used_percent.toFixed(0)}%</span>
+                <span className={`tabular-nums status-${statusLevel(disk.used_percent, 80, 95)}`}>{disk.used_percent.toFixed(0)}%</span>
               </div>
               <div className="h-[0.6vh] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.06)] overflow-hidden">
                 <div
-                  className="h-full bg-muthur-primary transition-all duration-500"
+                  className={`h-full transition-all duration-500 status-fill-${statusLevel(disk.used_percent, 80, 95)}`}
                   style={{ width: `${Math.min(100, disk.used_percent)}%` }}
                 />
               </div>
@@ -176,7 +176,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
             <div key={i} className="flex text-[10px] py-px">
               <span className="w-8 text-muthur-secondary opacity-50 tabular-nums">{proc.pid}</span>
               <span className="flex-1 truncate text-muthur-secondary">{proc.name}</span>
-              <span className="w-7 text-right text-muthur-primary tabular-nums">{proc.cpu_usage.toFixed(0)}</span>
+              <span className={`w-7 text-right tabular-nums status-${statusLevel(proc.cpu_usage, 50, 85)}`}>{proc.cpu_usage.toFixed(0)}</span>
             </div>
           ))}
         </div>

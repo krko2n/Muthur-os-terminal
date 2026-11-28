@@ -1,4 +1,4 @@
-export type ThemeId = 'mother' | 'amber' | 'cryo' | 'surgical' | 'noir' | 'bios' | 'crt' | 'phosphor' | 'oxide' | 'void' | 'field' | 'hazmat' | 'medbay' | 'deepsea' | 'signal' | 'phantom' | 'neon';
+export type ThemeId = 'mother' | 'terminal' | 'greyops' | 'amber' | 'cryo' | 'surgical' | 'noir' | 'bios' | 'crt' | 'phosphor' | 'oxide' | 'void' | 'field' | 'hazmat' | 'medbay' | 'deepsea' | 'signal' | 'phantom' | 'neon';
 export type FontId = 'sharetech' | 'orbitron' | 'rajdhani' | 'audiowide' | 'bios';
 export type LayoutPresetId = 'command' | 'focus' | 'wide' | 'simulation' | 'cinema' | 'custom';
 export type SoundPackId = 'ship' | 'quiet' | 'retro' | 'horror' | 'combat' | 'field' | 'recorder' | 'alarm' | 'analog';
@@ -15,6 +15,11 @@ export interface ThemePreset {
   grey: string;
   text: string;
   danger: string;
+  /**
+   * Status colours (green = fine, orange = worth a look, red = dangerous).
+   * Omitted entries fall back to defaults that stay readable and distinct.
+   */
+  status?: { ok?: string; warn?: string; danger?: string };
   surface?: string;
   vibe?: 'core' | 'bios' | 'crt';
 }
@@ -123,6 +128,35 @@ export const THEME_PRESETS: ThemePreset[] = [
     vibe: 'core',
   },
   {
+    // Classic phosphor terminal: pure black, one green.
+    id: 'terminal',
+    label: 'GREEN TERMINAL',
+    accent: '#00ff41',
+    background: '#000000',
+    panel: '#000000',
+    grey: '#0b140d',
+    text: '#7dff9a',
+    danger: '#ff3030',
+    status: { ok: '#00ff41', warn: '#ffb000', danger: '#ff3030' },
+    surface: '#000000',
+    vibe: 'core',
+  },
+  {
+    // Neutral grey chrome so status colours stand out: green is fine,
+    // orange is worth a look, red is dangerous.
+    id: 'greyops',
+    label: 'GREY OPS',
+    accent: '#b4bac0',
+    background: '#0a0b0c',
+    panel: '#101214',
+    grey: '#1c1f22',
+    text: '#d5d9dd',
+    danger: '#ff3b30',
+    status: { ok: '#30d158', warn: '#ff9f0a', danger: '#ff3b30' },
+    surface: '#08090a',
+    vibe: 'core',
+  },
+  {
     id: 'amber',
     label: 'AMBER',
     accent: '#ffb13b',
@@ -175,6 +209,8 @@ export const THEME_PRESETS: ThemePreset[] = [
     grey: '#07127a',
     text: '#c8f7ff',
     danger: '#d9162e',
+    // brighter status colours: the theme red is unreadable on the blue background
+    status: { ok: '#7dff9a', warn: '#ffc94d', danger: '#ff7a85' },
     surface: '#0013a0',
     vibe: 'bios',
   },
@@ -761,6 +797,36 @@ export function importInterfaceSettings(raw: string): InterfaceSettings | null {
   }
 }
 
+const DEFAULT_STATUS = { ok: '#3ddc68', warn: '#ffb13b', danger: '#ff3b3b' };
+
+function hexHue(hex: string): number | null {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return null;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, g, b);
+  const delta = max - Math.min(r, g, b);
+  if (delta === 0) return null;
+  const h = max === r ? ((g - b) / delta) % 6 : max === g ? (b - r) / delta + 2 : (r - g) / delta + 4;
+  return (h * 60 + 360) % 360;
+}
+
+/**
+ * Colours for ok / warn / danger states. Green-accent themes use their accent
+ * for ok and red-danger themes keep their danger colour; anything else falls
+ * back to defaults so green, orange and red always mean the same thing.
+ */
+export function getStatusColors(theme: Pick<ThemePreset, 'accent' | 'danger' | 'status'>) {
+  const accentHue = hexHue(theme.accent);
+  const dangerHue = hexHue(theme.danger);
+  const accentIsGreen = accentHue !== null && accentHue >= 80 && accentHue <= 165;
+  const dangerIsRed = dangerHue !== null && (dangerHue >= 330 || dangerHue <= 15);
+  return {
+    ok: theme.status?.ok ?? (accentIsGreen ? theme.accent : DEFAULT_STATUS.ok),
+    warn: theme.status?.warn ?? DEFAULT_STATUS.warn,
+    danger: theme.status?.danger ?? (dangerIsRed ? theme.danger : DEFAULT_STATUS.danger),
+  };
+}
+
 export function getThemePreset(id: ThemeId) {
   return THEME_PRESETS.find((theme) => theme.id === id) ?? THEME_PRESETS[0];
 }
@@ -811,6 +877,9 @@ export function applyInterfaceSettings(settings: InterfaceSettings) {
   root.style.setProperty('--color-grey', theme.grey);
   root.style.setProperty('--color-text', theme.text);
   root.style.setProperty('--color-danger', theme.danger);
+  const status = getStatusColors(theme);
+  root.style.setProperty('--color-ok', status.ok);
+  root.style.setProperty('--color-warn', status.warn);
   root.style.setProperty('--color-surface', theme.surface ?? theme.background);
   root.style.setProperty('--font-ui', font.ui);
   root.style.setProperty('--font-display', font.display);

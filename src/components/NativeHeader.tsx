@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import MuthurLogo from './MuthurLogo';
-import { formatUptime, usagePercent } from '../core/metrics';
+import { formatUptime, usagePercent, statusLevel, type StatusLevel } from '../core/metrics';
 
 interface NativeHeaderProps {
   systemStats?: any;
@@ -50,8 +50,8 @@ export default function NativeHeader({ systemStats }: NativeHeaderProps) {
       <div className="w-px h-5 bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)]" />
 
       <div className="flex items-center gap-5 flex-1 min-w-0">
-        <HeaderMetric label="CPU" value={linked ? `${cpuUsage.toFixed(0)}%` : '--'} alert={cpuUsage > 80} />
-        <HeaderMetric label="RAM" value={linked ? `${memPercent.toFixed(0)}%` : '--'} alert={memPercent > 90} />
+        <HeaderMetric label="CPU" value={linked ? `${cpuUsage.toFixed(0)}%` : '--'} level={linked ? statusLevel(cpuUsage) : undefined} />
+        <HeaderMetric label="RAM" value={linked ? `${memPercent.toFixed(0)}%` : '--'} level={linked ? statusLevel(memPercent, 75, 90) : undefined} />
         <HeaderMetric label="UP" value={linked ? formatUptime(systemStats.uptime ?? 0) : '--'} />
         <HeaderMetric label="PWR" value={power} />
       </div>
@@ -71,11 +71,11 @@ export default function NativeHeader({ systemStats }: NativeHeaderProps) {
   );
 }
 
-function HeaderMetric({ label, value, alert = false }: { label: string; value: string; alert?: boolean }) {
+function HeaderMetric({ label, value, level }: { label: string; value: string; level?: StatusLevel }) {
   return (
     <div className="flex items-center gap-1.5 shrink-0">
       <span className="text-[10px] tracking-wider opacity-50">{label}</span>
-      <span className={`tabular-nums text-[11px] ${alert ? 'text-muthur-accent' : 'text-muthur-secondary'}`}>
+      <span className={`tabular-nums text-[11px] ${level ? `status-${level}` : 'text-muthur-secondary'}`}>
         {value}
       </span>
     </div>

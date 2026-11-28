@@ -142,10 +142,11 @@ Safer install modes:
 ./install.sh --no-deps
 ./install.sh --no-ollama
 ./install.sh --prefix "$HOME/.local"
+./install.sh --no-boot
 ./install.sh --quiet
 ```
 
-`--dry-run` prints the detected plan and exits before changes. `--no-deps` skips distro, Rust, and Node dependency installation. `--no-ollama` keeps optional offline-AI setup out of the install/update flow. A custom `--prefix` installs user binaries under that prefix and skips system session files. `--quiet` reduces installer chatter for scripted runs.
+`--dry-run` prints the detected plan and exits before changes. `--no-deps` skips distro, Rust, and Node dependency installation. `--no-ollama` keeps optional offline-AI setup out of the install/update flow. A custom `--prefix` installs user binaries under that prefix and skips system session files. By default the installer makes MUTHUR start at boot: on a machine with a desktop login manager (LightDM, GDM, SDDM) it adds a fullscreen autostart entry for your user; on a machine with no graphical login it installs everything MUTHUR needs (WebKit, cage, greetd, GStreamer audio, fonts) and configures greetd to log you straight into the MUTHUR session. `--no-boot` leaves startup unchanged, and `muthur-ui disable` undoes it later. `--quiet` reduces installer chatter for scripted runs.
 
 **Root execution:** The installer blocks running as root on normal installed systems to prevent file-ownership issues. It is automatically allowed in disposable environments (Arch ISO, Docker/Podman containers, VMs detected via `systemd-detect-virt`, and CI runners). To force root execution elsewhere, set `MUTHUR_ALLOW_ROOT=1`.
 
@@ -540,8 +541,8 @@ MIT -- see [LICENSE](LICENSE).
 ---
 
 <!-- MUTHUR-STATS:START -->
-![Lines of Code](https://img.shields.io/badge/lines%20of%20code-29%2C799-c9d1d9?style=flat-square&labelColor=161b22)
-![Project Files](https://img.shields.io/badge/project%20files-172-c9d1d9?style=flat-square&labelColor=161b22)
+![Lines of Code](https://img.shields.io/badge/lines%20of%20code-30%2C450-c9d1d9?style=flat-square&labelColor=161b22)
+![Project Files](https://img.shields.io/badge/project%20files-173-c9d1d9?style=flat-square&labelColor=161b22)
 <!-- MUTHUR-STATS:END -->
 
 </div>

@@ -12,6 +12,7 @@
 #   ./install.sh --no-deps  Skip system/Rust/Node dependency installation
 #   ./install.sh --no-ollama  Skip optional Ollama/offline-AI steps
 #   ./install.sh --prefix ~/.local  Install user binaries under a custom prefix
+#   ./install.sh --no-boot  Do not make MUTHUR the session that starts at boot
 #   MUTHUR_ALLOW_PRIVILEGED_INSTALL=1 ./install.sh --quiet  Allow quiet privileged changes
 #
 # Supports: Arch Linux, Ubuntu/Debian, Fedora
@@ -41,6 +42,7 @@ QUIET=""
 DRY_RUN="false"
 SKIP_DEPS="false"
 SKIP_OLLAMA="false"
+SKIP_BOOT="false"
 ALLOW_PRIVILEGED_INSTALL="false"
 
 case "${MUTHUR_ALLOW_PRIVILEGED_INSTALL:-}" in
@@ -57,7 +59,10 @@ Options:
   --no-deps            Skip system, Rust, and Node dependency installation
   --no-ollama          Skip optional Ollama/offline-AI steps
   --prefix <path>      Install user binaries under <path>/bin (default: /usr/local)
-  --help, -h           Show this help
+  --no-boot            Do not make MUTHUR start at boot (default: boot into MUTHUR;
+                       with a desktop login it autostarts after login, without
+                       one it becomes the greetd autologin session)
+  --help, -h          Show this help
 
 Environment:
   MUTHUR_ALLOW_PRIVILEGED_INSTALL=1
@@ -79,6 +84,9 @@ while [ "$#" -gt 0 ]; do
             ;;
         --no-ollama)
             SKIP_OLLAMA="true"
+            ;;
+        --no-boot)
+            SKIP_BOOT="true"
             ;;
         --prefix)
             [ "${2:-}" ] || { echo "Missing value for --prefix" >&2; exit 2; }
@@ -206,8 +214,11 @@ print_privileged_plan() {
         echo "  - write native session files under $SESSION_DIR"
     fi
 
-    echo "  - optional display setup may enable/start seatd or greetd"
-    echo "  - optional display setup may add the user to the seat group"
+    if [ "$SKIP_BOOT" != "true" ]; then
+        echo "  - boot setup: with a desktop login manager, add a user autostart entry (no sudo)"
+        echo "  - boot setup: without one, write /etc/greetd/config.toml (autologin into MUTHUR),"
+        echo "    enable greetd and seatd, add the user to the seat group, set graphical.target"
+    fi
     echo "  - generated launcher prompts before runtime package/service/group fixes"
     echo ""
 }
@@ -367,14 +378,15 @@ install_deps() {
         "system-packages" \
         "install system packages" \
         "uses sudo with pacman, apt-get, or dnf when not already root" \
-        "packages include build tools, WebKit/GTK, cage, greetd, seatd, and polkit" || exit 1
+        "packages include build tools, WebKit/GTK, GStreamer audio, cage, greetd, seatd, and polkit" || exit 1
 
     case $OS in
         arch)
             maybe_sudo pacman -Sy --noconfirm --needed \
                 base-devel curl wget file openssl xdg-utils \
                 gtk3 libappindicator-gtk3 librsvg webkit2gtk-4.1 \
-                cage greetd seatd polkit mesa
+                cage greetd seatd polkit mesa ttf-dejavu \
+                gst-plugins-base gst-plugins-good
             ;;
         debian)
             maybe_sudo apt-get update -qq
@@ -382,14 +394,16 @@ install_deps() {
                 build-essential curl wget file xdg-utils \
                 libssl-dev libgtk-3-dev libayatana-appindicator3-dev \
                 librsvg2-dev libwebkit2gtk-4.1-dev \
-                cage greetd seatd policykit-1
+                cage greetd seatd policykit-1 fonts-dejavu-core \
+                gstreamer1.0-plugins-base gstreamer1.0-plugins-good
             ;;
         fedora)
             maybe_sudo dnf install -y -q \
                 gcc gcc-c++ make curl wget file xdg-utils \
                 openssl-devel gtk3-devel libappindicator-gtk3-devel \
                 librsvg2-devel webkit2gtk4.1-devel \
-                cage greetd seatd polkit
+                cage greetd seatd polkit dejavu-sans-mono-fonts \
+                gstreamer1-plugins-base gstreamer1-plugins-good
             ;;
     esac
 
@@ -398,7 +412,17 @@ install_deps() {
 
 # ─── Toolchain ─────────────────────────────────────────────────────────────
 
+# rustup puts cargo in ~/.cargo/bin, which non-interactive shells (ssh, CI,
+# --no-deps reruns) do not have on PATH. Load it when it is there.
+load_rust_env() {
+    if ! command -v cargo &>/dev/null && [ -f "$HOME/.cargo/env" ]; then
+        # shellcheck disable=SC1091
+        source "$HOME/.cargo/env"
+    fi
+}
+
 install_rust() {
+    load_rust_env
     if command -v rustc &>/dev/null; then
         info "Rust $(rustc --version | cut -d' ' -f2)"
     else
@@ -537,6 +561,11 @@ build_app() {
     step "[2/2] Compiling application (frontend + backend + terminal CLI)..."
     npm run build
     npm run build:cli
+    load_rust_env
+    if ! command -v cargo &>/dev/null; then
+        err "cargo not found. Install Rust (https://rustup.rs) or rerun without --no-deps."
+        exit 1
+    fi
     cd "$SCRIPT_DIR/src-tauri"
     cargo build --release
     cd "$SCRIPT_DIR"
@@ -915,48 +944,108 @@ verify_installation() {
 
 # ─── Autostart Setup ──────────────────────────────────────────────────────
 
-offer_display_setup() {
-    # Skip in quiet mode
-    [ "$QUIET" = "--quiet" ] && return 0
+# Prints the systemd unit name behind display-manager.service (lightdm, gdm,
+# sddm, greetd, ...) or nothing when the machine has no graphical login.
+detect_display_manager() {
+    local link="/etc/systemd/system/display-manager.service"
+    if [ -L "$link" ]; then
+        basename "$(readlink -f "$link")" .service
+    fi
+}
 
-    # Ensure seat management is fully configured
+# The account greetd runs its greeter as differs between distros.
+greetd_greeter_user() {
+    local candidate
+    for candidate in greeter _greetd greetd; do
+        if id "$candidate" &>/dev/null; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+    echo "greeter"
+}
+
+# A desktop login manager already owns the screen, so MUTHUR starts fullscreen
+# right after login through XDG autostart. No root access is needed.
+enable_desktop_autostart() {
+    local autostart_dir="$HOME/.config/autostart"
+    local target="$autostart_dir/muthur-autostart.desktop"
+    mkdir -p "$autostart_dir"
+    sed "s|^Exec=.*|Exec=$INSTALL_DIR/muthur-bin|" \
+        "$SCRIPT_DIR/packaging/muthur-autostart.desktop" > "$target"
+    info "Autostart: $target"
+    echo "  MUTHUR opens fullscreen as soon as you log in to $1."
+}
+
+# No graphical login exists: greetd logs the user straight into the MUTHUR
+# session (cage + muthur-bin). The default session keeps a text login that
+# also starts MUTHUR, so a crash or logout never leaves the machine stuck.
+enable_greetd_boot() {
+    local user="${SUDO_USER:-$USER}"
+    local config="/etc/greetd/config.toml"
+    local greeter
+    greeter="$(greetd_greeter_user)"
+
+    if [ ! -x "$SYSTEM_BIN/muthur-session" ]; then
+        warn "Boot setup skipped: $SYSTEM_BIN/muthur-session is missing (custom --prefix)."
+        return 0
+    fi
+    if ! command -v greetd &>/dev/null || ! command -v cage &>/dev/null; then
+        warn "Boot setup skipped: greetd or cage is not installed (rerun without --no-deps)."
+        return 0
+    fi
+
     confirm_privileged_operation \
-        "display-services" \
-        "configure display services and seat access" \
-        "sudo systemctl enable/start seatd" \
-        "sudo usermod -aG seat ${SUDO_USER:-$USER}" \
-        "sudo systemctl enable greetd" || {
-            warn "Display service setup skipped. Launch manually after configuring seatd/greetd."
+        "boot-session" \
+        "boot straight into MUTHUR" \
+        "write $config (the old file is kept as $config.muthur-backup)" \
+        "sudo systemctl enable greetd seatd" \
+        "sudo usermod -aG seat $user" \
+        "sudo systemctl set-default graphical.target" || {
+            warn "Boot setup skipped. Start MUTHUR manually with: muthur"
             return 0
         }
-    maybe_sudo systemctl enable seatd 2>/dev/null || true
-    maybe_sudo systemctl start seatd 2>/dev/null || true
-    maybe_sudo usermod -aG seat "${SUDO_USER:-$USER}" 2>/dev/null || true
-    maybe_sudo systemctl enable greetd 2>/dev/null || true
 
-    echo ""
-    echo -e "${BOLD}MUTHUR session ready.${NC}"
-    echo "  Display server (cage + greetd) is installed."
-    echo ""
-    echo "  Autostart options:"
-    echo "    1) Enable  - MUTHUR launches fullscreen on boot (replaces login screen)"
-    echo "    2) Disable - Launch manually with 'muthur' after login"
-    echo ""
+    if [ -f "$config" ] && [ ! -f "$config.muthur-backup" ]; then
+        maybe_sudo cp "$config" "$config.muthur-backup"
+    fi
+    maybe_sudo mkdir -p "$(dirname "$config")"
+    maybe_sudo tee "$config" >/dev/null <<GREETD
+# Written by the MUTHUR installer. Restore the previous file from
+# $config.muthur-backup to undo.
+[terminal]
+vt = 1
 
-    local choice=""
-    read -r -p "  Select [1/2]: " choice || choice="2"
+[default_session]
+command = "agreety --cmd $SYSTEM_BIN/muthur-session"
+user = "$greeter"
 
-    case "$choice" in
-        1)
-            if [ -x "$INSTALL_DIR/muthur-ui" ]; then
-                "$INSTALL_DIR/muthur-ui" enable 2>/dev/null || true
-            fi
-            info "Autostart ENABLED. MUTHUR will launch on next boot."
-            echo "  Disable later with: muthur-ui disable"
+[initial_session]
+command = "$SYSTEM_BIN/muthur-session"
+user = "$user"
+GREETD
+    maybe_sudo systemctl enable seatd.service greetd.service
+    maybe_sudo usermod -aG seat "$user" 2>/dev/null || true
+    maybe_sudo systemctl set-default graphical.target
+    info "Boot session: greetd logs $user into MUTHUR at startup"
+    echo "  Reboot to start MUTHUR. Undo with: muthur-ui disable"
+}
+
+setup_boot_session() {
+    if [ "$SKIP_BOOT" = "true" ]; then
+        dimtext "  Boot setup skipped (--no-boot). Launch with: muthur"
+        return 0
+    fi
+
+    step "Configuring MUTHUR to start at boot..."
+    local dm
+    dm="$(detect_display_manager)"
+    case "$dm" in
+        ""|greetd)
+            enable_greetd_boot
             ;;
         *)
-            info "Autostart disabled. Launch manually with: muthur"
-            echo "  Enable later with: muthur-ui enable"
+            enable_desktop_autostart "$dm"
             ;;
     esac
 }
@@ -1034,12 +1123,13 @@ main() {
         install_rust
         install_node
     fi
+    load_rust_env
     run_health_check
     build_app
     install_assets
     offer_offline_pack
     verify_installation
-    offer_display_setup
+    setup_boot_session
     print_summary
 }
 
