@@ -9,6 +9,9 @@ For detailed commit history, see [VERSION_HISTORY.md](VERSION_HISTORY.md).
 
 ## [Unreleased]
 
+### Fixed
+- `scripts/uninstall.sh` now accepts `--prefix <path>` and reads the prefix recorded by `install.sh` in `~/.config/muthur/install-prefix`, so custom-prefix installs (for example `~/.local`) are fully removed.
+
 ### Planned
 - Plugin system for custom widgets
 - Configurable themes

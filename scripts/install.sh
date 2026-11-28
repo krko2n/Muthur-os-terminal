@@ -762,6 +762,11 @@ WRAPPER
     fi
     info "Binary: $INSTALL_DIR/muthur"
 
+    # Record the prefix so uninstall.sh removes commands from the same place.
+    mkdir -p "$CONFIG_DIR"
+    printf '%s\n' "$PREFIX" > "$CONFIG_DIR/install-prefix"
+    dimtext "  Install prefix recorded: $CONFIG_DIR/install-prefix"
+
     # ── CLI Utilities ──
     if [ -f "$SCRIPT_DIR/packaging/bin/kys" ]; then
         install_binary_file "$SCRIPT_DIR/packaging/bin/kys" "$INSTALL_DIR/kys"

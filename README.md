@@ -440,17 +440,20 @@ Then re-run the installer or source nvm again.
 ## Uninstalling
 
 ```bash
-# Remove the binary and tools
-sudo rm /usr/local/bin/muthur
-sudo rm /usr/local/bin/muthur-ui
-sudo rm /usr/local/bin/kys
-sudo rm /usr/bin/muthur-session
-sudo rm /usr/bin/muthur-os-terminal
+./scripts/uninstall.sh
+```
 
-# Remove desktop entries
-rm ~/.local/share/applications/muthur.desktop
+The uninstaller removes the commands (`muthur`, `muthur-bin`, `muthur-cli`, `muthur-ui`, `kys`) from the prefix the installer recorded in `~/.config/muthur/install-prefix`, falling back to `MUTHUR_PREFIX` and then `/usr/local`. For the default `/usr/local` install it also removes `/usr/bin/muthur-os-terminal`, `/usr/bin/muthur-session` and the Wayland session entry. It asks for confirmation first and only uses sudo for paths outside your home directory.
 
-# Remove your config (optional -- only if you want to erase settings)
+If you installed with a custom prefix and the record is missing, pass the same prefix:
+
+```bash
+./scripts/uninstall.sh --prefix ~/.local
+```
+
+To also erase your settings (optional):
+
+```bash
 rm -rf ~/.config/muthur
 rm -rf ~/.config/xKOR_3RR0R
 ```

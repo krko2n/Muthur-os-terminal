@@ -93,6 +93,29 @@ assertIncludes('scripts/muthur-offline-pack.sh', 'MUTHUR_OFFLINE_AI');
 assertIncludes('scripts/muthur-offline-pack.sh', 'MUTHUR_WIKI_ZIM_URL');
 assertIncludes('scripts/muthur-offline-pack.sh', 'MUTHUR_MAPS_URL');
 
+assertIncludes(
+  'scripts/install.sh',
+  'printf \'%s\\n\' "$PREFIX" > "$CONFIG_DIR/install-prefix"',
+  'installer records the prefix it used'
+);
+
+assertPattern(
+  'scripts/uninstall.sh',
+  /--prefix\)[\s\S]*?PREFIX="\$2"/,
+  'uninstaller --prefix option'
+);
+assertIncludes('scripts/uninstall.sh', 'install-prefix', 'uninstaller reads the recorded install prefix');
+assertIncludes('scripts/uninstall.sh', 'DEFAULT_PREFIX="/usr/local"', 'uninstaller falls back to /usr/local');
+assertIncludes('scripts/uninstall.sh', 'COMMANDS="muthur muthur-bin muthur-cli muthur-ui kys"', 'uninstaller removes every installed command');
+assertPattern(
+  'scripts/uninstall.sh',
+  /if \[ "\$SYSTEM_ASSETS" = "true" \]; then[\s\S]*?muthur-os-terminal/,
+  'uninstaller removes the system link only for the default install'
+);
+assertIncludes('scripts/uninstall.sh', 'Are you sure you want to uninstall? (y/N)', 'uninstaller confirmation prompt');
+assertIncludes('scripts/uninstall.sh', 'maybe_sudo', 'uninstaller uses sudo only when needed');
+assertIncludes('README.md', 'uninstall.sh --prefix', 'README documentation for uninstall --prefix');
+
 if (install.indexOf('preflight') > install.indexOf('install_deps')) {
   throw new Error('scripts/install.sh: preflight must run before dependency installation');
 }
