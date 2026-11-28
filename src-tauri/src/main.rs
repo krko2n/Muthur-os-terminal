@@ -1204,8 +1204,53 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::{is_private_or_local_ip, validate_fetch_url};
+    use super::{is_private_or_local_ip, validate_fetch_url, validate_user_filesystem_path};
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+
+    // The file explorer must stay inside home / app / offline-pack folders
+    // unless MUTHUR_ALLOW_FULL_FS is set. Tests run with HOME and the crate
+    // directory as the allowed roots; /etc is outside both.
+    #[test]
+    fn filesystem_access_outside_allowed_roots_is_rejected() {
+        if std::env::var("MUTHUR_ALLOW_FULL_FS").is_ok() {
+            return;
+        }
+        let err = validate_user_filesystem_path("/etc", true).unwrap_err();
+        assert!(err.contains("limited to your home"), "{err}");
+    }
+
+    #[test]
+    fn traversal_is_resolved_before_the_root_check() {
+        if std::env::var("MUTHUR_ALLOW_FULL_FS").is_ok() {
+            return;
+        }
+        let sneaky = format!("{}/../../../../../../etc", env!("CARGO_MANIFEST_DIR"));
+        assert!(validate_user_filesystem_path(&sneaky, true).is_err());
+    }
+
+    #[test]
+    fn allowed_directory_is_returned_canonicalized() {
+        let dir = env!("CARGO_MANIFEST_DIR");
+        let with_dots = format!("{dir}/src/..");
+        let resolved =
+            validate_user_filesystem_path(&with_dots, true).expect("crate dir is allowed");
+        assert_eq!(resolved, std::path::Path::new(dir).canonicalize().unwrap());
+    }
+
+    #[test]
+    fn files_are_rejected_where_a_directory_is_required() {
+        let file = format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR"));
+        assert!(validate_user_filesystem_path(&file, true)
+            .unwrap_err()
+            .starts_with("Not a directory"));
+        assert!(validate_user_filesystem_path(&file, false).is_ok());
+    }
+
+    #[test]
+    fn missing_paths_report_cannot_access() {
+        let err = validate_user_filesystem_path("/definitely/not/here/muthur", true).unwrap_err();
+        assert!(err.starts_with("Cannot access"), "{err}");
+    }
 
     #[test]
     fn fetch_url_policy_allows_public_http_urls() {

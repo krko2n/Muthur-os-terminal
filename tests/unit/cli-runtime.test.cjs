@@ -1,5 +1,7 @@
 // Runtime check for the terminal-only CLI: builds it, then executes it.
 // Requires no GUI, AI, cloud, or network.
+const test = require('node:test');
+const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -40,27 +42,22 @@ function run(args) {
   return spawnSync(process.execPath, [CLI, ...args], { cwd: ROOT, env, encoding: 'utf8' });
 }
 
-function expect(args, status, stream, text) {
-  const result = run(args);
-  const label = `muthur ${args.join(' ') || '(no args)'}`;
-  if (result.status !== status) {
-    throw new Error(`${label} exited ${result.status}, expected ${status}\n${result.stderr}`);
-  }
-  if (!result[stream].includes(text)) {
-    throw new Error(`${label} ${stream} is missing: ${text}`);
-  }
+const cases = [
+  [[], 0, 'stdout', 'Usage:'],
+  [['--help'], 0, 'stdout', 'Usage:'],
+  [['--version'], 0, 'stdout', `muthur ${VERSION}`],
+  [['status'], 0, 'stdout', 'Terminal-only ready: yes'],
+  [['config', 'show'], 0, 'stdout', 'missing, using defaults'],
+  [['config', 'bogus'], 1, 'stderr', 'Unknown config command: bogus'],
+  [['bogus'], 1, 'stderr', 'Unknown command: bogus'],
+];
+
+for (const [args, status, stream, text] of cases) {
+  test(`muthur ${args.join(' ') || '(no args)'} exits ${status} and prints '${text}'`, () => {
+    const result = run(args);
+    assert.equal(result.status, status, result.stderr);
+    assert.ok(result[stream].includes(text), `${stream} was:\n${result[stream]}`);
+  });
 }
 
-try {
-  expect([], 0, 'stdout', 'Usage:');
-  expect(['--help'], 0, 'stdout', 'Usage:');
-  expect(['--version'], 0, 'stdout', `muthur ${VERSION}`);
-  expect(['status'], 0, 'stdout', 'Terminal-only ready: yes');
-  expect(['config', 'show'], 0, 'stdout', 'missing, using defaults');
-  expect(['config', 'bogus'], 1, 'stderr', 'Unknown config command: bogus');
-  expect(['bogus'], 1, 'stderr', 'Unknown command: bogus');
-} finally {
-  fs.rmSync(configHome, { recursive: true, force: true });
-}
-
-console.log('CLI runtime check passed.');
+test.after(() => fs.rmSync(configHome, { recursive: true, force: true }));
