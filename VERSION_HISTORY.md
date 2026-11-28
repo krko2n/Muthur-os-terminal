@@ -2,6 +2,21 @@
 
 Auto-generated from git log.
 
+b2f4ab8 fix(packaging): disable makepkg LTO for the Arch package
+b43a2e1 fix(packaging): build Arch package from source; CLI runs on older Node
+90d48e4 fix(config): CLI reads the same config.toml as the GUI and installer
+006f4c9 fix(installer): terminal-only muthur commands never start the GUI session
+707c94a chore: keep AGENTS.md private like CLAUDE.md
+2e94a27 test: guard theming against hard-coded accent colours
+25930a0 test: replace source-grep checks with behavioural tests
+abe3849 feat(gui): eDEX-UI memory grid, network module, skewed tabs, theming fixes
+0509b77 fix: stop WebGL context leak, duplicate tab names, and HTML truncation panic
+a85c800 fix(deps): clear cargo audit and cargo deny failures
+04bd014 docs: add roadmap and refresh README stats
+2519c7b feat(cli): add runnable CLI build with real exit codes
+2fda909 fix(deps): resolve npm audit advisories
+3840b23 docs: add vm smoke checklist
+b89d041 docs: auto-update generated docs [skip ci]
 b3460e2 feat: add survival pack placeholders
 fe8d443 docs: auto-update generated docs [skip ci]
 d54da65 feat: add example terminal game package
@@ -37,18 +52,3 @@ e2eb993 docs: auto-update generated docs [skip ci]
 c818981 test: include cli status smoke check
 50528f1 test: validate cli status skeleton
 7e96856 docs: auto-update generated docs [skip ci]
-803850f docs: list cli status command in help
-9f3239b docs: auto-update generated docs [skip ci]
-ce9cbeb feat: route cli status command
-1788bc3 feat: add cli status command
-e5ece7d feat: add terminal status service
-6b2de32 docs: auto-update generated docs [skip ci]
-4805eb5 fix: simplify cli argv handling
-922c872 docs: auto-update generated docs [skip ci]
-b7ee307 test: include cli help smoke check
-0f7e65d docs: auto-update generated docs [skip ci]
-8478426 test: validate cli help skeleton
-38bfdbb docs: auto-update generated docs [skip ci]
-21cec57 feat: add cli entrypoint skeleton
-adac3ca docs: auto-update generated docs [skip ci]
-75cba7f feat: add cli help skeleton
