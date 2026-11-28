@@ -2,20 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MUTHUR://CORE</title>
     <link rel="preload" href="/fonts/ShareTechMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <style>
+      /* Pre-paint defaults; the theme variables take over once the app loads.
+         #root stays transparent so the dot-grid painted on body shows through. */
       html,
       body,
       #root {
         margin: 0;
         width: 100%;
         height: 100%;
-        background: #05080d;
-        color: #00ff41;
         overflow: hidden;
+      }
+      html,
+      body {
+        background: var(--color-bg, #05080d);
+        color: var(--color-accent, #00ff41);
+      }
+      #root {
+        color: inherit;
       }
       body {
         color-scheme: dark;

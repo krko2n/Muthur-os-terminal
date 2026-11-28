@@ -7,7 +7,7 @@ interface VoidCardsProps {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-[rgba(0,255,65,0.1)] px-[0.6vh] py-[0.45vh] min-w-0">
+    <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] px-[0.6vh] py-[0.45vh] min-w-0">
       <div className="text-[0.8vh] tracking-wider text-muthur-secondary opacity-55">{label}</div>
       <div className="text-[1.08vh] tracking-wider text-muthur-primary truncate">{value}</div>
     </div>
@@ -209,12 +209,12 @@ export default function VoidCards({ fullscreen }: VoidCardsProps) {
       <div className={`grid ${fullscreen ? 'grid-cols-[1fr_0.5fr] gap-[3vh] max-w-[80vh] w-full' : 'grid-cols-[1fr_0.72fr] gap-[0.7vh] w-full'} flex-1 min-h-0`}>
         <div className="grid grid-rows-[1fr_auto] gap-[0.7vh] min-h-0">
           <div className="grid grid-cols-2 gap-[1vh] min-h-0">
-            <div className={`border border-[rgba(0,255,65,0.18)] bg-[rgba(0,255,65,0.05)] flex flex-col items-center justify-center ${fullscreen ? 'min-h-[28vh]' : 'min-h-[18vh]'}`}>
+            <div className={`border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.05)] flex flex-col items-center justify-center ${fullscreen ? 'min-h-[28vh]' : 'min-h-[18vh]'}`}>
               <div className="text-[0.8vh] text-muthur-secondary opacity-45 tracking-widest">CURRENT</div>
               <div className={`${fullscreen ? 'text-[5vh]' : 'text-[3.2vh]'} text-muthur-primary font-display tracking-widest`}>{cardLabel(current)}</div>
               <div className="text-[0.9vh] text-muthur-secondary opacity-50">RANK {current.rank}</div>
             </div>
-            <div className={`border border-[rgba(0,255,65,0.1)] bg-[rgba(0,255,65,0.025)] flex flex-col items-center justify-center ${fullscreen ? 'min-h-[28vh]' : 'min-h-[18vh]'}`}>
+            <div className={`border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.025)] flex flex-col items-center justify-center ${fullscreen ? 'min-h-[28vh]' : 'min-h-[18vh]'}`}>
               <div className="text-[0.8vh] text-muthur-secondary opacity-45 tracking-widest">PREVIOUS</div>
               <div className={`${fullscreen ? 'text-[3.5vh]' : 'text-[2.2vh]'} text-muthur-secondary opacity-70 font-display tracking-widest`}>{lastCard ? cardLabel(lastCard) : 'NONE'}</div>
               <div className="text-[0.9vh] text-muthur-secondary opacity-35">LOCAL DECK</div>
@@ -222,18 +222,18 @@ export default function VoidCards({ fullscreen }: VoidCardsProps) {
           </div>
           <div className="grid grid-cols-3 gap-[0.7vh]">
             <button onClick={() => predict('hi')} className={`${fullscreen ? 'h-[5vh]' : 'h-[3vh]'} border border-muthur-primary text-muthur-primary tracking-widest text-[1vh]`}>HIGHER [H]</button>
-            <button onClick={() => predict('eq')} className={`${fullscreen ? 'h-[5vh]' : 'h-[3vh]'} border border-[rgba(0,255,65,0.28)] text-muthur-secondary tracking-widest text-[1vh]`}>EQUAL [E]</button>
+            <button onClick={() => predict('eq')} className={`${fullscreen ? 'h-[5vh]' : 'h-[3vh]'} border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.28)] text-muthur-secondary tracking-widest text-[1vh]`}>EQUAL [E]</button>
             <button onClick={() => predict('lo')} className={`${fullscreen ? 'h-[5vh]' : 'h-[3vh]'} border border-muthur-accent text-muthur-accent tracking-widest text-[1vh]`}>LOWER [L]</button>
           </div>
         </div>
-        <div className="border border-[rgba(0,255,65,0.12)] p-[1.2vh] min-w-0 flex flex-col justify-between">
+        <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[1.2vh] min-w-0 flex flex-col justify-between">
           <div className="grid grid-cols-2 gap-[0.6vh]">
             <Metric label="STATE" value={status} />
             <Metric label="ROUND" value={String(round)} />
             <Metric label="SCORE" value={String(score)} />
             <Metric label="STREAK" value={String(streak)} />
           </div>
-          <div className="h-[0.7vh] bg-[rgba(0,255,65,0.08)] overflow-hidden my-[1vh]">
+          <div className="h-[0.7vh] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] overflow-hidden my-[1vh]">
             <div className="h-full bg-muthur-primary transition-all" style={{ width: `${Math.max(3, (deck.length / 47) * 100)}%` }} />
           </div>
           <Metric label="DECK" value={`${deck.length} CARDS`} />
@@ -242,7 +242,7 @@ export default function VoidCards({ fullscreen }: VoidCardsProps) {
           </button>
           <button
             onClick={() => setShowTutorial(true)}
-            className="mt-[0.8vh] h-[3vh] border border-[rgba(0,255,65,0.25)] text-muthur-secondary tracking-widest text-[0.9vh] hover:border-muthur-primary transition-colors"
+            className="mt-[0.8vh] h-[3vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.25)] text-muthur-secondary tracking-widest text-[0.9vh] hover:border-muthur-primary transition-colors"
           >
             HELP
           </button>

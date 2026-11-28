@@ -179,7 +179,7 @@ export default function LoadingScreen({ onComplete, bootPreset = 'core' }: Loadi
         ref={containerRef}
         className="w-full h-full p-8 font-mono overflow-hidden flex flex-col"
       >
-        <div className="shrink-0 flex items-center justify-between border-b border-[rgba(0,255,65,0.18)] pb-4 mb-5">
+        <div className="shrink-0 flex items-center justify-between border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] pb-4 mb-5">
           <div>
             <div className="text-muthur-primary font-display text-[2.2vh] tracking-[0.25em]">{title}</div>
             <div className="text-muthur-secondary text-[1.1vh] tracking-[0.25em] opacity-50 mt-1">{subtitle}</div>
@@ -209,7 +209,7 @@ export default function LoadingScreen({ onComplete, bootPreset = 'core' }: Loadi
         </div>
 
         <div className="shrink-0 mt-5">
-          <div className="h-[0.9vh] bg-[rgba(0,255,65,0.08)] border border-[rgba(0,255,65,0.18)] overflow-hidden">
+          <div className="h-[0.9vh] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] overflow-hidden">
             <div
               className="h-full bg-muthur-primary transition-all duration-200"
               style={{ width: `${bootProgress}%` }}

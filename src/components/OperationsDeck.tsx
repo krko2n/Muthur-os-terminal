@@ -257,7 +257,7 @@ function HelpButton({ onClick }: { onClick: () => void }) {
         onClick();
         playSound('folder', 0.06);
       }}
-      className="px-[0.6vh] py-[0.15vh] border text-[0.82vh] tracking-wider transition-all hover:bg-[rgba(0,255,65,0.1)]"
+      className="px-[0.6vh] py-[0.15vh] border text-[0.82vh] tracking-wider transition-all hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)]"
       style={{
         borderColor: 'rgba(var(--color-r, 0), var(--color-g, 255), var(--color-b, 65), 0.3)',
         color: 'var(--color-accent)',
@@ -363,8 +363,8 @@ export default function OperationsDeck({
   };
 
   return (
-    <div className="h-full flex flex-col min-w-0 bg-[rgba(5,8,13,0.78)] border-r border-[rgba(0,255,65,0.15)]">
-      <div className="flex items-center justify-between px-[1vh] py-[0.5vh] border-b border-[rgba(0,255,65,0.15)] shrink-0 deck-title">
+    <div className="h-full flex flex-col min-w-0 bg-[rgba(5,8,13,0.78)] border-r border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)]">
+      <div className="flex items-center justify-between px-[1vh] py-[0.5vh] border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] shrink-0 deck-title">
         <div className="text-[1.2vh] tracking-widest opacity-75 flex items-center gap-[0.6vh] font-display">
           <LayoutIcon size={14} color="var(--color-accent)" />
           OPS DECK
@@ -438,8 +438,8 @@ function StyleTab({ settings, onSettingsChange }: { settings: InterfaceSettings;
                 onClick={() => applyLoadout(loadout)}
                 className={`min-h-[5.4vh] border text-left px-[0.75vh] py-[0.55vh] transition-all ${
                   active
-                    ? 'border-muthur-primary bg-[rgba(0,255,65,0.09)]'
-                    : 'border-[rgba(0,255,65,0.12)] hover:border-[rgba(0,255,65,0.35)]'
+                    ? 'border-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.09)]'
+                    : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] hover:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.35)]'
                 }`}
               >
                 <div className="flex items-center justify-between gap-[0.6vh]">
@@ -469,8 +469,8 @@ function StyleTab({ settings, onSettingsChange }: { settings: InterfaceSettings;
               }}
               className={`h-[4.6vh] border text-left px-[0.7vh] transition-all ${
                 settings.themeId === theme.id && !settings.customTheme.enabled
-                  ? 'border-muthur-primary bg-[rgba(0,255,65,0.08)]'
-                  : 'border-[rgba(0,255,65,0.12)] hover:border-[rgba(0,255,65,0.35)]'
+                  ? 'border-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)]'
+                  : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] hover:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.35)]'
               }`}
             >
               <div className="flex items-center gap-[0.6vh]">
@@ -486,7 +486,7 @@ function StyleTab({ settings, onSettingsChange }: { settings: InterfaceSettings;
           ))}
         </div>
 
-        <div className="mt-[1vh] border border-[rgba(0,255,65,0.12)] p-[0.8vh]">
+        <div className="mt-[1vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.8vh]">
           <div className="flex items-center justify-between mb-[0.7vh]">
             <span className="text-[1vh] tracking-wider text-muthur-secondary opacity-70">CUSTOM THEME</span>
             <Toggle
@@ -524,7 +524,7 @@ function StyleTab({ settings, onSettingsChange }: { settings: InterfaceSettings;
               className={`h-[3.2vh] px-[0.7vh] border text-[0.92vh] tracking-wider transition-colors truncate ${
                 settings.fontId === font.id
                   ? 'border-muthur-primary text-muthur-bg bg-muthur-primary'
-                  : 'border-[rgba(0,255,65,0.12)] text-muthur-secondary hover:border-[rgba(0,255,65,0.35)]'
+                  : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] text-muthur-secondary hover:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.35)]'
               }`}
               style={{ fontFamily: font.display }}
             >
@@ -542,7 +542,7 @@ function StyleTab({ settings, onSettingsChange }: { settings: InterfaceSettings;
                 playSound('switch', 0.1);
               }}
               className={`border px-[0.7vh] py-[0.45vh] text-left ${
-                settings.soundPack === pack.id ? 'border-muthur-primary bg-[rgba(0,255,65,0.08)]' : 'border-[rgba(0,255,65,0.12)]'
+                settings.soundPack === pack.id ? 'border-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)]' : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)]'
               }`}
             >
               <div className="text-[0.95vh] tracking-wider text-muthur-primary">{pack.label}</div>
@@ -551,7 +551,7 @@ function StyleTab({ settings, onSettingsChange }: { settings: InterfaceSettings;
           ))}
         </div>
 
-        <div className="mt-[1vh] border border-[rgba(0,255,65,0.12)] p-[0.8vh]">
+        <div className="mt-[1vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.8vh]">
           <div className="flex items-center justify-between mb-[0.7vh]">
             <span className="text-[1vh] tracking-wider text-muthur-secondary opacity-70">AUDIO BUS</span>
             <Toggle
@@ -574,7 +574,7 @@ function StyleTab({ settings, onSettingsChange }: { settings: InterfaceSettings;
               <button
                 key={label}
                 onClick={() => playSound(sound as Parameters<typeof playSound>[0], 0.18)}
-                className="h-[2.5vh] border border-[rgba(0,255,65,0.18)] text-[0.78vh] tracking-wider text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors"
+                className="h-[2.5vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] text-[0.78vh] tracking-wider text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors"
               >
                 {label}
               </button>
@@ -612,8 +612,8 @@ function LayoutTab({
               onClick={() => onLayoutPresetChange(preset.id)}
               className={`border p-[0.65vh] h-[6.9vh] transition-all ${
                 settings.layoutPreset === preset.id
-                  ? 'border-muthur-primary bg-[rgba(0,255,65,0.08)]'
-                  : 'border-[rgba(0,255,65,0.12)] hover:border-[rgba(0,255,65,0.35)]'
+                  ? 'border-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)]'
+                  : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] hover:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.35)]'
               }`}
             >
               <div className="text-[0.95vh] tracking-widest text-muthur-primary mb-[0.4vh]">{preset.label}</div>
@@ -625,7 +625,7 @@ function LayoutTab({
 
       <section className="min-w-0">
         <ControlHeader icon={<LayoutIcon size={13} />} label="DRAG-FREE EDITOR" />
-        <div className="border border-[rgba(0,255,65,0.12)] p-[0.9vh] space-y-[0.75vh]">
+        <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.9vh] space-y-[0.75vh]">
           <LabeledSlider label="LEFT" value={settings.layout.leftWidth} min={14} max={32} step={1} onChange={(leftWidth) => onLayoutChange({ leftWidth })} />
           <LabeledSlider label="RIGHT" value={settings.layout.rightWidth} min={14} max={32} step={1} onChange={(rightWidth) => onLayoutChange({ rightWidth })} />
           <LabeledSlider label="BOTTOM" value={settings.layout.bottomHeight} min={24} max={50} step={1} onChange={(bottomHeight) => onLayoutChange({ bottomHeight })} />
@@ -746,17 +746,17 @@ function OpsTab({
 
         <ControlHeader icon={<StorageIcon size={13} />} label="BACKUP / RESTORE" />
         <div className="grid grid-cols-2 gap-[0.6vh]">
-          <div className="border border-[rgba(0,255,65,0.12)] p-[0.7vh] min-w-0">
+          <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.7vh] min-w-0">
             <button onClick={runExport} className="w-full h-[2.7vh] border border-muthur-primary text-muthur-primary text-[0.95vh] tracking-widest">
               EXPORT
             </button>
-            <textarea readOnly value={exportText} className="mt-[0.5vh] h-[5.5vh] w-full bg-transparent border border-[rgba(0,255,65,0.1)] text-[0.72vh] text-muthur-secondary opacity-60 p-[0.4vh]" />
+            <textarea readOnly value={exportText} className="mt-[0.5vh] h-[5.5vh] w-full bg-transparent border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] text-[0.72vh] text-muthur-secondary opacity-60 p-[0.4vh]" />
           </div>
-          <div className="border border-[rgba(0,255,65,0.12)] p-[0.7vh] min-w-0">
-            <button onClick={runImport} className="w-full h-[2.7vh] border border-[rgba(0,255,65,0.28)] text-muthur-secondary text-[0.95vh] tracking-widest">
+          <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.7vh] min-w-0">
+            <button onClick={runImport} className="w-full h-[2.7vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.28)] text-muthur-secondary text-[0.95vh] tracking-widest">
               IMPORT {importStatus}
             </button>
-            <textarea value={importText} onChange={(event) => setImportText(event.target.value)} className="mt-[0.5vh] h-[5.5vh] w-full bg-transparent border border-[rgba(0,255,65,0.1)] text-[0.72vh] text-muthur-secondary p-[0.4vh]" />
+            <textarea value={importText} onChange={(event) => setImportText(event.target.value)} className="mt-[0.5vh] h-[5.5vh] w-full bg-transparent border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] text-[0.72vh] text-muthur-secondary p-[0.4vh]" />
           </div>
         </div>
       </section>
@@ -852,12 +852,12 @@ function OfflineTab({ settings, onSettingsChange }: { settings: InterfaceSetting
           <TextField label="MAP REGION" value={offline.mapRegion} onChange={(mapRegion) => update({ mapRegion, enabled: true })} />
         </div>
 
-        <div className="mt-[1vh] border border-[rgba(0,255,65,0.12)] p-[0.75vh]">
+        <div className="mt-[1vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.75vh]">
           <div className="flex items-center justify-between text-[0.9vh] tracking-wider text-muthur-secondary opacity-70 mb-[0.45vh]">
             <span>READINESS</span>
             <span className="text-muthur-primary tabular-nums">{readiness}%</span>
           </div>
-          <div className="h-[0.75vh] bg-[rgba(0,255,65,0.08)] overflow-hidden">
+          <div className="h-[0.75vh] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] overflow-hidden">
             <div className="h-full bg-muthur-primary transition-all" style={{ width: `${readiness}%` }} />
           </div>
           <div className="mt-[0.55vh] text-[0.78vh] text-muthur-secondary opacity-55 leading-snug">
@@ -868,7 +868,7 @@ function OfflineTab({ settings, onSettingsChange }: { settings: InterfaceSetting
 
       <section className="min-w-0 flex flex-col">
         <ControlHeader icon={<StorageIcon size={13} />} label="PACK MANAGER" />
-        <div className="border border-[rgba(0,255,65,0.12)] p-[0.75vh] flex-1 min-h-0 flex flex-col">
+        <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.75vh] flex-1 min-h-0 flex flex-col">
           <div className="grid grid-cols-3 gap-[0.5vh]">
             <Metric label="STATUS" value={packStatus?.status?.toUpperCase() ?? (loadingPack ? 'SCANNING' : 'UNKNOWN')} />
             <Metric label="SIZE" value={formatBytes(packStatus?.sizeBytes ?? 0)} />
@@ -880,12 +880,12 @@ function OfflineTab({ settings, onSettingsChange }: { settings: InterfaceSetting
                 key={module.id}
                 className={`border px-[0.45vh] py-[0.35vh] text-center text-[0.75vh] tracking-wider ${
                   packStatus?.modules?.[module.id] && offline[module.id]
-                    ? 'border-muthur-primary text-muthur-primary bg-[rgba(0,255,65,0.08)]'
+                    ? 'border-muthur-primary text-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)]'
                     : packStatus?.modules?.[module.id]
-                    ? 'border-[rgba(0,255,65,0.3)] text-muthur-secondary opacity-75'
+                    ? 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)] text-muthur-secondary opacity-75'
                     : offline[module.id]
                     ? 'border-muthur-accent text-muthur-accent bg-[rgba(255,59,83,0.08)]'
-                    : 'border-[rgba(0,255,65,0.1)] text-muthur-secondary opacity-45'
+                    : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] text-muthur-secondary opacity-45'
                 }`}
               >
                 {module.id.toUpperCase()}
@@ -897,7 +897,7 @@ function OfflineTab({ settings, onSettingsChange }: { settings: InterfaceSetting
             <StatusCard title="CURRENT" value={packStatus?.currentVersion ?? 'UNKNOWN'} body="app pack format" />
             <StatusCard title="UPDATED" value={formatStamp(packStatus?.updatedAt)} body="manifest timestamp" />
           </div>
-          <pre className="mt-[0.8vh] flex-1 min-h-0 overflow-auto bg-[rgba(0,255,65,0.035)] border border-[rgba(0,255,65,0.1)] p-[0.65vh] text-[0.78vh] text-muthur-primary whitespace-pre-wrap">
+          <pre className="mt-[0.8vh] flex-1 min-h-0 overflow-auto bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.035)] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] p-[0.65vh] text-[0.78vh] text-muthur-primary whitespace-pre-wrap">
 {`# Commands are queued into the shell for review, not auto-executed.
 ${buildOfflineCommand('--status')}
 ${buildOfflineCommand(packStatus?.status === 'stale' ? '--update' : '--install')}`}
@@ -907,12 +907,12 @@ ${buildOfflineCommand(packStatus?.status === 'stale' ? '--update' : '--install')
             <button
               onClick={openPackFolder}
               disabled={!packStatus?.path}
-              className="text-left text-[0.72vh] text-muthur-secondary opacity-60 truncate border border-[rgba(0,255,65,0.1)] px-[0.45vh] disabled:opacity-25"
+              className="text-left text-[0.72vh] text-muthur-secondary opacity-60 truncate border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] px-[0.45vh] disabled:opacity-25"
               title={packPath}
             >
               {packPath}
             </button>
-            <button onClick={() => queueOfflineCommand('--status')} className="px-[0.7vh] border border-[rgba(0,255,65,0.24)] text-muthur-secondary text-[0.75vh] tracking-wider">
+            <button onClick={() => queueOfflineCommand('--status')} className="px-[0.7vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.24)] text-muthur-secondary text-[0.75vh] tracking-wider">
               STATUS
             </button>
             <button onClick={() => queueOfflineCommand(packStatus?.status === 'stale' ? '--update' : '--install')} className="px-[0.7vh] border border-muthur-primary text-muthur-primary text-[0.75vh] tracking-wider">
@@ -949,12 +949,12 @@ function LocalMapViewer({ maps, configuredRegion }: { maps: OfflineMapEntry[]; c
   return (
     <section className="min-w-0 flex flex-col">
       <ControlHeader icon={<StorageIcon size={13} />} label="LOCAL MAP VIEWER" />
-      <div className="border border-[rgba(0,255,65,0.12)] p-[0.75vh] flex-1 min-h-0 flex flex-col">
+      <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.75vh] flex-1 min-h-0 flex flex-col">
         <div className="grid grid-cols-[1fr_auto] gap-[0.5vh]">
           <select
             value={selectedMap?.path ?? ''}
             onChange={(event) => setSelectedPath(event.target.value)}
-            className="min-w-0 bg-transparent border border-[rgba(0,255,65,0.18)] px-[0.45vh] py-[0.25vh] text-[0.8vh] text-muthur-primary"
+            className="min-w-0 bg-transparent border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] px-[0.45vh] py-[0.25vh] text-[0.8vh] text-muthur-primary"
           >
             {maps.length === 0 && <option value="">NO MBTILES</option>}
             {maps.map((map) => <option key={map.path} value={map.path}>{map.name}</option>)}
@@ -962,7 +962,7 @@ function LocalMapViewer({ maps, configuredRegion }: { maps: OfflineMapEntry[]; c
           <div className="text-[0.75vh] text-muthur-secondary opacity-50 tabular-nums">{formatBytes(selectedMap?.sizeBytes ?? 0)}</div>
         </div>
 
-        <div className="mt-[0.6vh] relative h-[13vh] border border-[rgba(0,255,65,0.16)] bg-[rgba(0,255,65,0.025)] overflow-hidden">
+        <div className="mt-[0.6vh] relative h-[13vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.16)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.025)] overflow-hidden">
           <div className="absolute inset-0 opacity-35" style={{
             backgroundImage: 'linear-gradient(rgba(var(--color-r), var(--color-g), var(--color-b), 0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--color-r), var(--color-g), var(--color-b), 0.16) 1px, transparent 1px)',
             backgroundSize: '16.6% 20%, 16.6% 20%',
@@ -1035,7 +1035,7 @@ function GamesTab() {
       {mode === 'cards' && <VoidCardsGame onResult={recordResult} onSnapshot={setSnapshot} />}
       <section className="min-w-0 flex flex-col">
         <ControlHeader icon={<GameIcon size={13} />} label="OFFLINE ARCADE" />
-        <div className="border border-[rgba(0,255,65,0.12)] p-[0.7vh] flex-1 min-h-0 overflow-auto">
+        <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.7vh] flex-1 min-h-0 overflow-auto">
           <div className="grid grid-cols-1 gap-[0.45vh]">
             {PLAYABLE_GAMES.map((game) => (
               <button
@@ -1043,8 +1043,8 @@ function GamesTab() {
                 onClick={() => selectGame(game.id)}
                 className={`border px-[0.6vh] py-[0.5vh] text-left transition-all ${
                   mode === game.id
-                    ? 'border-muthur-primary bg-[rgba(0,255,65,0.08)]'
-                    : 'border-[rgba(0,255,65,0.1)] bg-[rgba(0,255,65,0.025)] hover:border-[rgba(0,255,65,0.32)]'
+                    ? 'border-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)]'
+                    : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.025)] hover:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.32)]'
                 }`}
               >
                 <div className="flex items-center justify-between gap-[0.5vh]">
@@ -1061,7 +1061,7 @@ function GamesTab() {
             {PLAYABLE_GAMES.map((game) => {
               const record = memory.records[game.id];
               return (
-                <div key={game.id} className="border border-[rgba(0,255,65,0.1)] p-[0.45vh] min-w-0">
+                <div key={game.id} className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] p-[0.45vh] min-w-0">
                   <div className="text-[0.7vh] text-muthur-secondary opacity-40 truncate">{game.name}</div>
                   <div className="text-[0.9vh] text-muthur-primary tabular-nums">{record?.highScore ?? 0}</div>
                   <div className="text-[0.65vh] text-muthur-secondary opacity-45 truncate">
@@ -1076,7 +1076,7 @@ function GamesTab() {
               <button
                 key={slot.id}
                 onClick={() => saveSlot(slot.id)}
-                className="border border-[rgba(0,255,65,0.12)] p-[0.45vh] text-left hover:border-muthur-primary transition-colors"
+                className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.45vh] text-left hover:border-muthur-primary transition-colors"
               >
                 <div className="text-[0.72vh] text-muthur-primary tracking-wider">{slot.label}</div>
                 <div className="text-[0.65vh] text-muthur-secondary opacity-45 truncate">{slot.summary}</div>
@@ -1088,7 +1088,7 @@ function GamesTab() {
           <ControlHeader icon={<GameIcon size={13} />} label="FUTURE MODULES" />
           <div className="space-y-[0.45vh]">
             {GAME_IDEAS.map((idea, index) => (
-              <div key={idea.name} className="border border-[rgba(0,255,65,0.1)] bg-[rgba(0,255,65,0.025)] px-[0.6vh] py-[0.45vh]">
+              <div key={idea.name} className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.025)] px-[0.6vh] py-[0.45vh]">
                 <div className="flex items-center justify-between gap-[0.5vh]">
                   <span className="text-[0.9vh] tracking-wider text-muthur-primary truncate">{idea.name}</span>
                   <span className="text-[0.75vh] text-muthur-secondary opacity-45 tabular-nums">{idea.stat}</span>
@@ -1134,7 +1134,7 @@ function LogTab({ settings, onSettingsChange }: { settings: InterfaceSettings; o
     <div className="grid grid-cols-[1fr_1fr_0.8fr] gap-[1vh] h-full">
       <section className="min-w-0 flex flex-col">
         <ControlHeader icon={<KeyboardIcon size={13} />} label="MISSION LOG" />
-        <div className="flex-1 min-h-0 overflow-auto border border-[rgba(0,255,65,0.12)] p-[0.7vh] space-y-[0.45vh]">
+        <div className="flex-1 min-h-0 overflow-auto border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.7vh] space-y-[0.45vh]">
           {settings.missionLog.map(item => (
             <button key={item.id} onClick={() => setMissionDone(item.id)} className="w-full text-left flex gap-[0.5vh] text-[0.9vh] text-muthur-secondary">
               <span className="text-muthur-primary">{item.done ? '[x]' : '[ ]'}</span>
@@ -1143,16 +1143,16 @@ function LogTab({ settings, onSettingsChange }: { settings: InterfaceSettings; o
           ))}
         </div>
         <div className="mt-[0.6vh] flex gap-[0.4vh]">
-          <input value={missionInput} onChange={(event) => setMissionInput(event.target.value)} className="flex-1 min-w-0 bg-transparent border border-[rgba(0,255,65,0.18)] px-[0.5vh] text-[0.9vh] text-muthur-primary" />
+          <input value={missionInput} onChange={(event) => setMissionInput(event.target.value)} className="flex-1 min-w-0 bg-transparent border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] px-[0.5vh] text-[0.9vh] text-muthur-primary" />
           <button onClick={addMission} className="px-[0.8vh] border border-muthur-primary text-muthur-primary text-[0.9vh]">ADD</button>
         </div>
       </section>
 
       <section className="min-w-0 flex flex-col">
         <ControlHeader icon={<StorageIcon size={13} />} label="BOOKMARKS / HELP" />
-        <div className="flex-1 min-h-0 overflow-auto border border-[rgba(0,255,65,0.12)] p-[0.7vh] space-y-[0.45vh]">
+        <div className="flex-1 min-h-0 overflow-auto border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.7vh] space-y-[0.45vh]">
           {settings.bookmarks.map(bookmark => (
-            <div key={bookmark.id} className="border border-[rgba(0,255,65,0.08)] p-[0.45vh]">
+            <div key={bookmark.id} className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] p-[0.45vh]">
               <div className="text-[0.9vh] tracking-wider text-muthur-primary truncate">{bookmark.label}</div>
               <div className="text-[0.75vh] text-muthur-secondary opacity-45 truncate">{bookmark.url}</div>
             </div>
@@ -1162,20 +1162,20 @@ function LogTab({ settings, onSettingsChange }: { settings: InterfaceSettings; o
           </div>
         </div>
         <div className="mt-[0.6vh] grid grid-cols-[0.55fr_1fr_auto] gap-[0.35vh]">
-          <input value={bookmarkLabel} onChange={(event) => setBookmarkLabel(event.target.value)} placeholder="LABEL" className="min-w-0 bg-transparent border border-[rgba(0,255,65,0.18)] px-[0.45vh] text-[0.78vh] text-muthur-primary" />
-          <input value={bookmarkUrl} onChange={(event) => setBookmarkUrl(event.target.value)} placeholder="URL" className="min-w-0 bg-transparent border border-[rgba(0,255,65,0.18)] px-[0.45vh] text-[0.78vh] text-muthur-primary" />
+          <input value={bookmarkLabel} onChange={(event) => setBookmarkLabel(event.target.value)} placeholder="LABEL" className="min-w-0 bg-transparent border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] px-[0.45vh] text-[0.78vh] text-muthur-primary" />
+          <input value={bookmarkUrl} onChange={(event) => setBookmarkUrl(event.target.value)} placeholder="URL" className="min-w-0 bg-transparent border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] px-[0.45vh] text-[0.78vh] text-muthur-primary" />
           <button onClick={addBookmark} className="px-[0.6vh] border border-muthur-primary text-muthur-primary text-[0.8vh]">ADD</button>
         </div>
       </section>
 
       <section className="min-w-0 flex flex-col">
         <ControlHeader icon={<LayoutIcon size={13} />} label="PLUGIN SLOTS" />
-        <div className="flex-1 min-h-0 overflow-auto border border-[rgba(0,255,65,0.12)] p-[0.7vh] space-y-[0.5vh]">
+        <div className="flex-1 min-h-0 overflow-auto border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.7vh] space-y-[0.5vh]">
           {settings.pluginSlots.map(slot => (
             <button
               key={slot.id}
               onClick={() => onSettingsChange({ pluginSlots: settings.pluginSlots.map(item => item.id === slot.id ? { ...item, enabled: !item.enabled } : item) })}
-              className={`w-full text-left border p-[0.55vh] ${slot.enabled ? 'border-muthur-primary bg-[rgba(0,255,65,0.06)]' : 'border-[rgba(0,255,65,0.1)]'}`}
+              className={`w-full text-left border p-[0.55vh] ${slot.enabled ? 'border-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.06)]' : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)]'}`}
             >
               <div className="text-[0.88vh] text-muthur-primary tracking-wider">{slot.enabled ? 'ON ' : 'OFF'} {slot.label}</div>
               <div className="text-[0.72vh] text-muthur-secondary opacity-45 leading-tight">{slot.description}</div>
@@ -1289,20 +1289,20 @@ function SignalLockGame({ onResult, onSnapshot }: GameCallbacks) {
                     ? 'bg-muthur-primary border-muthur-primary'
                     : isTarget
                     ? 'border-muthur-accent bg-[rgba(255,59,83,0.16)]'
-                    : 'border-[rgba(0,255,65,0.12)] bg-[rgba(0,255,65,0.03)]'
+                    : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.03)]'
                 }`}
               />
             );
           })}
         </div>
-        <div className="border border-[rgba(0,255,65,0.12)] p-[0.8vh] min-w-0 flex flex-col justify-between">
+        <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.8vh] min-w-0 flex flex-col justify-between">
           <div className="grid grid-cols-2 gap-[0.45vh] text-[0.88vh]">
             <Metric label="STATE" value={status} />
             <Metric label="TIME" value={`${timeLeft}s`} />
             <Metric label="SCORE" value={String(score)} />
             <Metric label="TARGET" value={String(target + 1)} />
           </div>
-          <div className="h-[0.7vh] bg-[rgba(0,255,65,0.08)] overflow-hidden">
+          <div className="h-[0.7vh] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] overflow-hidden">
             <div className="h-full bg-muthur-primary transition-all" style={{ width: `${(timeLeft / 30) * 100}%` }} />
           </div>
           <button onClick={running ? lock : reset} className="h-[3vh] border border-muthur-primary text-muthur-primary tracking-widest text-[1vh]">
@@ -1537,10 +1537,10 @@ function SectorTacticsGame({ onResult, onSnapshot }: GameCallbacks) {
                     : unit?.side === 'system'
                     ? 'border-muthur-accent text-muthur-accent bg-[rgba(255,59,83,0.12)]'
                     : unit?.side === 'crew'
-                    ? 'border-[rgba(0,255,65,0.36)] text-muthur-primary bg-[rgba(0,255,65,0.08)]'
+                    ? 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.36)] text-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)]'
                     : legal
-                    ? 'border-muthur-primary bg-[rgba(0,255,65,0.12)]'
-                    : 'border-[rgba(0,255,65,0.11)] bg-[rgba(0,255,65,0.025)]'
+                    ? 'border-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)]'
+                    : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.11)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.025)]'
                 }`}
               >
                 {unit?.label ?? (legal ? '+' : '')}
@@ -1548,7 +1548,7 @@ function SectorTacticsGame({ onResult, onSnapshot }: GameCallbacks) {
             );
           })}
         </div>
-        <div className="border border-[rgba(0,255,65,0.12)] p-[0.8vh] min-w-0 flex flex-col justify-between">
+        <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.8vh] min-w-0 flex flex-col justify-between">
           <div className="grid grid-cols-2 gap-[0.45vh] text-[0.88vh]">
             <Metric label="STATE" value={status} />
             <Metric label="MOVES" value={String(moves)} />
@@ -1657,12 +1657,12 @@ function VoidCardsGame({ onResult, onSnapshot }: GameCallbacks) {
       <div className="grid grid-cols-[1fr_0.72fr] gap-[0.7vh] flex-1 min-h-0">
         <div className="grid grid-rows-[1fr_auto] gap-[0.7vh] min-h-0">
           <div className="grid grid-cols-2 gap-[0.7vh] min-h-0">
-            <div className="border border-[rgba(0,255,65,0.18)] bg-[rgba(0,255,65,0.05)] flex flex-col items-center justify-center min-h-[18vh]">
+            <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.05)] flex flex-col items-center justify-center min-h-[18vh]">
               <div className="text-[0.8vh] text-muthur-secondary opacity-45 tracking-widest">CURRENT</div>
               <div className="text-[3.2vh] text-muthur-primary font-display tracking-widest">{cardLabel(current)}</div>
               <div className="text-[0.9vh] text-muthur-secondary opacity-50">RANK {current.rank}</div>
             </div>
-            <div className="border border-[rgba(0,255,65,0.1)] bg-[rgba(0,255,65,0.025)] flex flex-col items-center justify-center min-h-[18vh]">
+            <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.025)] flex flex-col items-center justify-center min-h-[18vh]">
               <div className="text-[0.8vh] text-muthur-secondary opacity-45 tracking-widest">PREVIOUS</div>
               <div className="text-[2.2vh] text-muthur-secondary opacity-70 font-display tracking-widest">{lastCard ? cardLabel(lastCard) : 'NONE'}</div>
               <div className="text-[0.9vh] text-muthur-secondary opacity-35">LOCAL DECK</div>
@@ -1670,18 +1670,18 @@ function VoidCardsGame({ onResult, onSnapshot }: GameCallbacks) {
           </div>
           <div className="grid grid-cols-3 gap-[0.55vh]">
             <button onClick={() => predict('hi')} className="h-[3vh] border border-muthur-primary text-muthur-primary tracking-widest text-[0.95vh]">HIGHER [H]</button>
-            <button onClick={() => predict('eq')} className="h-[3vh] border border-[rgba(0,255,65,0.28)] text-muthur-secondary tracking-widest text-[0.95vh]">EQUAL [E]</button>
+            <button onClick={() => predict('eq')} className="h-[3vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.28)] text-muthur-secondary tracking-widest text-[0.95vh]">EQUAL [E]</button>
             <button onClick={() => predict('lo')} className="h-[3vh] border border-muthur-accent text-muthur-accent tracking-widest text-[0.95vh]">LOWER [L]</button>
           </div>
         </div>
-        <div className="border border-[rgba(0,255,65,0.12)] p-[0.8vh] min-w-0 flex flex-col justify-between">
+        <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[0.8vh] min-w-0 flex flex-col justify-between">
           <div className="grid grid-cols-2 gap-[0.45vh] text-[0.88vh]">
             <Metric label="STATE" value={status} />
             <Metric label="ROUND" value={String(round)} />
             <Metric label="SCORE" value={String(score)} />
             <Metric label="STREAK" value={String(streak)} />
           </div>
-          <div className="h-[0.7vh] bg-[rgba(0,255,65,0.08)] overflow-hidden">
+          <div className="h-[0.7vh] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] overflow-hidden">
             <div className="h-full bg-muthur-primary transition-all" style={{ width: `${Math.max(3, (deck.length / 47) * 100)}%` }} />
           </div>
           <Metric label="DECK" value={`${deck.length} CARDS`} />
@@ -1701,7 +1701,7 @@ function DeckTabButton({ active, onClick, label, icon, title }: { active: boolea
       className={`h-[2.7vh] px-[0.55vh] flex items-center justify-center gap-[0.3vh] border text-[0.92vh] tracking-wider font-mono transition-all ${
         active
           ? 'bg-muthur-primary text-muthur-bg border-muthur-primary'
-          : 'text-muthur-secondary border-[rgba(0,255,65,0.16)] opacity-60 hover:opacity-100 hover:border-[rgba(0,255,65,0.35)]'
+          : 'text-muthur-secondary border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.16)] opacity-60 hover:opacity-100 hover:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.35)]'
       }`}
       title={title}
     >
@@ -1713,7 +1713,7 @@ function DeckTabButton({ active, onClick, label, icon, title }: { active: boolea
 
 function ControlHeader({ icon, label }: { icon: ReactNode; label: string }) {
   return (
-    <div className="text-[1.12vh] tracking-widest opacity-75 mb-[0.75vh] mt-[0.45vh] flex items-center gap-[0.55vh] panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-[0.6vh]">
+    <div className="text-[1.12vh] tracking-widest opacity-75 mb-[0.75vh] mt-[0.45vh] flex items-center gap-[0.55vh] panel-header-bracket border-t border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] pt-[0.6vh]">
       {icon}
       {label}
     </div>
@@ -1763,13 +1763,13 @@ function LabeledSlider(props: { label: string; value: number; min: number; max: 
 function LayoutDiagram({ layout }: { layout: { leftWidth: number; rightWidth: number; bottomHeight: number; deckSplit: number } }) {
   const center = 100 - layout.leftWidth - layout.rightWidth;
   return (
-    <div className="h-[4vh] border border-[rgba(0,255,65,0.2)] p-[0.3vh] flex flex-col gap-[0.3vh]">
+    <div className="h-[4vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.2)] p-[0.3vh] flex flex-col gap-[0.3vh]">
       <div className="flex flex-1 gap-[0.3vh] min-h-0">
-        <span className="bg-[rgba(0,255,65,0.18)]" style={{ width: `${layout.leftWidth}%` }} />
-        <span className="bg-[rgba(0,255,65,0.36)]" style={{ width: `${center}%` }} />
-        <span className="bg-[rgba(0,255,65,0.12)]" style={{ width: `${layout.rightWidth}%` }} />
+        <span className="bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)]" style={{ width: `${layout.leftWidth}%` }} />
+        <span className="bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.36)]" style={{ width: `${center}%` }} />
+        <span className="bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)]" style={{ width: `${layout.rightWidth}%` }} />
       </div>
-      <div className="bg-[rgba(0,255,65,0.16)]" style={{ height: `${Math.max(18, layout.bottomHeight)}%` }} />
+      <div className="bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.16)]" style={{ height: `${Math.max(18, layout.bottomHeight)}%` }} />
     </div>
   );
 }
@@ -1786,7 +1786,7 @@ function SmallChoice({ active, title, body, onClick }: { active: boolean; title:
         playSound('switch', 0.08);
       }}
       className={`min-h-[4.6vh] border px-[0.65vh] py-[0.55vh] text-left transition-all ${
-        active ? 'border-muthur-primary bg-[rgba(0,255,65,0.08)]' : 'border-[rgba(0,255,65,0.12)] hover:border-[rgba(0,255,65,0.3)]'
+        active ? 'border-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)]' : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] hover:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)]'
       }`}
     >
       <div className="text-[0.98vh] tracking-wider text-muthur-primary truncate">{title}</div>
@@ -1801,7 +1801,7 @@ function CommandButton({ title, body, onClick }: { title: string; body: string; 
 
 function StatusCard({ title, value, body }: { title: string; value: string; body: string }) {
   return (
-    <div className="border border-[rgba(0,255,65,0.12)] px-[0.75vh] py-[0.65vh] min-w-0">
+    <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] px-[0.75vh] py-[0.65vh] min-w-0">
       <div className="text-[0.88vh] tracking-wider text-muthur-secondary opacity-55">{title}</div>
       <div className="text-[1.02vh] tracking-wider text-muthur-primary truncate">{value}</div>
       <div className="text-[0.82vh] text-muthur-secondary opacity-62 truncate">{body}</div>
@@ -1811,7 +1811,7 @@ function StatusCard({ title, value, body }: { title: string; value: string; body
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-[rgba(0,255,65,0.1)] px-[0.6vh] py-[0.45vh] min-w-0">
+    <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] px-[0.6vh] py-[0.45vh] min-w-0">
       <div className="text-[0.8vh] tracking-wider text-muthur-secondary opacity-55">{label}</div>
       <div className="text-[1.08vh] tracking-wider text-muthur-primary truncate">{value}</div>
     </div>
@@ -1825,7 +1825,7 @@ function TextField({ label, value, onChange }: { label: string; value: string; o
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="min-w-0 bg-transparent border border-[rgba(0,255,65,0.18)] px-[0.55vh] py-[0.35vh] text-[1vh] text-muthur-primary focus:outline-none focus:border-muthur-primary"
+        className="min-w-0 bg-transparent border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] px-[0.55vh] py-[0.35vh] text-[1vh] text-muthur-primary focus:outline-none focus:border-muthur-primary"
       />
     </label>
   );

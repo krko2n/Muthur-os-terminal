@@ -1,4 +1,5 @@
 import * as os from 'node:os';
+import { formatBytes } from './metrics';
 
 export interface MuthurMemoryStatus {
   readonly totalBytes: number;
@@ -24,14 +25,6 @@ export interface MuthurStatus {
 function percent(used: number, total: number): number {
   if (total <= 0) return 0;
   return Math.round((used / total) * 1000) / 10;
-}
-
-function formatBytes(bytes: number): string {
-  const gib = bytes / 1024 / 1024 / 1024;
-  if (gib >= 1) return `${gib.toFixed(1)} GiB`;
-
-  const mib = bytes / 1024 / 1024;
-  return `${mib.toFixed(1)} MiB`;
 }
 
 function formatUptime(seconds: number): string {
