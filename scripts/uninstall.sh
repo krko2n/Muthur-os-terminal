@@ -55,7 +55,8 @@ fi
 
 # Confirm uninstall
 echo -e "${YELLOW}This will remove:${NC}"
-echo "  - Binary: /usr/local/bin/muthur"
+echo "  - Commands in /usr/local/bin: muthur, muthur-bin, muthur-cli, muthur-ui, kys"
+echo "  - System link: /usr/bin/muthur-os-terminal"
 echo "  - Desktop entry: ~/.local/share/applications/muthur.desktop"
 echo "  - Config directory: ~/.config/xKOR_3RR0R/"
 echo ""
@@ -66,13 +67,22 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-# Remove binary
-if [ -f "/usr/local/bin/muthur" ]; then
-    echo -e "${YELLOW}Removing binary...${NC}"
-    maybe_sudo rm -f /usr/local/bin/muthur
-    echo -e "${GREEN}[OK]${NC} Binary removed"
-else
-    echo -e "${YELLOW}[SKIP]${NC} Binary not found"
+# Remove every command the installer deploys (launcher, app binary, CLI, tools)
+removed_any=false
+for cmd in muthur muthur-bin muthur-cli muthur-ui kys; do
+    if [ -e "/usr/local/bin/$cmd" ] || [ -L "/usr/local/bin/$cmd" ]; then
+        maybe_sudo rm -f "/usr/local/bin/$cmd"
+        echo -e "${GREEN}[OK]${NC} Removed /usr/local/bin/$cmd"
+        removed_any=true
+    fi
+done
+if [ -L "/usr/bin/muthur-os-terminal" ]; then
+    maybe_sudo rm -f /usr/bin/muthur-os-terminal
+    echo -e "${GREEN}[OK]${NC} Removed /usr/bin/muthur-os-terminal"
+    removed_any=true
+fi
+if [ "$removed_any" = false ]; then
+    echo -e "${YELLOW}[SKIP]${NC} No installed commands found"
 fi
 
 # Remove desktop entry

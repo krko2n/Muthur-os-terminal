@@ -534,8 +534,9 @@ build_app() {
     npm ci --legacy-peer-deps 2>/dev/null || npm install --legacy-peer-deps
     info "Dependencies installed"
 
-    step "[2/2] Compiling application (frontend + backend)..."
+    step "[2/2] Compiling application (frontend + backend + terminal CLI)..."
     npm run build
+    npm run build:cli
     cd "$SCRIPT_DIR/src-tauri"
     cargo build --release
     cd "$SCRIPT_DIR"
@@ -573,6 +574,13 @@ install_assets() {
 #!/bin/bash
 # MUTHUR OS Terminal launcher
 # Auto-detects and fixes missing dependencies before starting.
+
+# Any argument is a terminal-only CLI command (muthur status, muthur config
+# show, muthur --help). It must never start the graphical session, so this
+# check runs before the display/compositor logic below.
+if [ "$#" -gt 0 ]; then
+    exec "$(dirname "$(readlink -f "$0")")/muthur-cli" "$@"
+fi
 
 if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
     exec muthur-bin "$@"
@@ -762,6 +770,14 @@ WRAPPER
     fi
     info "Binary: $INSTALL_DIR/muthur"
 
+    # ── Terminal-only CLI (muthur status / config / --help) ──
+    if [ -f "$SCRIPT_DIR/dist-cli/muthur.mjs" ]; then
+        install_binary_file "$SCRIPT_DIR/dist-cli/muthur.mjs" "$INSTALL_DIR/muthur-cli"
+        info "Command: $INSTALL_DIR/muthur-cli (also: muthur <command>)"
+    else
+        warn "Terminal CLI not built (dist-cli/muthur.mjs missing); run: npm run build:cli"
+    fi
+
     # ── CLI Utilities ──
     if [ -f "$SCRIPT_DIR/packaging/bin/kys" ]; then
         install_binary_file "$SCRIPT_DIR/packaging/bin/kys" "$INSTALL_DIR/kys"
@@ -852,6 +868,14 @@ verify_installation() {
         info "Binary OK ($size)"
     else
         err "Binary missing: $INSTALL_DIR/muthur"
+        errors=$((errors + 1))
+    fi
+
+    # Terminal CLI check: run it, do not just look for the file
+    if "$INSTALL_DIR/muthur-cli" --version >/dev/null 2>&1; then
+        info "Terminal CLI OK ($("$INSTALL_DIR/muthur-cli" --version))"
+    else
+        err "Terminal CLI does not run: $INSTALL_DIR/muthur-cli --version"
         errors=$((errors + 1))
     fi
 
