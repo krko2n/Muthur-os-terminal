@@ -2,6 +2,9 @@
 
 Auto-generated from git log.
 
+22baae7 chore: refresh README code stats
+23b4906 docs: auto-update generated docs [skip ci]
+9ecf7d6 feat: eDEX-style setup tab, keyboard, sounds, status themes and boot-to-MUTHUR
 b2f4ab8 fix(packaging): disable makepkg LTO for the Arch package
 b43a2e1 fix(packaging): build Arch package from source; CLI runs on older Node
 90d48e4 fix(config): CLI reads the same config.toml as the GUI and installer
@@ -49,6 +52,3 @@ dd45a56 feat: route cli config command
 e3b6af7 feat: add cli config command
 487057e feat: add local config service
 e2eb993 docs: auto-update generated docs [skip ci]
-c818981 test: include cli status smoke check
-50528f1 test: validate cli status skeleton
-7e96856 docs: auto-update generated docs [skip ci]
