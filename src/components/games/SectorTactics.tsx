@@ -7,7 +7,7 @@ interface SectorTacticsProps {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-[rgba(0,255,65,0.1)] px-[0.6vh] py-[0.45vh] min-w-0">
+    <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] px-[0.6vh] py-[0.45vh] min-w-0">
       <div className="text-[0.8vh] tracking-wider text-muthur-secondary opacity-55">{label}</div>
       <div className="text-[1.08vh] tracking-wider text-muthur-primary truncate">{value}</div>
     </div>
@@ -325,10 +325,10 @@ export default function SectorTactics({ fullscreen }: SectorTacticsProps) {
                     : unit?.side === 'system'
                     ? 'border-muthur-accent text-muthur-accent bg-[rgba(255,59,83,0.12)]'
                     : unit?.side === 'crew'
-                    ? 'border-[rgba(0,255,65,0.36)] text-muthur-primary bg-[rgba(0,255,65,0.08)]'
+                    ? 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.36)] text-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)]'
                     : legal
-                    ? 'border-muthur-primary bg-[rgba(0,255,65,0.12)]'
-                    : 'border-[rgba(0,255,65,0.11)] bg-[rgba(0,255,65,0.025)]'
+                    ? 'border-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)]'
+                    : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.11)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.025)]'
                 }`}
               >
                 {unit?.label ?? (legal ? '+' : '')}
@@ -336,7 +336,7 @@ export default function SectorTactics({ fullscreen }: SectorTacticsProps) {
             );
           })}
         </div>
-        <div className="border border-[rgba(0,255,65,0.12)] p-[1.2vh] min-w-0 flex flex-col justify-between">
+        <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[1.2vh] min-w-0 flex flex-col justify-between">
           <div className="grid grid-cols-2 gap-[0.6vh]">
             <Metric label="STATE" value={status} />
             <Metric label="MOVES" value={String(moves)} />
@@ -351,7 +351,7 @@ export default function SectorTactics({ fullscreen }: SectorTacticsProps) {
           </button>
           <button
             onClick={() => setShowTutorial(true)}
-            className="mt-[0.8vh] h-[3vh] border border-[rgba(0,255,65,0.25)] text-muthur-secondary tracking-widest text-[0.9vh] hover:border-muthur-primary transition-colors"
+            className="mt-[0.8vh] h-[3vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.25)] text-muthur-secondary tracking-widest text-[0.9vh] hover:border-muthur-primary transition-colors"
           >
             HELP
           </button>

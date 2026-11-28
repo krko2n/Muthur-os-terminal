@@ -7,7 +7,7 @@ interface SignalLockProps {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-[rgba(0,255,65,0.1)] px-[0.6vh] py-[0.45vh] min-w-0">
+    <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] px-[0.6vh] py-[0.45vh] min-w-0">
       <div className="text-[0.8vh] tracking-wider text-muthur-secondary opacity-55">{label}</div>
       <div className="text-[1.08vh] tracking-wider text-muthur-primary truncate">{value}</div>
     </div>
@@ -208,20 +208,20 @@ export default function SignalLock({ fullscreen }: SignalLockProps) {
                     ? 'bg-muthur-primary border-muthur-primary'
                     : isTarget
                     ? 'border-muthur-accent bg-[rgba(255,59,83,0.16)]'
-                    : 'border-[rgba(0,255,65,0.12)] bg-[rgba(0,255,65,0.03)]'
+                    : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.03)]'
                 }`}
               />
             );
           })}
         </div>
-        <div className="border border-[rgba(0,255,65,0.12)] p-[1.2vh] min-w-0 flex flex-col justify-between">
+        <div className="border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.12)] p-[1.2vh] min-w-0 flex flex-col justify-between">
           <div className="grid grid-cols-2 gap-[0.6vh]">
             <Metric label="STATE" value={status} />
             <Metric label="TIME" value={`${timeLeft}s`} />
             <Metric label="SCORE" value={String(score)} />
             <Metric label="TARGET" value={String(target + 1)} />
           </div>
-          <div className="h-[0.7vh] bg-[rgba(0,255,65,0.08)] overflow-hidden my-[1vh]">
+          <div className="h-[0.7vh] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] overflow-hidden my-[1vh]">
             <div className="h-full bg-muthur-primary transition-all" style={{ width: `${(timeLeft / 30) * 100}%` }} />
           </div>
           <button onClick={running ? lock : reset} className="h-[4vh] border border-muthur-primary text-muthur-primary tracking-widest text-[1.1vh]">
@@ -229,7 +229,7 @@ export default function SignalLock({ fullscreen }: SignalLockProps) {
           </button>
           <button
             onClick={() => setShowTutorial(true)}
-            className="mt-[0.8vh] h-[3vh] border border-[rgba(0,255,65,0.25)] text-muthur-secondary tracking-widest text-[0.9vh] hover:border-muthur-primary transition-colors"
+            className="mt-[0.8vh] h-[3vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.25)] text-muthur-secondary tracking-widest text-[0.9vh] hover:border-muthur-primary transition-colors"
           >
             HELP
           </button>

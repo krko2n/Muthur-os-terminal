@@ -10,6 +10,7 @@ import LoadingScreen from './components/LoadingScreen';
 import FirstRunSetup from './components/FirstRunSetup';
 import CommandPalette from './components/CommandPalette';
 import ShutdownScreen from './components/ShutdownScreen';
+import PanelBoundary from './components/PanelBoundary';
 import { configureAudio, playSound } from './audio';
 import {
   applyInterfaceSettings,
@@ -239,15 +240,16 @@ function App() {
         {/* Top section */}
         <div className="flex flex-1 min-h-0">
           <div style={{ width: `${leftWidth}%`, transitionDelay: '0.2s' }} className={`shrink-0 overflow-hidden min-w-0 panel-reveal ${assembled ? 'visible' : ''}`}>
-            <LeftPanel systemStats={systemStats} />
+            <PanelBoundary name="SYSTEM"><LeftPanel systemStats={systemStats} /></PanelBoundary>
           </div>
 
           <div
-            className="w-[3px] shrink-0 hover:bg-[rgba(0,255,65,0.3)] transition-colors"
+            className="w-[3px] shrink-0 hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)] transition-colors"
             onMouseDown={() => startDrag('left')}
           />
 
           <div className={`flex-1 min-w-0 min-h-0 panel-reveal ${assembled ? 'visible' : ''}`} style={{ transitionDelay: '0s' }}>
+            <PanelBoundary name="TERMINAL">
             <CenterPanel
               settings={settings}
               deckSplit={deckSplit}
@@ -266,26 +268,28 @@ function App() {
               onOpenPalette={() => setCommandPaletteOpen(true)}
               onOpenShutdown={() => setShutdownOpen(true)}
             />
+            </PanelBoundary>
           </div>
 
           <div
-            className="w-[3px] shrink-0 hover:bg-[rgba(0,255,65,0.3)] transition-colors"
+            className="w-[3px] shrink-0 hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)] transition-colors"
             onMouseDown={() => startDrag('right')}
           />
 
           <div style={{ width: `${rightWidth}%`, transitionDelay: '0.4s' }} className={`shrink-0 overflow-hidden min-w-0 panel-reveal ${assembled ? 'visible' : ''}`}>
-            <RightPanel />
+            <PanelBoundary name="ORBITAL"><RightPanel systemStats={systemStats} /></PanelBoundary>
           </div>
         </div>
 
         {/* Bottom resize */}
         <div
-          className="h-[3px] shrink-0 hover:bg-[rgba(0,255,65,0.3)] transition-colors"
+          className="h-[3px] shrink-0 hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)] transition-colors"
           onMouseDown={() => startDrag('bottom')}
         />
 
         {/* Bottom */}
         <div style={{ height: `${bottomHeight}vh`, transitionDelay: '0.6s' }} className={`shrink-0 overflow-hidden panel-reveal ${assembled ? 'visible' : ''}`}>
+          <PanelBoundary name="DECK">
           <BottomPanel
             deckSplit={deckSplit}
             onDeckSplitChange={(next) => {
@@ -297,6 +301,7 @@ function App() {
               }));
             }}
           />
+          </PanelBoundary>
         </div>
       </div>
     </div>

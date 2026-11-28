@@ -5,6 +5,7 @@ node_modules/
 # Build outputs
 dist/
 dist-ssr/
+dist-cli/
 dist-verify*/
 target/
 target-codex*/
@@ -120,6 +121,7 @@ agent_orchestration.log
 
 # Internal development files (not for end users)
 CLAUDE.md
+AGENTS.md
 .claude/
 TODO.md
 mother_internal_specification.md

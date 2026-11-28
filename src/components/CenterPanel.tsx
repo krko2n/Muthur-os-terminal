@@ -15,7 +15,7 @@ interface CenterPanelProps {
 
 export default function CenterPanel(props: CenterPanelProps) {
   return (
-    <div className="h-full flex flex-col min-h-0 min-w-0 border-x border-[rgba(0,255,65,0.1)] relative"
+    <div className="h-full flex flex-col min-h-0 min-w-0 border-x border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] relative"
       style={{
         clipPath: 'polygon(0% 1.5vh, 1vh 0%, calc(100% - 1vh) 0%, 100% 1.5vh, 100% calc(100% - 1.5vh), calc(100% - 1vh) 100%, 1vh 100%, 0% calc(100% - 1.5vh))',
       }}

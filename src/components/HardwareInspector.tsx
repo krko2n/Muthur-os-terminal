@@ -24,7 +24,7 @@ export default function HardwareInspector() {
 
   return (
     <div className="shrink-0">
-      <div className="text-[10px] tracking-wider opacity-50 mb-1 panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-1">
+      <div className="text-[10px] tracking-wider opacity-50 mb-1 panel-header-bracket border-t border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] pt-1">
         HARDWARE
       </div>
       <div className="text-[10px] text-muthur-secondary space-y-0.5">

@@ -166,7 +166,7 @@ export default function NativeBrowserView({ url, onNavigate }: NativeBrowserView
             <span>{getUrlHost(url)}</span>
             <span className="tabular-nums">{Math.round(progress)}%</span>
           </div>
-          <div className="h-[3px] bg-[rgba(0,255,65,0.08)] overflow-hidden">
+          <div className="h-[3px] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] overflow-hidden">
             <div
               className="h-full bg-muthur-primary transition-all duration-150"
               style={{ width: `${progress}%` }}
@@ -186,7 +186,7 @@ export default function NativeBrowserView({ url, onNavigate }: NativeBrowserView
   if (error) {
     return (
       <div className="flex-1 p-5 font-mono flex items-center justify-center">
-        <div className="w-full max-w-[640px] border border-[rgba(0,255,65,0.16)] bg-[rgba(0,255,65,0.025)] p-4">
+        <div className="w-full max-w-[640px] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.16)] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.025)] p-4">
           <div className="flex items-center justify-between gap-3 mb-2">
             <div className="text-muthur-accent text-sm tracking-[0.18em]">WEB REQUEST FAILED</div>
             <div className="text-[11px] text-muthur-secondary opacity-45">{getUrlHost(url)}</div>
@@ -200,25 +200,25 @@ export default function NativeBrowserView({ url, onNavigate }: NativeBrowserView
           <div className="flex flex-wrap gap-2 mt-4">
             <button
               onClick={() => fetchPage(url)}
-              className="px-3 py-1.5 text-xs tracking-widest border border-muthur-primary text-muthur-primary hover:bg-[rgba(0,255,65,0.08)] transition-colors"
+              className="px-3 py-1.5 text-xs tracking-widest border border-muthur-primary text-muthur-primary hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] transition-colors"
             >
               RETRY
             </button>
             <button
               onClick={() => onNavigate(SEARCH_HOME)}
-              className="px-3 py-1.5 text-xs tracking-widest border border-[rgba(0,255,65,0.22)] text-muthur-secondary hover:border-[rgba(0,255,65,0.45)] transition-colors"
+              className="px-3 py-1.5 text-xs tracking-widest border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.22)] text-muthur-secondary hover:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.45)] transition-colors"
             >
               SEARCH HOME
             </button>
             <button
               onClick={() => onNavigate(getSearchUrl(url))}
-              className="px-3 py-1.5 text-xs tracking-widest border border-[rgba(0,255,65,0.22)] text-muthur-secondary hover:border-[rgba(0,255,65,0.45)] transition-colors"
+              className="px-3 py-1.5 text-xs tracking-widest border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.22)] text-muthur-secondary hover:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.45)] transition-colors"
             >
               SEARCH TARGET
             </button>
             <button
               onClick={() => onNavigate('muthur://manual')}
-              className="px-3 py-1.5 text-xs tracking-widest border border-[rgba(0,255,65,0.22)] text-muthur-secondary hover:border-[rgba(0,255,65,0.45)] transition-colors"
+              className="px-3 py-1.5 text-xs tracking-widest border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.22)] text-muthur-secondary hover:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.45)] transition-colors"
             >
               LOCAL MANUAL
             </button>
@@ -235,7 +235,7 @@ export default function NativeBrowserView({ url, onNavigate }: NativeBrowserView
           <div className="text-muthur-primary text-sm tracking-[0.24em] opacity-65">WEB VIEW STANDBY</div>
           <button
             onClick={() => onNavigate(SEARCH_HOME)}
-            className="mt-4 px-4 py-1.5 text-[11px] tracking-widest border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors"
+            className="mt-4 px-4 py-1.5 text-[11px] tracking-widest border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.25)] text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors"
           >
             OPEN SEARCH
           </button>
@@ -246,7 +246,7 @@ export default function NativeBrowserView({ url, onNavigate }: NativeBrowserView
 
   return (
     <div ref={contentRef} className="flex-1 overflow-auto p-4 font-mono text-[14px] leading-relaxed scrollbar-thin">
-      <div className="sticky top-0 z-10 mb-3 pb-2 border-b border-[rgba(0,255,65,0.1)] bg-[rgba(5,8,13,0.94)] backdrop-blur-sm">
+      <div className="sticky top-0 z-10 mb-3 pb-2 border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] bg-[rgba(5,8,13,0.94)] backdrop-blur-sm">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="text-[10px] tracking-widest text-muthur-secondary opacity-45">
@@ -260,14 +260,14 @@ export default function NativeBrowserView({ url, onNavigate }: NativeBrowserView
             {historyIdx >= 0 && (
               <button
                 onClick={goBack}
-                className="text-[10px] text-muthur-secondary opacity-55 hover:opacity-100 border border-[rgba(0,255,65,0.2)] px-2 py-0.5"
+                className="text-[10px] text-muthur-secondary opacity-55 hover:opacity-100 border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.2)] px-2 py-0.5"
               >
                 BACK
               </button>
             )}
             <button
               onClick={() => fetchPage(doc.url || url)}
-              className="text-[10px] text-muthur-secondary opacity-55 hover:opacity-100 border border-[rgba(0,255,65,0.2)] px-2 py-0.5"
+              className="text-[10px] text-muthur-secondary opacity-55 hover:opacity-100 border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.2)] px-2 py-0.5"
             >
               RELOAD
             </button>
@@ -282,7 +282,7 @@ export default function NativeBrowserView({ url, onNavigate }: NativeBrowserView
       </div>
 
       {doc.links.length > 0 && (
-        <div className="mt-6 pt-3 border-t border-[rgba(0,255,65,0.1)]">
+        <div className="mt-6 pt-3 border-t border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)]">
           <div className="text-[10px] tracking-wider opacity-40 mb-2">REFERENCES</div>
           {doc.links.map(link => (
             <div key={link.id} className="text-xs text-muthur-secondary opacity-50 truncate">
@@ -356,7 +356,7 @@ function BlockRenderer({ block, onLinkClick }: { block: TextBlock; onLinkClick: 
 
     case 'CodeBlock':
       return (
-        <pre className="bg-[rgba(0,255,65,0.03)] border border-[rgba(0,255,65,0.1)] p-2 text-xs text-muthur-secondary overflow-x-auto">
+        <pre className="bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.03)] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] p-2 text-xs text-muthur-secondary overflow-x-auto">
           {block.code}
         </pre>
       );
@@ -369,7 +369,7 @@ function BlockRenderer({ block, onLinkClick }: { block: TextBlock; onLinkClick: 
               <thead>
                 <tr>
                   {block.headers.map((h, i) => (
-                    <th key={i} className="text-left px-2 py-1 border-b border-[rgba(0,255,65,0.15)] text-muthur-primary">
+                    <th key={i} className="text-left px-2 py-1 border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] text-muthur-primary">
                       {h}
                     </th>
                   ))}
@@ -380,7 +380,7 @@ function BlockRenderer({ block, onLinkClick }: { block: TextBlock; onLinkClick: 
               {block.rows?.map((row, ri) => (
                 <tr key={ri}>
                   {row.map((cell, ci) => (
-                    <td key={ci} className="px-2 py-0.5 text-muthur-secondary border-b border-[rgba(0,255,65,0.05)]">
+                    <td key={ci} className="px-2 py-0.5 text-muthur-secondary border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.05)]">
                       {cell}
                     </td>
                   ))}
@@ -396,13 +396,13 @@ function BlockRenderer({ block, onLinkClick }: { block: TextBlock; onLinkClick: 
 
     case 'BlockQuote':
       return (
-        <div className="pl-3 border-l-2 border-[rgba(0,255,65,0.3)] text-muthur-secondary opacity-80 italic">
+        <div className="pl-3 border-l-2 border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)] text-muthur-secondary opacity-80 italic">
           {block.text}
         </div>
       );
 
     case 'Separator':
-      return <hr className="border-[rgba(0,255,65,0.15)] my-2" />;
+      return <hr className="border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] my-2" />;
 
     default:
       return null;
