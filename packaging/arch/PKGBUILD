@@ -26,6 +26,9 @@ provides=('muthur-os-terminal')
 conflicts=('muthur-os-terminal' 'muthur-os-terminal-bin')
 source=("muthur::${MUTHUR_PKG_SOURCE:-git+https://github.com/krko2n/Muthur-os-terminal.git}")
 sha256sums=('SKIP')
+# makepkg's default LTO compiles bundled C crypto (aws-lc-sys) to GCC bitcode
+# that the Rust link step cannot resolve (undefined aws_lc_* symbols).
+options=('!lto')
 
 pkgver() {
   cd muthur
