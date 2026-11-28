@@ -1,8 +1,10 @@
 import { runConfigCommand } from './commands/config';
 import { runStatusCommand } from './commands/status';
 import { renderHelp, renderVersion } from './help';
+import { version } from '../../package.json';
 
-const CLI_VERSION = '0.1.1';
+// Single source of truth for the version: package.json (bundled at build time).
+const CLI_VERSION = version;
 
 export function runCli(args: readonly string[] = []): number {
   const [command, ...rest] = args;
@@ -30,4 +32,4 @@ export function runCli(args: readonly string[] = []): number {
   return 1;
 }
 
-runCli(process.argv.slice(2));
+process.exitCode = runCli(process.argv.slice(2));

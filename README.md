@@ -482,16 +482,22 @@ src-tauri/src/          Rust backend
   ai.rs                 Ollama AI client
   crash.rs              Crash reporting
 
+src/core/               UI-agnostic logic shared by CLI and GUI
+src/cli/                Terminal-only CLI (npm run build:cli)
+
 src/components/         React frontend
-  Terminal.tsx           Multi-tab terminal with browser
-  BrowserView.tsx       Structured web page renderer
-  Header.tsx            Top status bar
+  Terminal.tsx          Multi-tab terminal with browser
+  NativeBrowserView.tsx Structured web page renderer
+  NativeHeader.tsx      Top status bar (CPU, RAM, uptime, power)
+  LeftPanel.tsx         Clock, hardware, CPU, memory grid, storage, processes
+  RightPanel.tsx        Globe, network, AI panel
   Globe.tsx             3D Earth visualization
+  NetworkStatus.tsx     Link state and throughput chart
   FileExplorer.tsx      File browser grid
   AIPanel.tsx           AI chat panel
-  LeftPanel.tsx         System monitoring
   BottomPanel.tsx       File explorer + keyboard
   Keyboard.tsx          On-screen keyboard
+  PanelBoundary.tsx     Keeps one crashed panel from blanking the UI
   CustomCursor.tsx      Animated cursor
 
 packaging/              System integration
@@ -531,8 +537,8 @@ MIT -- see [LICENSE](LICENSE).
 ---
 
 <!-- MUTHUR-STATS:START -->
-![Lines of Code](https://img.shields.io/badge/lines%20of%20code-29%2C758-c9d1d9?style=flat-square&labelColor=161b22)
-![Project Files](https://img.shields.io/badge/project%20files-167-c9d1d9?style=flat-square&labelColor=161b22)
+![Lines of Code](https://img.shields.io/badge/lines%20of%20code-29%2C642-c9d1d9?style=flat-square&labelColor=161b22)
+![Project Files](https://img.shields.io/badge/project%20files-172-c9d1d9?style=flat-square&labelColor=161b22)
 <!-- MUTHUR-STATS:END -->
 
 </div>

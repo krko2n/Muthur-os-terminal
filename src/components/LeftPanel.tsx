@@ -1,6 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { CpuIcon, StorageIcon } from './SystemIcons';
 import HardwareInspector from './HardwareInspector';
+import MemoryGrid from './MemoryGrid';
+import { formatUptime } from '../core/metrics';
+import { useOnline } from '../hooks/useOnline';
 
 interface LeftPanelProps {
   systemStats: any;
@@ -73,11 +76,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
 
   useEffect(() => { drawChart(); }, [drawChart]);
 
-  const formatUptime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    return `${h}:${String(m).padStart(2, '0')}`;
-  };
+  const online = useOnline();
 
   const disks = systemStats?.disk?.slice(0, 3) || [];
 
@@ -103,7 +102,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
         </div>
         <div className="flex justify-between">
           <span>{systemStats?.battery?.present ? `BAT ${systemStats.battery.percent}%` : 'AC'}</span>
-          <span className="text-muthur-primary">ONLINE</span>
+          <span className={online ? 'text-muthur-primary' : 'text-muthur-accent'}>{online ? 'ONLINE' : 'OFFLINE'}</span>
         </div>
       </div>
 
@@ -112,9 +111,9 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
 
       {/* CPU Chart */}
       <div className="shrink-0">
-        <div className="text-[10px] tracking-wider opacity-50 mb-1 flex items-center justify-between panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-1">
+        <div className="text-[10px] tracking-wider opacity-50 mb-1 flex items-center justify-between panel-header-bracket border-t border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] pt-1">
           <span className="flex items-center gap-1">
-            <CpuIcon size={10} color="rgba(0,255,65,0.5)" />
+            <CpuIcon size={10} />
             CPU
           </span>
           <span className="text-muthur-primary tabular-nums">
@@ -130,11 +129,14 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
         />
       </div>
 
+      {/* Memory */}
+      <MemoryGrid used={systemStats?.memory_used} total={systemStats?.memory_total} />
+
       {/* Storage */}
       <div className="shrink-0">
-        <div className="text-[10px] tracking-wider opacity-50 mb-1 flex items-center justify-between panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-1">
+        <div className="text-[10px] tracking-wider opacity-50 mb-1 flex items-center justify-between panel-header-bracket border-t border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] pt-1">
           <span className="flex items-center gap-1">
-            <StorageIcon size={10} color="rgba(0,255,65,0.5)" />
+            <StorageIcon size={10} />
             STORAGE
           </span>
           <span className="text-muthur-secondary tabular-nums">
@@ -148,7 +150,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
                 <span className="truncate max-w-[12vh]">{disk.mount_point}</span>
                 <span className="tabular-nums text-muthur-primary">{disk.used_percent.toFixed(0)}%</span>
               </div>
-              <div className="h-[0.6vh] bg-[rgba(0,255,65,0.06)] overflow-hidden">
+              <div className="h-[0.6vh] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.06)] overflow-hidden">
                 <div
                   className="h-full bg-muthur-primary transition-all duration-500"
                   style={{ width: `${Math.min(100, disk.used_percent)}%` }}
@@ -163,7 +165,7 @@ export default function LeftPanel({ systemStats }: LeftPanelProps) {
 
       {/* Top Processes */}
       <div className="flex-1 min-h-0 flex flex-col">
-        <div className="text-[10px] tracking-wider opacity-50 mb-1 shrink-0 panel-header-bracket border-t border-[rgba(0,255,65,0.15)] pt-1">PROCESSES</div>
+        <div className="text-[10px] tracking-wider opacity-50 mb-1 shrink-0 panel-header-bracket border-t border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] pt-1">PROCESSES</div>
         <div className="flex text-[9px] opacity-40 mb-0.5 shrink-0">
           <span className="w-8">PID</span>
           <span className="flex-1">NAME</span>

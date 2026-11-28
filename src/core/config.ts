@@ -43,7 +43,42 @@ function configHome(): string {
 export function resolveMuthurConfigPath(): string {
   const explicitPath = process.env.MUTHUR_CONFIG;
   if (explicitPath) return explicitPath;
-  return path.join(configHome(), 'muthur', 'config.json');
+  // Same file the GUI backend reads (src-tauri/src/ai.rs) and the installer creates.
+  return path.join(configHome(), 'muthur', 'config.toml');
+}
+
+type TomlTable = Record<string, Record<string, string | number | boolean>>;
+
+/**
+ * Parses the TOML subset MUTHUR config uses: [section] headers, comments, and
+ * key = "string" | number | true/false. Throws with a line number otherwise.
+ */
+export function parseConfigToml(source: string): TomlTable {
+  const tables: TomlTable = { '': {} };
+  let current = '';
+  source.split(/\r?\n/).forEach((rawLine, index) => {
+    const line = rawLine.replace(/\s+#.*$/, '').trim();
+    if (!line || line.startsWith('#')) return;
+
+    const section = line.match(/^\[([A-Za-z0-9_.-]+)\]$/);
+    if (section) {
+      current = section[1];
+      tables[current] = tables[current] ?? {};
+      return;
+    }
+
+    const pair = line.match(/^([A-Za-z0-9_-]+)\s*=\s*(.+)$/);
+    if (!pair) throw new Error(`line ${index + 1}: expected 'key = value' or '[section]'`);
+    const [, key, rawValue] = pair;
+    const quoted = rawValue.match(/^"((?:[^"\\]|\\.)*)"$/) ?? rawValue.match(/^'([^']*)'$/);
+    let value: string | number | boolean;
+    if (quoted) value = quoted[1].replace(/\\(["\\])/g, '$1');
+    else if (rawValue === 'true' || rawValue === 'false') value = rawValue === 'true';
+    else if (/^-?\d+(\.\d+)?$/.test(rawValue)) value = Number(rawValue);
+    else throw new Error(`line ${index + 1}: unsupported value for '${key}'`);
+    tables[current][key] = value;
+  });
+  return tables;
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -62,7 +97,7 @@ function mergeConfig(raw: unknown): MuthurConfig {
   return {
     ai: {
       model: readString(ai, 'model', DEFAULT_CONFIG.ai.model),
-      baseUrl: readString(ai, 'baseUrl', DEFAULT_CONFIG.ai.baseUrl),
+      baseUrl: readString(ai, 'base_url', DEFAULT_CONFIG.ai.baseUrl),
     },
   };
 }
@@ -102,7 +137,7 @@ export function readMuthurConfig(configPath = resolveMuthurConfigPath()): Muthur
 
   let rawConfig: unknown;
   try {
-    rawConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    rawConfig = parseConfigToml(fs.readFileSync(configPath, 'utf8'));
   } catch (error) {
     return {
       ok: false,

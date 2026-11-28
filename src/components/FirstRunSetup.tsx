@@ -17,7 +17,7 @@ export default function FirstRunSetup({ settings, onSettingsChange, onComplete }
   return (
     <div className="fixed inset-0 z-[9500] bg-[rgba(0,0,0,0.78)] flex items-center justify-center p-[4vh]">
       <div className="w-full max-w-[980px] max-h-[86vh] overflow-hidden border-2 border-muthur-primary bg-[var(--color-panel)] text-muthur-secondary shadow-[0_0_36px_rgba(var(--color-r),var(--color-g),var(--color-b),0.24)] bios-window">
-        <div className="h-[4vh] flex items-center justify-center border-b border-muthur-primary bg-[rgba(0,255,65,0.08)] font-display text-[1.4vh] tracking-[0.25em] text-muthur-primary">
+        <div className="h-[4vh] flex items-center justify-center border-b border-muthur-primary bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] font-display text-[1.4vh] tracking-[0.25em] text-muthur-primary">
           MUTHUR SETUP UTILITY
         </div>
         <div className="grid grid-cols-[1fr_1fr_0.9fr] gap-[1.2vh] p-[1.4vh]">
@@ -117,7 +117,7 @@ function SetupSelect({ label, value, options, onChange }: { label: string; value
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="bg-transparent border border-[rgba(0,255,65,0.28)] text-muthur-secondary px-[0.5vh] py-[0.35vh] focus:outline-none"
+        className="bg-transparent border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.28)] text-muthur-secondary px-[0.5vh] py-[0.35vh] focus:outline-none"
       >
         {options.map(option => <option key={option.id} value={option.id} className="bg-[#05080d]">{option.label}</option>)}
       </select>
@@ -127,7 +127,7 @@ function SetupSelect({ label, value, options, onChange }: { label: string; value
 
 function SetupToggle({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="w-full flex items-center justify-between border border-[rgba(0,255,65,0.18)] px-[0.7vh] py-[0.45vh] text-[1vh]">
+    <button onClick={onClick} className="w-full flex items-center justify-between border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] px-[0.7vh] py-[0.45vh] text-[1vh]">
       <span>{label}</span>
       <span className={active ? 'text-muthur-primary' : 'text-muthur-accent'}>{active ? '[Enabled]' : '[Skipped]'}</span>
     </button>

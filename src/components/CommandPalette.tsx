@@ -65,7 +65,7 @@ export default function CommandPalette({ open, settings, onClose, onSettingsChan
   return (
     <div className="fixed inset-0 z-[9600] bg-[rgba(0,0,0,0.55)] flex items-start justify-center pt-[12vh]">
       <div className="w-[min(720px,88vw)] border border-muthur-primary bg-[var(--color-panel)] shadow-[0_0_28px_rgba(var(--color-r),var(--color-g),var(--color-b),0.2)]">
-        <div className="border-b border-[rgba(0,255,65,0.18)] px-[1vh] py-[0.8vh] flex items-center gap-[1vh]">
+        <div className="border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.18)] px-[1vh] py-[0.8vh] flex items-center gap-[1vh]">
           <span className="text-muthur-primary text-[1.2vh] tracking-widest">COMMAND</span>
           <input
             autoFocus
@@ -85,7 +85,7 @@ export default function CommandPalette({ open, settings, onClose, onSettingsChan
             <button
               key={command.id}
               onClick={() => run(command)}
-              className="w-full text-left border border-[rgba(0,255,65,0.1)] hover:border-muthur-primary px-[0.8vh] py-[0.65vh]"
+              className="w-full text-left border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] hover:border-muthur-primary px-[0.8vh] py-[0.65vh]"
             >
               <div className="text-[1.05vh] text-muthur-primary tracking-wider">{command.title}</div>
               <div className="text-[0.82vh] text-muthur-secondary opacity-45">{command.body}</div>

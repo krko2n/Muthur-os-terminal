@@ -60,7 +60,13 @@ pub struct BrowserDocument {
 
 pub fn parse_html(html: &str, base_url: &str) -> BrowserDocument {
     let html = if html.len() > MAX_HTML_BYTES {
-        &html[..MAX_HTML_BYTES]
+        // Slicing at a raw byte index panics inside a multi-byte character;
+        // back off to the nearest char boundary.
+        let mut end = MAX_HTML_BYTES;
+        while !html.is_char_boundary(end) {
+            end -= 1;
+        }
+        &html[..end]
     } else {
         html
     };
@@ -398,4 +404,57 @@ fn resolve_url(href: &str, base_url: &str) -> String {
     }
 
     href.to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{parse_html, TextBlock, MAX_HTML_BYTES};
+
+    #[test]
+    fn extracts_title_headings_paragraphs_and_numbered_links() {
+        let html = r#"<html><head><title>Ship Log</title></head><body>
+            <h1>Nostromo</h1>
+            <p>Crew of seven. See <a href="/crew">the crew list</a>.</p>
+            <a href="https://other.example/manual">Manual</a>
+        </body></html>"#;
+        let doc = parse_html(html, "https://weyland.example/logs/today");
+
+        assert_eq!(doc.title, "Ship Log");
+        assert!(doc
+            .blocks
+            .iter()
+            .any(|b| matches!(b, TextBlock::Heading { text, .. } if text == "Nostromo")));
+        assert!(doc
+            .blocks
+            .iter()
+            .any(|b| matches!(b, TextBlock::Paragraph { .. })));
+
+        let urls: Vec<&str> = doc.links.iter().map(|l| l.url.as_str()).collect();
+        assert!(
+            urls.contains(&"https://weyland.example/crew"),
+            "relative link not resolved: {urls:?}"
+        );
+        assert!(urls.contains(&"https://other.example/manual"));
+        let ids: Vec<usize> = doc.links.iter().map(|l| l.id).collect();
+        let mut sorted = ids.clone();
+        sorted.dedup();
+        assert_eq!(ids, sorted, "link ids must be unique and ordered");
+    }
+
+    #[test]
+    fn missing_title_falls_back_to_untitled() {
+        let doc = parse_html("<p>no head</p>", "https://example.org/");
+        assert_eq!(doc.title, "Untitled");
+    }
+
+    #[test]
+    fn oversized_page_is_truncated_without_splitting_a_utf8_character() {
+        // Put a 3-byte character across the truncation boundary.
+        let mut html = String::from("<p>");
+        html.push_str(&"a".repeat(MAX_HTML_BYTES - 4));
+        html.push_str("\u{2603}\u{2603} tail</p>");
+        assert!(!html.is_char_boundary(MAX_HTML_BYTES));
+        let doc = parse_html(&html, "https://example.org/");
+        assert!(!doc.blocks.is_empty());
+    }
 }

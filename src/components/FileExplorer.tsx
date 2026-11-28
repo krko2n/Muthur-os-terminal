@@ -226,15 +226,15 @@ export default function FileExplorer() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-[1vh] py-[0.4vh] border-b border-[rgba(0,255,65,0.15)] shrink-0">
+      <div className="flex items-center justify-between px-[1vh] py-[0.4vh] border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] shrink-0">
         <span className="text-[1.3vh] tracking-widest opacity-60 flex items-center gap-[0.5vh]">
-          <FileSystemIcon size={14} color="rgba(0,255,65,0.5)" />
+          <FileSystemIcon size={14} />
           FILE MANAGER
         </span>
         <div className="flex items-center gap-[1vh]">
           <button
             onClick={() => setListView(prev => !prev)}
-            className="text-[1.05vh] text-muthur-secondary opacity-65 hover:opacity-100 border border-[rgba(0,255,65,0.15)] px-[0.55vh] py-[0.15vh]"
+            className="text-[1.05vh] text-muthur-secondary opacity-65 hover:opacity-100 border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] px-[0.55vh] py-[0.15vh]"
           >
             {listView ? 'GRID' : 'LIST'}
           </button>
@@ -254,7 +254,7 @@ export default function FileExplorer() {
           <div className="flex flex-col gap-[0.3vh]">
             <div
               onClick={goUp}
-              className="flex items-center gap-[1vh] px-[0.5vh] py-[0.3vh] hover:bg-[rgba(0,255,65,0.05)] text-muthur-primary"
+              className="flex items-center gap-[1vh] px-[0.5vh] py-[0.3vh] hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.05)] text-muthur-primary"
             >
               <div className="w-[2vh] h-[2vh] shrink-0"><FileIcon type="up" /></div>
               <span className="text-[1.2vh]">..</span>
@@ -263,7 +263,7 @@ export default function FileExplorer() {
               <div
                 key={i}
                 onClick={() => handleEntryClick(entry)}
-                className={`flex items-center gap-[1vh] px-[0.5vh] py-[0.3vh] hover:bg-[rgba(0,255,65,0.05)] ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}`}
+                className={`flex items-center gap-[1vh] px-[0.5vh] py-[0.3vh] hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.05)] ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}`}
                 style={{ opacity: 0, animation: `fadeIn 0.2s ease forwards`, animationDelay: `${i * 20}ms` }}
               >
                 <div className="w-[2vh] h-[2vh] shrink-0"><FileIcon type={getIconType(entry)} /></div>
@@ -281,7 +281,7 @@ export default function FileExplorer() {
           >
             <div
               onClick={goUp}
-              className="flex flex-col items-center justify-center hover:bg-[rgba(0,255,65,0.05)] transition-colors rounded text-muthur-primary"
+              className="flex flex-col items-center justify-center hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.05)] transition-colors rounded text-muthur-primary"
             >
               <div className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]"><FileIcon type="up" /></div>
               <span className="text-[1.1vh] opacity-70">..</span>
@@ -290,7 +290,7 @@ export default function FileExplorer() {
               <div
                 key={i}
                 onClick={() => handleEntryClick(entry)}
-                className={`flex flex-col items-center justify-center hover:bg-[rgba(0,255,65,0.05)] transition-all rounded ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}`}
+                className={`flex flex-col items-center justify-center hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.05)] transition-all rounded ${entry.is_dir ? 'text-muthur-secondary' : 'text-muthur-primary'}`}
                 style={{ opacity: 0, animation: `fadeIn 0.3s ease forwards`, animationDelay: `${i * 30}ms` }}
               >
                 <div className="w-[4.5vh] h-[4.5vh] mb-[0.3vh]"><FileIcon type={getIconType(entry)} /></div>
@@ -305,10 +305,10 @@ export default function FileExplorer() {
 
       {/* Disk usage bar */}
       {diskUsage && (
-        <div className="shrink-0 px-[1vh] py-[0.4vh] border-t border-[rgba(0,255,65,0.15)]">
+        <div className="shrink-0 px-[1vh] py-[0.4vh] border-t border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)]">
           <div className="flex items-center gap-[1vh] text-[1.0vh]">
             <span className="text-muthur-secondary opacity-50 shrink-0">{diskUsage.mount_point}</span>
-            <div className="flex-1 h-[0.6vh] bg-[rgba(0,255,65,0.08)] rounded-sm overflow-hidden">
+            <div className="flex-1 h-[0.6vh] bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] rounded-sm overflow-hidden">
               <div
                 className="h-full bg-muthur-primary transition-all duration-500"
                 style={{ width: `${diskUsage.used_percent}%` }}

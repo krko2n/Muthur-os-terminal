@@ -220,7 +220,7 @@ export default function AIPanel() {
   return (
     <div className="flex flex-col min-h-0 flex-1">
       <div className="text-[1.3vh] tracking-widest opacity-60 mb-[0.5vh] flex items-center gap-[0.5vh]">
-        <AIIcon size={14} color="rgba(0,255,65,0.6)" />
+        <AIIcon size={14} />
         MUTHUR SURVIVAL AI
       </div>
       <div className="text-[0.95vh] text-muthur-secondary opacity-45 mb-[0.6vh] flex flex-wrap gap-x-[0.9vh] gap-y-[0.2vh]">
@@ -280,13 +280,13 @@ export default function AIPanel() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask anything..."
-            className="flex-1 bg-transparent border border-[rgba(0,255,65,0.2)] px-[0.5vh] py-[0.3vh] text-[1.3vh] text-muthur-primary focus:outline-none focus:border-[rgba(0,255,65,0.5)]"
+            className="flex-1 bg-transparent border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.2)] px-[0.5vh] py-[0.3vh] text-[1.3vh] text-muthur-primary focus:outline-none focus:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.5)]"
             disabled={loading}
           />
           <button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
-            className="px-[1vh] text-[1.3vh] border border-[rgba(0,255,65,0.3)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] disabled:opacity-20 transition-colors"
+            className="px-[1vh] text-[1.3vh] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)] text-muthur-primary hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] disabled:opacity-20 transition-colors"
           >
             &gt;
           </button>

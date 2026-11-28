@@ -52,7 +52,7 @@ export default function BottomPanel({
 
       {/* Resize handle */}
       <div
-        className="w-[3px] shrink-0 hover:bg-[rgba(0,255,65,0.3)] transition-colors active:bg-muthur-primary"
+        className="w-[3px] shrink-0 hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)] transition-colors active:bg-muthur-primary"
         onMouseDown={() => {
           dragging.current = true;
           document.body.style.userSelect = 'none';

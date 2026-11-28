@@ -1,7 +1,11 @@
 [advisories]
 version = 2
 yanked = "deny"
-ignore = []
+ignore = [
+  # chrono is flagged unmaintained (not vulnerable); used only for crash report
+  # timestamps in src/crash.rs. Revisit when a maintained replacement is chosen.
+  { id = "RUSTSEC-2026-0543", reason = "unmaintained only; local timestamp formatting in crash.rs" },
+]
 
 [licenses]
 version = 2
@@ -22,7 +26,6 @@ allow = [
   "Unicode-DFS-2016",
   "Zlib",
 ]
-copyleft = "warn"
 exceptions = []
 
 [bans]
