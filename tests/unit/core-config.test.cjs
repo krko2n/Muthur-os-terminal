@@ -5,7 +5,8 @@ const os = require('node:os');
 const path = require('node:path');
 const { loadTs } = require('../helpers/load-ts.cjs');
 
-const { readMuthurConfig, resolveMuthurConfigPath, renderMuthurConfig } = loadTs('src/core/config.ts');
+const { readMuthurConfig, resolveMuthurConfigPath, renderMuthurConfig, parseConfigToml } = loadTs('src/core/config.ts');
+const { ROOT } = require('../helpers/load-ts.cjs');
 
 const ENV_KEYS = ['MUTHUR_CONFIG', 'MUTHUR_AI_MODEL', 'MUTHUR_AI_BASE_URL', 'XDG_CONFIG_HOME'];
 
@@ -28,17 +29,29 @@ function tempDir() {
 }
 
 function writeConfig(dir, contents) {
-  const file = path.join(dir, 'config.json');
+  const file = path.join(dir, 'config.toml');
   fs.writeFileSync(file, contents);
   return file;
 }
+
+test('the CLI reads config.toml, the same file the GUI backend and installer use', () => {
+  withEnv({ XDG_CONFIG_HOME: '/tmp/xdg' }, () => {
+    assert.ok(resolveMuthurConfigPath().endsWith(path.join('muthur', 'config.toml')));
+  });
+});
+
+test('the shipped example config parses and sets the documented defaults', () => {
+  const example = fs.readFileSync(path.join(ROOT, 'examples/config.toml.example'), 'utf8');
+  const parsed = parseConfigToml(example);
+  assert.equal(parsed.ai.model, 'llama3.2');
+});
 
 test('config path follows MUTHUR_CONFIG, then XDG_CONFIG_HOME', () => {
   withEnv({ MUTHUR_CONFIG: '/tmp/explicit.json', XDG_CONFIG_HOME: '/tmp/xdg' }, () => {
     assert.equal(resolveMuthurConfigPath(), '/tmp/explicit.json');
   });
   withEnv({ XDG_CONFIG_HOME: '/tmp/xdg' }, () => {
-    assert.equal(resolveMuthurConfigPath(), path.join('/tmp/xdg', 'muthur', 'config.json'));
+    assert.equal(resolveMuthurConfigPath(), path.join('/tmp/xdg', 'muthur', 'config.toml'));
   });
 });
 
@@ -55,20 +68,20 @@ test('missing config file falls back to defaults and still succeeds', () => {
 
 test('values from the file override defaults; blank or wrong-typed values do not', () => {
   withEnv({}, () => {
-    const file = writeConfig(tempDir(), JSON.stringify({ ai: { model: 'mistral', baseUrl: '   ' } }));
+    const file = writeConfig(tempDir(), '# comment\n[ai]\nmodel = "mistral"  # inline\nbase_url = "   "\n');
     const result = readMuthurConfig(file);
     assert.equal(result.ok, true);
     assert.equal(result.config.ai.model, 'mistral');
     assert.equal(result.config.ai.baseUrl, 'http://localhost:11434', 'blank string keeps default');
     assert.deepEqual(result.sources, ['defaults', 'file']);
 
-    const typed = readMuthurConfig(writeConfig(tempDir(), JSON.stringify({ ai: { model: 42 } })));
+    const typed = readMuthurConfig(writeConfig(tempDir(), '[ai]\nmodel = 42\n'));
     assert.equal(typed.config.ai.model, 'llama3.2', 'non-string keeps default');
   });
 });
 
 test('environment variables override the file and are reported as sources', () => {
-  const file = writeConfig(tempDir(), JSON.stringify({ ai: { model: 'mistral' } }));
+  const file = writeConfig(tempDir(), '[ai]\nmodel = "mistral"\n');
   withEnv({ MUTHUR_AI_MODEL: 'qwen', MUTHUR_AI_BASE_URL: 'http://10.0.0.5:11434' }, () => {
     const result = readMuthurConfig(file);
     assert.equal(result.config.ai.model, 'qwen');
@@ -77,13 +90,14 @@ test('environment variables override the file and are reported as sources', () =
   });
 });
 
-test('malformed JSON is reported as an error naming the file, not silently ignored', () => {
+test('malformed config is reported as an error naming the file and line, not silently ignored', () => {
   withEnv({}, () => {
-    const file = writeConfig(tempDir(), '{ "ai": ');
+    const file = writeConfig(tempDir(), '[ai]\nmodel = "ok"\nthis is not toml\n');
     const result = readMuthurConfig(file);
     assert.equal(result.ok, false);
     assert.match(result.error, /^Malformed config at /);
     assert.ok(result.error.includes(file));
+    assert.match(result.error, /line 3/);
     assert.match(renderMuthurConfig(result), /Muthur config error/);
   });
 });
