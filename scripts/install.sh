@@ -579,7 +579,13 @@ install_assets() {
 # show, muthur --help). It must never start the graphical session, so this
 # check runs before the display/compositor logic below.
 if [ "$#" -gt 0 ]; then
-    exec "$(dirname "$(readlink -f "$0")")/muthur-cli" "$@"
+    MUTHUR_CLI="$(dirname "$(readlink -f "$0")")/muthur-cli"
+    if [ ! -x "$MUTHUR_CLI" ]; then
+        echo "muthur: terminal CLI not installed at $MUTHUR_CLI" >&2
+        echo "Rebuild it from the source folder with: npm run build:cli && ./install.sh" >&2
+        exit 127
+    fi
+    exec "$MUTHUR_CLI" "$@"
 fi
 
 if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
@@ -771,11 +777,11 @@ WRAPPER
     info "Binary: $INSTALL_DIR/muthur"
 
     # ── Terminal-only CLI (muthur status / config / --help) ──
-    if [ -f "$SCRIPT_DIR/dist-cli/muthur.mjs" ]; then
-        install_binary_file "$SCRIPT_DIR/dist-cli/muthur.mjs" "$INSTALL_DIR/muthur-cli"
+    if [ -f "$SCRIPT_DIR/dist-cli/muthur.cjs" ]; then
+        install_binary_file "$SCRIPT_DIR/dist-cli/muthur.cjs" "$INSTALL_DIR/muthur-cli"
         info "Command: $INSTALL_DIR/muthur-cli (also: muthur <command>)"
     else
-        warn "Terminal CLI not built (dist-cli/muthur.mjs missing); run: npm run build:cli"
+        warn "Terminal CLI not built (dist-cli/muthur.cjs missing); run: npm run build:cli"
     fi
 
     # ── CLI Utilities ──

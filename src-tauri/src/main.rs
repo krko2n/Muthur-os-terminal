@@ -1212,7 +1212,10 @@ mod tests {
     // directory as the allowed roots; /etc is outside both.
     #[test]
     fn filesystem_access_outside_allowed_roots_is_rejected() {
-        if std::env::var("MUTHUR_ALLOW_FULL_FS").is_ok() {
+        // With HOME=/ (some build chroots) every path is legitimately allowed.
+        if std::env::var("MUTHUR_ALLOW_FULL_FS").is_ok()
+            || std::env::var("HOME").as_deref() == Ok("/")
+        {
             return;
         }
         let err = validate_user_filesystem_path("/etc", true).unwrap_err();

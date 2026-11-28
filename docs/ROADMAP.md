@@ -14,7 +14,7 @@ Goal: CI green on `main`, and a CLI that can actually be built and run.
 - [x] Clear `npm audit` advisories (lockfile-only update).
 - [x] Refresh README stats so `check:readme-stats` passes.
 - [x] CLI returns its exit code (`muthur bogus` now exits 1).
-- [x] `npm run build:cli` builds `dist-cli/muthur.mjs`; `bin` entry `muthur`.
+- [x] `npm run build:cli` builds `dist-cli/muthur.cjs`; `bin` entry `muthur`.
 - [x] Runtime CLI test: build and execute the CLI inside `npm test`.
 - [ ] Re-run or close the stale Dependabot PRs once `main` is green.
 
@@ -38,7 +38,9 @@ Goal: every planned command group has a working first command. Logic lives in
 
 Goal: `muthur` works from a TTY after install, with no display server.
 
-- Installer copies `dist-cli/muthur.mjs` to `/usr/local/bin/muthur`.
+- [x] Installer builds the CLI, installs it as `muthur-cli`, and `muthur <command>` runs it without starting the GUI.
+- [x] PKGBUILD builds from source (no release binaries exist) and runs the tests in `check()`.
+- [x] CLI and GUI read the same `~/.config/muthur/config.toml`.
 - Split PKGBUILD into `muthur-os-terminal-cli` (Node runtime only) and
   `muthur-os-terminal` (GUI).
 - Decide long-term CLI runtime: keep Node, or move core services into a Rust

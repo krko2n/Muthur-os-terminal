@@ -8,7 +8,7 @@ const os = require('node:os');
 const path = require('node:path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const CLI = path.join(ROOT, 'dist-cli', 'muthur.mjs');
+const CLI = path.join(ROOT, 'dist-cli', 'muthur.cjs');
 const VERSION = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
 
 const build = spawnSync(
