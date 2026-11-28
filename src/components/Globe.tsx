@@ -1,4 +1,5 @@
 import { useRef, useState, useMemo, useEffect, Component, ReactNode } from 'react';
+import { useThemeAccent } from '../hooks/useThemeAccent';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { feature } from 'topojson-client';
@@ -12,11 +13,22 @@ class WebGLErrorBoundary extends Component<{ children: ReactNode; fallback: Reac
   render() { return this.state.hasError ? this.props.fallback : this.props.children; }
 }
 
-function isWebGLAvailable(): boolean {
+// Probe once and cache. Creating a probe context on every render leaks WebGL
+// contexts; browsers cap them (~16) and evict the oldest, which eventually
+// kills the globe's real renderer.
+let webglAvailable: boolean | null = null;
+
+export function isWebGLAvailable(): boolean {
+  if (webglAvailable !== null) return webglAvailable;
   try {
     const canvas = document.createElement('canvas');
-    return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
-  } catch { return false; }
+    const gl = (canvas.getContext('webgl2') || canvas.getContext('webgl')) as WebGLRenderingContext | null;
+    webglAvailable = !!gl;
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+  } catch {
+    webglAvailable = false;
+  }
+  return webglAvailable;
 }
 
 type GlobeMode = 'events' | 'orbitals' | 'cyber';
@@ -126,6 +138,7 @@ function ConflictCircle({ center, radius: areaRadius, color, globeRadius }: { ce
 }
 
 function RotatingGlobe({ mode, worldLines, conflicts, signalNodes }: { mode: GlobeMode; worldLines: THREE.Vector3[][]; conflicts: ConflictArea[]; signalNodes: SignalNode[] }) {
+  const accent = useThemeAccent();
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((_state, delta) => {
@@ -170,11 +183,11 @@ function RotatingGlobe({ mode, worldLines, conflicts, signalNodes }: { mode: Glo
   return (
     <group ref={groupRef}>
       {gridLines.map((points, i) => (
-        <OccludedLine key={`grid-${i}`} points={points} color="#00ff41" opacity={0.06} />
+        <OccludedLine key={`grid-${i}`} points={points} color={accent} opacity={0.06} />
       ))}
 
       {worldLines.map((points, i) => (
-        <OccludedLine key={`world-${i}`} points={points} color="#00ff41" opacity={0.7} />
+        <OccludedLine key={`world-${i}`} points={points} color={accent} opacity={0.7} />
       ))}
 
       {mode === 'events' && conflicts.map((area, i) => (
@@ -206,15 +219,15 @@ function RotatingGlobe({ mode, worldLines, conflicts, signalNodes }: { mode: Glo
       ))}
 
       {/* Orbiting satellites */}
-      <Satellites radius={radius} />
+      <Satellites radius={radius} color={accent} />
 
       <ambientLight intensity={0.3} />
-      <pointLight position={[10, 10, 10]} intensity={0.5} color="#00ff41" />
+      <pointLight position={[10, 10, 10]} intensity={0.5} color={accent} />
     </group>
   );
 }
 
-function Satellites({ radius }: { radius: number }) {
+function Satellites({ radius, color }: { radius: number; color: string }) {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((_state, delta) => {
@@ -244,7 +257,7 @@ function Satellites({ radius }: { radius: number }) {
       {positions.map((pos, i) => (
         <mesh key={`sat-${i}`} position={pos}>
           <sphereGeometry args={[0.025, 6, 6]} />
-          <meshBasicMaterial color="#00ff41" transparent opacity={0.8} />
+          <meshBasicMaterial color={color} transparent opacity={0.8} />
         </mesh>
       ))}
     </group>
@@ -415,7 +428,7 @@ export default function Globe() {
             className={`px-[0.8vh] py-[0.2vh] text-[0.9vh] font-mono border transition-colors ${
               mode === m
                 ? 'text-[#ff4444] border-[#ff4444] bg-[rgba(255,68,68,0.1)]'
-                : 'border-[rgba(0,255,65,0.2)] text-muthur-primary opacity-40 hover:opacity-70'
+                : 'border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.2)] text-muthur-primary opacity-40 hover:opacity-70'
             }`}
           >
             {modeLabels[m]}
@@ -423,7 +436,7 @@ export default function Globe() {
         ))}
         <button
           onClick={loadConflictData}
-          className="px-[0.8vh] py-[0.2vh] text-[0.9vh] font-mono border border-[rgba(0,255,65,0.2)] text-muthur-secondary opacity-30 hover:opacity-70 transition-colors ml-[0.5vh]"
+          className="px-[0.8vh] py-[0.2vh] text-[0.9vh] font-mono border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.2)] text-muthur-secondary opacity-30 hover:opacity-70 transition-colors ml-[0.5vh]"
         >
           REFRESH
         </button>

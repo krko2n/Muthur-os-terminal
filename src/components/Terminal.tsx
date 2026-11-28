@@ -134,6 +134,9 @@ export default function Terminal({
 }: TerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sessionsRef = useRef<TerminalSession[]>([]);
+  // Monotonic tab number: deriving it from the session count reuses numbers
+  // after a tab closes and reads stale state inside async creators.
+  const sessionCounterRef = useRef(0);
   const [sessions, setSessions] = useState<TerminalSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [browserInput, setBrowserInput] = useState('');
@@ -253,7 +256,7 @@ export default function Terminal({
         resizeObserver.observe(terminalContainer);
 
         const fileName = filePath.split('/').pop() || 'file';
-        const sessionNum = sessionsRef.current.length + 1;
+        const sessionNum = ++sessionCounterRef.current;
         const newSession: TerminalSession = {
           id: sessionId,
           terminal,
@@ -374,7 +377,7 @@ export default function Terminal({
 
     if (type === 'browser') {
       const id = `browser-${Date.now()}`;
-      const sessionNum = sessions.length + 1;
+      const sessionNum = ++sessionCounterRef.current;
       const fakeSession: TerminalSession = {
         id,
         terminal: null,
@@ -460,7 +463,7 @@ export default function Terminal({
       });
       resizeObserver.observe(terminalContainer);
 
-      const sessionNum = sessions.length + 1;
+      const sessionNum = ++sessionCounterRef.current;
       const newSession: TerminalSession = {
         id: sessionId,
         terminal,
@@ -631,12 +634,12 @@ export default function Terminal({
   if (gameFullscreen && isGame) {
     return (
       <div className="fixed inset-0 z-[9999] bg-[rgba(2,4,8,0.98)] flex flex-col">
-        <div className="flex items-center justify-between px-4 py-2 border-b border-[rgba(0,255,65,0.15)] bg-[rgba(5,8,13,0.95)]">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] bg-[rgba(5,8,13,0.95)]">
           <span className="text-[12px] font-mono tracking-widest text-muthur-primary">{activeSession?.name}</span>
           <div className="flex gap-2">
             <button
               onClick={() => setGameFullscreen(false)}
-              className="px-3 py-1 text-[10px] border border-[rgba(0,255,65,0.3)] text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors font-mono tracking-wider"
+              className="px-3 py-1 text-[10px] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)] text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors font-mono tracking-wider"
             >
               EXIT FULLSCREEN
             </button>
@@ -657,42 +660,47 @@ export default function Terminal({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center px-2 py-1.5 border-b border-[rgba(0,255,65,0.15)] shrink-0 gap-1 bg-[rgba(5,8,13,0.82)]">
-        {sessions.map(session => (
-          <div
-            key={session.id}
-            className={`flex items-center gap-2 px-3 py-1.5 text-[11px] font-mono tracking-wider transition-all duration-200 border ${
-              activeSessionId === session.id
-                ? 'bg-muthur-primary text-muthur-bg border-muthur-primary'
-                : 'text-muthur-secondary opacity-65 hover:opacity-100 border-[rgba(0,255,65,0.15)]'
-            }`}
-            onClick={() => switchSession(session.id)}
-          >
-            <span>{session.type === 'game' ? `[G] ${session.name}` : session.name}</span>
-            <span
-              onClick={(e) => { e.stopPropagation(); closeSession(session.id); }}
-              className="text-[10px] opacity-50 hover:opacity-100 hover:text-[#ff006e] ml-1"
-            >
-              x
-            </span>
-          </div>
-        ))}
+      <div className="flex items-center px-2 py-1.5 border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] shrink-0 gap-1 bg-[rgba(5,8,13,0.82)]">
+        <div role="tablist" aria-label="Sessions" className="flex items-center pl-2">
+          {sessions.map(session => {
+            const active = activeSessionId === session.id;
+            const label = session.type === 'game' ? `[G] ${session.name}` : session.name;
+            return (
+              <div
+                key={session.id}
+                role="tab"
+                aria-selected={active}
+                className={`edex-tab font-mono ${active ? 'edex-tab-active' : ''}`}
+              >
+                <button type="button" onClick={() => switchSession(session.id)}>{label}</button>
+                <button
+                  type="button"
+                  aria-label={`Close ${session.name}`}
+                  className="edex-tab-close"
+                  onClick={() => closeSession(session.id)}
+                >
+                  x
+                </button>
+              </div>
+            );
+          })}
+        </div>
         <div className="flex gap-1 ml-auto">
           <button
             onClick={() => createNewSession('shell')}
-            className="px-3 py-1.5 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
+            className="px-3 py-1.5 text-[10px] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.25)] text-muthur-primary hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] transition-colors font-mono tracking-wider"
           >
             + SHELL
           </button>
           <button
             onClick={() => createNewSession('browser')}
-            className="px-3 py-1.5 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
+            className="px-3 py-1.5 text-[10px] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.25)] text-muthur-secondary hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] transition-colors font-mono tracking-wider"
           >
             + WEB
           </button>
           <button
             onClick={() => createNewSession('settings')}
-            className="px-3 py-1.5 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:bg-[rgba(0,255,65,0.1)] transition-colors font-mono tracking-wider"
+            className="px-3 py-1.5 text-[10px] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.25)] text-muthur-secondary hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] transition-colors font-mono tracking-wider"
           >
             + SETTINGS
           </button>
@@ -702,10 +710,10 @@ export default function Terminal({
       {/* Content */}
       {isGame ? (
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-          <div className="flex items-center justify-end px-3 py-1 border-b border-[rgba(0,255,65,0.08)] shrink-0 bg-[rgba(5,8,13,0.9)]">
+          <div className="flex items-center justify-end px-3 py-1 border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] shrink-0 bg-[rgba(5,8,13,0.9)]">
             <button
               onClick={() => setGameFullscreen(true)}
-              className="px-3 py-1 text-[10px] border border-[rgba(0,255,65,0.25)] text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors font-mono tracking-wider"
+              className="px-3 py-1 text-[10px] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.25)] text-muthur-secondary hover:text-muthur-primary hover:border-muthur-primary transition-colors font-mono tracking-wider"
             >
               FULLSCREEN
             </button>
@@ -731,28 +739,28 @@ export default function Terminal({
       ) : isBrowser ? (
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           {/* URL bar - fixed height, always visible */}
-          <div className="flex gap-2 px-3 py-2 border-b border-[rgba(0,255,65,0.15)] shrink-0 relative z-10 bg-[rgba(5,8,13,0.95)]">
+          <div className="flex gap-2 px-3 py-2 border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] shrink-0 relative z-10 bg-[rgba(5,8,13,0.95)]">
             <input
               type="text"
               value={browserInput}
               onChange={(e) => setBrowserInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && navigateBrowser(browserInput)}
               placeholder="URL or search..."
-              className="flex-1 bg-[rgba(0,255,65,0.03)] border border-[rgba(0,255,65,0.25)] rounded-sm px-3 py-1.5 text-sm text-muthur-primary font-mono focus:outline-none focus:border-[rgba(0,255,65,0.6)] focus:shadow-[0_0_6px_rgba(0,255,65,0.15)] placeholder:text-[rgba(0,255,65,0.3)]"
+              className="flex-1 bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.03)] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.25)] rounded-sm px-3 py-1.5 text-sm text-muthur-primary font-mono focus:outline-none focus:border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.6)] focus:shadow-[0_0_6px_rgba(var(--color-r),var(--color-g),var(--color-b),0.15)] placeholder:text-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)]"
             />
             <button
               onClick={() => navigateBrowser(browserInput)}
-              className="px-4 py-1.5 text-sm border border-[rgba(0,255,65,0.3)] text-muthur-primary hover:bg-[rgba(0,255,65,0.1)] rounded-sm font-mono tracking-wider"
+              className="px-4 py-1.5 text-sm border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.3)] text-muthur-primary hover:bg-[rgba(var(--color-r),var(--color-g),var(--color-b),0.1)] rounded-sm font-mono tracking-wider"
             >
               GO
             </button>
           </div>
-          <div className="flex gap-1 px-3 py-1 border-b border-[rgba(0,255,65,0.08)] shrink-0 overflow-x-auto scrollbar-thin">
+          <div className="flex gap-1 px-3 py-1 border-b border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.08)] shrink-0 overflow-x-auto scrollbar-thin">
             {bookmarks.slice(0, 8).map(bookmark => (
               <button
                 key={bookmark.id}
                 onClick={() => navigateBrowser(bookmark.url)}
-                className="shrink-0 px-2 py-0.5 text-[10px] border border-[rgba(0,255,65,0.16)] text-muthur-secondary opacity-60 hover:opacity-100 hover:border-muthur-primary tracking-wider"
+                className="shrink-0 px-2 py-0.5 text-[10px] border border-[rgba(var(--color-r),var(--color-g),var(--color-b),0.16)] text-muthur-secondary opacity-60 hover:opacity-100 hover:border-muthur-primary tracking-wider"
                 title={bookmark.url}
               >
                 {bookmark.label}
