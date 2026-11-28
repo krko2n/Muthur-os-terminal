@@ -7,6 +7,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import '@xterm/xterm/css/xterm.css';
 import NativeBrowserView from './NativeBrowserView';
 import OperationsDeck from './OperationsDeck';
+import SetupCard from './SetupCard';
 import { playSound } from '../audio';
 import { Bookmark, DEFAULT_BOOKMARKS, InterfaceSettings, LayoutPresetId } from '../theme';
 import { GameId, GAME_REGISTRY, SignalLock, SectorTactics, VoidCards } from './games';
@@ -142,6 +143,8 @@ export default function Terminal({
   const [browserInput, setBrowserInput] = useState('');
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(DEFAULT_BOOKMARKS);
   const [gameFullscreen, setGameFullscreen] = useState(false);
+  // First boot: once the first shell exists, open the SETTINGS tab with the setup card.
+  const setupPendingRef = useRef(!settings.firstRunComplete);
 
   useEffect(() => {
     sessionsRef.current = sessions;
@@ -354,24 +357,38 @@ export default function Terminal({
     return () => window.removeEventListener('open-game', handleOpenGame);
   }, [sessions]);
 
+  const openSettingsTab = () => {
+    const existing = sessionsRef.current.find(session => session.type === 'settings');
+    if (existing) {
+      switchSession(existing.id);
+      return;
+    }
+    const id = `settings-${Date.now()}`;
+    const settingsSession: TerminalSession = {
+      id,
+      terminal: null,
+      fitAddon: null,
+      name: 'SETTINGS',
+      type: 'settings',
+    };
+    // The shell that triggered first-boot setup may not be in sessionsRef yet.
+    containerRef.current?.querySelectorAll<HTMLElement>('.terminal-container').forEach(el => {
+      el.style.display = 'none';
+    });
+    setSessions(prev => [...prev, settingsSession]);
+    setActiveSessionId(id);
+    playSound('scan', 0.08);
+  };
+
+  const finishSetup = () => {
+    onSettingsChange({ firstRunComplete: true });
+    const shell = sessionsRef.current.find(session => session.type === 'shell');
+    if (shell) switchSession(shell.id);
+  };
+
   const createNewSession = async (type: 'shell' | 'browser' | 'settings') => {
     if (type === 'settings') {
-      const existing = sessions.find(session => session.type === 'settings');
-      if (existing) {
-        switchSession(existing.id);
-        return;
-      }
-      const id = `settings-${Date.now()}`;
-      const settingsSession: TerminalSession = {
-        id,
-        terminal: null,
-        fitAddon: null,
-        name: 'SETTINGS',
-        type: 'settings',
-      };
-      setSessions(prev => [...prev, settingsSession]);
-      setActiveSessionId(id);
-      playSound('scan', 0.08);
+      openSettingsTab();
       return;
     }
 
@@ -431,7 +448,7 @@ export default function Terminal({
         terminal.write(e.payload);
         const now = Date.now();
         if (now - lastStdout > 50) {
-          playSound('keyboard', 0.03);
+          playSound('stdout', 0.03);
           lastStdout = now;
         }
       });
@@ -483,6 +500,10 @@ export default function Terminal({
       });
       terminalContainer.style.display = 'block';
       terminal.focus();
+      if (setupPendingRef.current) {
+        setupPendingRef.current = false;
+        openSettingsTab();
+      }
     } catch (error) {
       console.error('Failed to create terminal session:', error);
     }
@@ -722,6 +743,10 @@ export default function Terminal({
             {renderGameContent(activeSession?.gameId)}
           </div>
         </div>
+      ) : isSettings && !settings.firstRunComplete ? (
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <SetupCard settings={settings} onSettingsChange={onSettingsChange} onComplete={finishSetup} />
+        </div>
       ) : isSettings ? (
         <div className="flex-1 min-h-0 overflow-hidden">
           <OperationsDeck
@@ -770,9 +795,10 @@ export default function Terminal({
           {/* Structured browser content */}
           <NativeBrowserView url={browserInput} onNavigate={navigateBrowser} />
         </div>
-      ) : (
-        <div ref={containerRef} className="flex-1 overflow-hidden" />
-      )}
+      ) : null}
+      {/* Shell terminals are attached to this node by hand, so it must never be
+          reused for another tab's content: keep it mounted and only hide it. */}
+      <div ref={containerRef} className={`flex-1 overflow-hidden ${isGame || isSettings || isBrowser ? 'hidden' : ''}`} />
     </div>
   );
 }

@@ -73,6 +73,8 @@
   --color-grey: #1a1e22;
   --color-text: #aacfd1;
   --color-danger: #ff3b53;
+  --color-ok: #00ff41;
+  --color-warn: #ffb13b;
   --font-ui: 'Share Tech', 'Share Tech Mono', sans-serif;
   --font-display: 'Share Tech Mono', 'Orbitron', monospace;
   --font-mono: 'Share Tech Mono', 'Courier New', monospace;
@@ -472,15 +474,12 @@ body.muthur-cinematic .custom-cursor {
   gap: clamp(3px, 0.28vw, 7px);
   padding: clamp(5px, 0.44vw, 10px);
   overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(var(--color-r), var(--color-g), var(--color-b), 0.055), transparent 26%),
-    linear-gradient(90deg, rgba(var(--color-r), var(--color-g), var(--color-b), 0.04), transparent 12%, transparent 88%, rgba(var(--color-r), var(--color-g), var(--color-b), 0.04)),
-    rgba(3, 7, 10, 0.5);
+  background: transparent;
   border-left: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.12);
 }
 
 .edex-keyboard-shell::before {
-  content: '';
+  content: none;
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -581,6 +580,8 @@ body.muthur-cinematic .custom-cursor {
   min-height: 0;
 }
 
+/* eDEX-UI keys: flat and almost invisible at rest, a solid accent block while
+   pressed, and a single blink when released. No skew, gradients or glow. */
 .edex-key {
   position: relative;
   min-width: 0;
@@ -592,114 +593,88 @@ body.muthur-cinematic .custom-cursor {
   -webkit-user-select: none;
   font-family: var(--font-mono);
   text-transform: uppercase;
-  color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.66);
-  border: 1px solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.18);
-  border-bottom-color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.34);
-  background:
-    linear-gradient(180deg, rgba(var(--color-r), var(--color-g), var(--color-b), 0.075), rgba(var(--color-r), var(--color-g), var(--color-b), 0.018)),
-    rgba(0, 0, 0, 0.18);
-  clip-path: polygon(0.42vw 0, 100% 0, calc(100% - 0.42vw) 100%, 0 100%);
-  transform: skewX(-8deg);
-  transition: transform 80ms ease, color 80ms ease, border-color 80ms ease, background 80ms ease, opacity 80ms ease;
-  box-shadow:
-    inset 0 1px 0 rgba(var(--color-r), var(--color-g), var(--color-b), 0.14),
-    inset 0 -8px 16px rgba(0, 0, 0, 0.3);
+  color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.75);
+  border: 0.1vh solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.1);
+  border-radius: 0.46vh;
+  background: transparent;
+  transition: background-color 60ms linear, color 60ms linear, border-color 60ms linear;
 }
 
 .edex-key:hover {
-  color: var(--color-accent);
-  border-color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.48);
-  background:
-    linear-gradient(180deg, rgba(var(--color-r), var(--color-g), var(--color-b), 0.14), rgba(var(--color-r), var(--color-g), var(--color-b), 0.032)),
-    rgba(0, 0, 0, 0.16);
-}
-
-.edex-key::before {
-  content: '';
-  position: absolute;
-  inset: 2px 4px auto 4px;
-  height: 1px;
-  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.22);
-}
-
-.edex-key::after {
-  content: '';
-  position: absolute;
-  right: 4px;
-  bottom: 3px;
-  width: 0.7vw;
-  max-width: 10px;
-  min-width: 5px;
-  height: 1px;
-  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.18);
-}
-
-.edex-key-label,
-.edex-key-shift {
-  transform: skewX(8deg);
+  border-color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.45);
+  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.06);
 }
 
 .edex-key-label {
   display: block;
-  max-width: calc(100% - 8px);
+  max-width: calc(100% - 6px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: clamp(9px, 0.68vw, 14px);
-  line-height: 1;
-  letter-spacing: 0.14em;
-}
-
-.edex-key-mod .edex-key-label {
-  font-size: clamp(8px, 0.55vw, 11px);
-  letter-spacing: 0.1em;
-}
-
-.edex-key-shift {
-  position: absolute;
-  top: 2px;
-  right: 0.45vw;
-  color: rgba(var(--color-text-r), var(--color-text-g), var(--color-text-b), 0.42);
-  font-size: clamp(6px, 0.45vw, 9px);
+  font-size: clamp(9px, 0.7vw, 14px);
   line-height: 1;
   letter-spacing: 0.08em;
 }
 
+.edex-key-mod .edex-key-label {
+  font-size: clamp(8px, 0.55vw, 11px);
+  letter-spacing: 0.12em;
+  opacity: 0.8;
+}
+
+/* Shifted character, top-left like the eDEX legend */
+.edex-key-shift {
+  position: absolute;
+  top: 0.35vh;
+  left: 0.45vh;
+  color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.42);
+  font-size: clamp(6px, 0.45vw, 9px);
+  line-height: 1;
+}
+
+.edex-key-space {
+  border: 0.19vh solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.5);
+}
+
 .edex-key-space .edex-key-label {
-  letter-spacing: 0.32em;
-  opacity: 0.58;
+  letter-spacing: 0.5em;
+  opacity: 0.45;
 }
 
-.edex-key-space::before {
-  inset: 48% 16% auto 16%;
-  background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.28);
-}
-
+/* L-shaped Enter: the two halves share a border so they read as one key */
 .edex-key-enter {
+  border-bottom-color: transparent;
+  border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
 
 .edex-key-enter-bottom {
   border-top-color: transparent;
-  clip-path: polygon(0 0, 100% 0, calc(100% - 0.42vw) 100%, 0.42vw 100%);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
-.edex-key-active {
+.edex-key-active,
+.edex-key-active:hover {
   color: var(--color-bg);
   border-color: var(--color-accent);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 96%, white 4%), var(--color-accent));
-  box-shadow:
-    0 0 22px rgba(var(--color-r), var(--color-g), var(--color-b), 0.75),
-    0 0 48px rgba(var(--color-r), var(--color-g), var(--color-b), 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.3);
-  text-shadow: 0 0 4px var(--color-bg);
-  transform: scale(0.97);
-  transition: all 0.05s ease-out;
+  background: var(--color-accent);
+  transition: none;
 }
 
 .edex-key-active .edex-key-shift {
-  color: rgba(0, 0, 0, 0.52);
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.edex-key-blink {
+  animation: edexKeyBlink 0.5s steps(1, end) 1;
+}
+
+@keyframes edexKeyBlink {
+  0% { background: var(--color-accent); color: var(--color-bg); }
+  33% { background: transparent; color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.75); }
+  66% { background: var(--color-accent); color: var(--color-bg); }
+  100% { background: transparent; }
 }
 
 /* Key blink on release (eDEX-UI style) */
@@ -711,8 +686,9 @@ body.muthur-cinematic .custom-cursor {
 .enter-key-top {
   position: relative;
   z-index: 2;
-  border-bottom-right-radius: 0 !important;
-  margin-bottom: -0.15vw;
+  /* reach across the row gap so the L-shaped Enter has no seam */
+  align-self: flex-start;
+  height: calc(100% + clamp(3px, 0.2vw, 5px));
 }
 
 /* Skewed parallelogram tabs (eDEX-UI signature) */
@@ -928,4 +904,201 @@ button, [data-tauri-drag-region] {
   0% { background: rgba(var(--color-r), var(--color-g), var(--color-b), 0); }
   50% { background: rgba(var(--color-r), var(--color-g), var(--color-b), 1); }
   100% { background: rgba(var(--color-r), var(--color-g), var(--color-b), 0); }
+}
+
+/* Status colours: green = fine, orange = worth a look, red = dangerous.
+   Every theme sets --color-ok / --color-warn / --color-danger. */
+.status-ok { color: var(--color-ok); }
+.status-warn { color: var(--color-warn); }
+.status-danger { color: var(--color-danger); }
+.status-fill-ok { background: var(--color-ok); }
+.status-fill-warn { background: var(--color-warn); }
+.status-fill-danger {
+  background: var(--color-danger);
+  animation: statusDangerPulse 1.2s steps(2, jump-none) infinite;
+}
+@keyframes statusDangerPulse {
+  from { opacity: 1; }
+  to { opacity: 0.55; }
+}
+
+/* First-boot setup card (lives inside the SETTINGS tab, eDEX module style) */
+.setup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2vh;
+  padding: 1.6vh 1.8vh;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+}
+.setup-card-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2vh;
+  padding-bottom: 0.9vh;
+  border-bottom: 0.1vh solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.35);
+}
+.setup-card-kicker {
+  font-size: 1vh;
+  letter-spacing: 0.4em;
+  color: rgba(var(--color-r), var(--color-g), var(--color-b), 0.6);
+}
+.setup-card-title {
+  font-family: var(--font-display);
+  font-size: 2.2vh;
+  letter-spacing: 0.3em;
+  color: var(--color-accent);
+}
+.setup-card-hint {
+  font-size: 1vh;
+  letter-spacing: 0.25em;
+  opacity: 0.55;
+}
+.setup-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2vh;
+}
+.setup-section {
+  position: relative;
+  padding: 1.1vh 1.2vh 1.2vh;
+  border: 0.1vh solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.22);
+  animation: setupSectionIn 0.45s cubic-bezier(0.4, 0, 1, 1) both;
+}
+.setup-section:nth-child(2) { animation-delay: 0.06s; }
+.setup-section:nth-child(3) { animation-delay: 0.12s; }
+.setup-section:nth-child(4) { animation-delay: 0.18s; }
+.setup-section:nth-child(5) { animation-delay: 0.24s; }
+.setup-section:nth-child(6) { animation-delay: 0.3s; }
+/* eDEX corner ticks */
+.setup-section::before,
+.setup-section::after {
+  content: '';
+  position: absolute;
+  width: 1vh;
+  height: 1vh;
+  border-color: var(--color-accent);
+  border-style: solid;
+}
+.setup-section::before { top: -0.1vh; left: -0.1vh; border-width: 0.2vh 0 0 0.2vh; }
+.setup-section::after { bottom: -0.1vh; right: -0.1vh; border-width: 0 0.2vh 0.2vh 0; }
+.setup-section-wide { grid-column: 1 / -1; }
+.setup-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.9vh;
+  margin-bottom: 0.9vh;
+  font-size: 1.1vh;
+  letter-spacing: 0.3em;
+  color: var(--color-accent);
+}
+.setup-section-index {
+  padding: 0 0.5vh;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  letter-spacing: 0.1em;
+}
+.setup-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6vh;
+}
+.setup-row + .setup-row { margin-top: 0.8vh; }
+.setup-chip {
+  padding: 0.45vh 0.9vh;
+  border: 0.1vh solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.3);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 1.05vh;
+  letter-spacing: 0.15em;
+  transition: background-color 80ms linear, color 80ms linear;
+}
+.setup-chip:hover { background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.12); }
+.setup-chip-active,
+.setup-chip-active:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-bg);
+}
+.setup-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11vh, 1fr));
+  gap: 0.6vh;
+}
+.setup-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5vh;
+  padding: 0.5vh;
+  border: 0.1vh solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.2);
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+}
+.setup-swatch:hover { background: rgba(var(--color-r), var(--color-g), var(--color-b), 0.1); }
+.setup-swatch-preview {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 0.3vh;
+  height: 2.2vh;
+  padding: 0.4vh;
+  border: 0.1vh solid;
+}
+.setup-swatch-label {
+  font-size: 0.95vh;
+  letter-spacing: 0.15em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.setup-volume {
+  display: flex;
+  align-items: center;
+  gap: 0.8vh;
+  flex: 1;
+  min-width: 14vh;
+  font-size: 1.05vh;
+  letter-spacing: 0.15em;
+}
+.setup-volume input { flex: 1; accent-color: var(--color-accent); }
+.setup-note {
+  margin-top: 0.8vh;
+  font-size: 1vh;
+  line-height: 1.5;
+  opacity: 0.55;
+}
+.setup-card-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding-bottom: 0.4vh;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vh;
+  margin-top: auto;
+  padding-top: 0.9vh;
+  border-top: 0.1vh solid rgba(var(--color-r), var(--color-g), var(--color-b), 0.35);
+  font-size: 1vh;
+  letter-spacing: 0.2em;
+  opacity: 0.9;
+}
+.setup-commit {
+  padding: 0.7vh 2vh;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: 1.15vh;
+  letter-spacing: 0.3em;
+  animation: setupCommitBlink 1.6s steps(2, jump-none) infinite;
+}
+@keyframes setupSectionIn {
+  from { opacity: 0; transform: translateY(0.8vh); filter: brightness(170%); }
+  to { opacity: 1; transform: none; filter: brightness(100%); }
+}
+@keyframes setupCommitBlink {
+  from { opacity: 1; }
+  to { opacity: 0.7; }
 }

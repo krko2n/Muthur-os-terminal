@@ -8,8 +8,11 @@
 
 set -e
 
-# Logging
-LOG_FILE="${XDG_RUNTIME_DIR:-/tmp}/muthur-session.log"
+# Logging. Kept under ~/.local/state (next to the launcher's startup.log):
+# XDG_RUNTIME_DIR is wiped when the session ends, which hid boot failures.
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/muthur"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/session.log"
 exec 1>> "$LOG_FILE"
 exec 2>&1
 
@@ -36,6 +39,30 @@ if [ ! -x "/usr/local/bin/muthur-bin" ] && [ ! -x "/usr/bin/muthur-os-terminal" 
     echo "ERROR: muthur-bin not found"
     notify-send -u critical "MUTHUR Session Error" "MUTHUR binary not found" 2>/dev/null
     exit 1
+fi
+
+# The compositor (wlroots) and WebKit need GPU 3D. Virtual machines and
+# machines without a render node get software rendering instead, the same
+# rules the muthur launcher applies; otherwise cage exits with
+# "Unable to create the wlroots renderer" and the boot ends at a login prompt.
+USE_SOFTWARE=0
+if command -v systemd-detect-virt &>/dev/null && [ "$(systemd-detect-virt 2>/dev/null || true)" != "none" ]; then
+    USE_SOFTWARE=1
+fi
+if ! ls /dev/dri/renderD* &>/dev/null; then
+    USE_SOFTWARE=1
+fi
+if [ "${MUTHUR_HARDWARE_RENDER:-}" = "1" ]; then
+    USE_SOFTWARE=0
+fi
+if [ "$USE_SOFTWARE" = "1" ]; then
+    echo "[$(date)] Software rendering (virtual machine or no GPU render node)"
+    export WLR_RENDERER=pixman
+    export WLR_RENDERER_ALLOW_SOFTWARE=1
+    export WLR_NO_HARDWARE_CURSORS=1
+    export LIBGL_ALWAYS_SOFTWARE=1
+    export WEBKIT_DISABLE_COMPOSITING_MODE=1
+    export WEBKIT_DISABLE_DMABUF_RENDERER=1
 fi
 
 # Wait for DRM/KMS to be ready

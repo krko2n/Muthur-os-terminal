@@ -23,7 +23,7 @@ function assertPattern(file, pattern, label) {
 
 const install = read('scripts/install.sh');
 
-for (const option of ['--dry-run', '--no-deps', '--no-ollama', '--prefix', '--quiet']) {
+for (const option of ['--dry-run', '--no-deps', '--no-ollama', '--no-boot', '--prefix', '--quiet']) {
   assertIncludes('scripts/install.sh', option, `installer option ${option}`);
   assertIncludes('README.md', option, `README documentation for ${option}`);
 }

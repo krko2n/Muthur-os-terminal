@@ -70,7 +70,7 @@ export default function NetworkStatus({ systemStats }: NetworkStatusProps) {
     <div className="shrink-0 flex flex-col gap-[0.4vh]">
       <div className="text-[1.1vh] tracking-widest opacity-50 flex justify-between panel-header-bracket border-t border-muthur-border pt-[0.4vh]">
         <span>NETWORK</span>
-        <span className={online ? 'text-muthur-primary' : 'text-muthur-accent'}>{online ? 'ONLINE' : 'OFFLINE'}</span>
+        <span className={online ? 'status-ok' : 'status-danger'}>{online ? 'ONLINE' : 'OFFLINE'}</span>
       </div>
       <div className="flex justify-between text-[1.0vh] tabular-nums">
         <span className="text-muthur-primary">DOWN {net ? formatRate(net.rx_speed) : '--'}</span>

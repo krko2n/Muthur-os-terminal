@@ -14,7 +14,9 @@ export type SoundName =
   | 'scroll'
   | 'game'
   | 'thrust'
-  | 'orbit';
+  | 'orbit'
+  | 'stdout'
+  | 'alarm';
 
 export type SoundPack = 'ship' | 'quiet' | 'retro' | 'horror' | 'combat' | 'field' | 'recorder' | 'alarm' | 'analog';
 
@@ -35,6 +37,9 @@ const SOUND_FILES: Record<SoundName, string> = {
   game: '/audio/core-laser.ogg',
   thrust: '/audio/core-thruster.ogg',
   orbit: '/audio/core-orbit.ogg',
+  // eDEX-style terminal output tick and a red-state alarm
+  stdout: '/audio/ui-scroll.ogg',
+  alarm: '/audio/error.wav',
 };
 
 const PACK_FILES: Partial<Record<SoundPack, Partial<Record<SoundName, string>>>> = {
